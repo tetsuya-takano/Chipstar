@@ -1,9 +1,7 @@
 ﻿namespace Chipstar.Downloads
 {
-    internal interface ILoadRequest
+    public interface ILoadJob : ILoadTask
     {
-        bool IsCompleted { get; }
-
         void Update();
         void Done();
     }
