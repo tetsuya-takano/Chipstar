@@ -1,24 +1,26 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Chipstar.Downloads;
+using UnityEngine.Networking;
 
 public class AssetLoadExample : MonoBehaviour
 {
-
+    IDownloadEngine engine = null;
     // Use this for initialization
     void Start()
     {
-        var assetLoadTask = AssetLoader.Load<Texture>("");
-        var sceneLoadTask = SceneLoader.LoadLevel("");
-
-        assetLoadTask.OnLoaded = texture    => { };
-        sceneLoadTask.OnLoaded = ()         => { };
-
-        if (assetLoadTask.IsCompleted && sceneLoadTask.IsCompleted)
+        engine  = new DownloadEngine();
+        var request = new WWWDLJob<WWWDL.TextDL, string >("https://www.google.com/");
+        engine.Enqueue( request );
+        request.OnLoaded = text =>
         {
-            return;
-        }
-        assetLoadTask.Dispose();
-        sceneLoadTask.Dispose();
+            Debug.Log(text);
+        };
+    }
+
+
+    private void Update()
+    {
+        engine.Update();
     }
 }

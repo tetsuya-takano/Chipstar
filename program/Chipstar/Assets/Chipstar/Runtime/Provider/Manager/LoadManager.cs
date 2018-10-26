@@ -34,16 +34,14 @@
 
         protected virtual IAssetLoadTask<T> CreateLoadAsset<T>( IRuntimeBundleData data )
         {
-            return 
+            return null; 
         }
 
 
         protected virtual ILoadTask CreateFileLoad( IRuntimeBundleData data )
         {
-            var req  = ReqConverter .Create( data );
-            var task = DLEngine     .Enqueue( req );
 
-            return task;
+            return null;
         }
 
         protected virtual ILoadTask CreateFileLoadWithNeedAll( IRuntimeBundleData data )

@@ -35,7 +35,7 @@
             {
                 return LoadManager.LoadAsset<T>( data );
             }
-            return DoPreload( data );
+            return null;
         }
 
         public ILoadTask Preload( string path )

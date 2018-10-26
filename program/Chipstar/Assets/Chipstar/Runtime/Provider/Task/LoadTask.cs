@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace Chipstar.Downloads
 {
@@ -10,9 +11,10 @@ namespace Chipstar.Downloads
     {
         Action OnLoaded { set; }
     }
-    public interface ILoadRequest : ILoadTask
+
+    public interface IABLoadTask : ILoadTask
     {
-        Action OnCompleted { get; }
+        Action<AssetBundle> OnLoaded { set; }
     }
 
     public interface ILoadTask : IDisposable

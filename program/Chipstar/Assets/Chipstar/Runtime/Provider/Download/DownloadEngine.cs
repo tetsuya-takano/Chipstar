@@ -6,7 +6,7 @@ namespace Chipstar.Downloads
     public interface IDownloadEngine
     {
         void Update();
-        ILoadTask Enqueue( ILoadRequest bundle );
+        void Enqueue(ILoadJob request);
     }
 
     public class DownloadEngine : IDownloadEngine
@@ -41,22 +41,15 @@ namespace Chipstar.Downloads
                 return;
             }
             m_current = m_queue.Dequeue();
+            m_current.Run();
         }
 
         /// <summary>
         /// 追加
         /// </summary>
-        public virtual ILoadTask Enqueue( ILoadRequest req )
+        public virtual void Enqueue(ILoadJob job)
         {
-            var job = CreateJob( req );
             m_queue.Enqueue( job );
-
-            return job;
-        }
-
-        protected virtual ILoadJob CreateJob( ILoadRequest req )
-        {
-            return null;
         }
     }
 }
