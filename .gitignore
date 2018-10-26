@@ -1,4 +1,5 @@
 program/Chipstar/Library/
 program/Chipstar/Temp/
+program/Chipstar/.vs/
 *.sln
-*.csproj.*
+*.csproj*
