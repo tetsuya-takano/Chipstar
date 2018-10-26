@@ -20,21 +20,4 @@ namespace Chipstar.Downloads
         float   Progress    { get; }
         bool    IsCompleted { get; }
     }
-
-
-    public abstract class LoadTask<T>
-                : ILoadTask
-        where T : ILoadTask
-    {
-        public abstract bool  IsCompleted   { get; }
-        public abstract float Progress      { get; }
-
-        /// <summary>
-        /// 破棄処理
-        /// </summary>
-        public void Dispose()
-        {
-
-        }
-    }
 }

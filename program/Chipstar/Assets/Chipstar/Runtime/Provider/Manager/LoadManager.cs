@@ -2,7 +2,8 @@
 {
     internal interface ILoadManager
     {
-        IAssetLoadTask<T> Create<T>( IRuntimeBundleData data );
+        IAssetLoadTask<T>   LoadAsset<T>     ( IRuntimeBundleData data );
+        ILoadTask           PreloadBundleFile( IRuntimeBundleData data );
     }
 
 
@@ -21,10 +22,21 @@
         /// <summary>
         /// 読み込み管理
         /// </summary>
-        public IAssetLoadTask<T> Create<T>( IRuntimeBundleData data)
+        public IAssetLoadTask<T> LoadAsset<T>( IRuntimeBundleData data)
         {
-
+            return CreateLoadAsset<T>( data );
         }
+
+        public ILoadTask PreloadBundleFile( IRuntimeBundleData data )
+        {
+            return CreateFileLoadWithNeedAll( data );
+        }
+
+        protected virtual IAssetLoadTask<T> CreateLoadAsset<T>( IRuntimeBundleData data )
+        {
+            return 
+        }
+
 
         protected virtual ILoadTask CreateFileLoad( IRuntimeBundleData data )
         {

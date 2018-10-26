@@ -31,7 +31,22 @@
         {
             //  パスからバンドルデータを取得
             var data    = LoadDatabase.Find( path );
-            return LoadManager.Create<T>( data );
+            if( data.IsOnMemory )
+            {
+                return LoadManager.LoadAsset<T>( data );
+            }
+            return DoPreload( data );
+        }
+
+        public ILoadTask Preload( string path )
+        {
+            var data    = LoadDatabase.Find( path );
+            return DoPreload( data );
+        }
+
+        protected virtual ILoadTask DoPreload( IRuntimeBundleData data )
+        {
+            return LoadManager.PreloadBundleFile( data );
         }
 
         public ISceneLoadTask LoadLevel(string sceneName)
