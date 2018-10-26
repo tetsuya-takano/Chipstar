@@ -1,5 +1,12 @@
 ﻿namespace Chipstar.Downloads
 {
+    //==============================
+    //  読み込み統括
+    //  リクエストを受け取って、タスクを返す
+    //  使用者が触るのはこれ
+    //==============================
+
+
     public interface IAssetLoadProvider
     {
         IAssetLoadTask<T>   LoadAsset<T>( string path );
@@ -9,10 +16,12 @@
     /// <summary>
     /// 読み込みマネージャ
     /// </summary>
-    public class AssetLoadProvider : IAssetLoadProvider
+    public class AssetLoadProvider<TData> 
+                    : IAssetLoadProvider
+        where TData : IRuntimeBundleData
     {
-        private ILoadDatabase   LoadDatabase    { get; set; }
-        private ILoadManager    LoadManager     { get; set; }
+        private ILoadDatabase<TData>    LoadDatabase    { get; set; }
+        private ILoadManager            LoadManager     { get; set; }
 
 
         /// <summary>
