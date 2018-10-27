@@ -2,7 +2,7 @@
 
 namespace Chipstar.Downloads
 {
-    public interface ILoadJob : ILoadTask
+    public interface IDLJob : ILoadTask
     {
         void Run();
         void Update();
@@ -13,7 +13,7 @@ namespace Chipstar.Downloads
     /// DLジョブ
     /// </summary>
     public abstract class DLJob<THandler, TSource, TLocation, TData> 
-                        : ILoadJob
+                        : IDLJob
         where THandler  : IDLHandler<TSource,TData>
         where TLocation : IDLLocation
     {

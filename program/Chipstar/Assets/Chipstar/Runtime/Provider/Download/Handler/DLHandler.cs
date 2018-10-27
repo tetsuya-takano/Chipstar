@@ -15,7 +15,9 @@ namespace Chipstar.Downloads
         public Action<TData> OnLoaded { set; protected get; }
         public virtual void Complete(TSource source)
         {
+            if (OnLoaded == null) { return; }
             DoComplete( source );
+            OnLoaded = null;
         }
         protected abstract void DoComplete(TSource source);
 

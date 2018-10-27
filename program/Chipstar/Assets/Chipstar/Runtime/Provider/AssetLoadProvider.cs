@@ -24,12 +24,17 @@
         //===============================
         //  プロパティ
         //===============================
-        private ILoadDatabase<TRuntimeData>     LoadDatabase    { get; set; }
-        private IDownloadEngine                 Engine          { get; set; }
+        private ILoadDatabase<TRuntimeData>     LoadDatabase    { get; set; } // コンテンツテーブルから作成したDB
+        private IDownloadEngine                 Engine          { get; set; } // DLエンジン
 
         //===============================
         //  関数
         //===============================
+
+        public void InitLoad()
+        {
+            
+        }
 
         /// <summary>
         /// アセットの取得

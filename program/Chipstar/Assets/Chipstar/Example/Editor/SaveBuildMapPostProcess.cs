@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Chipstar.Downloads;
+using System.Text;
 
 namespace Chipstar.Example
 {
@@ -57,9 +58,8 @@ namespace Chipstar.Example
             }
             var path        = Path.Combine( settings.OutputPath, FileName );
             var contents    = JsonUtility.ToJson( json, true );
-
             //  書き込み
-            File.WriteAllText( path, contents, System.Text.Encoding.UTF8 );
+            File.WriteAllText( path, contents );
         }
     }
 }

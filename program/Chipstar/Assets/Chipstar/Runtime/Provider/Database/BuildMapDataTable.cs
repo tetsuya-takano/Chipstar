@@ -67,7 +67,6 @@ namespace Chipstar.Downloads
         //===============================
         //  関数
         //===============================
-
         public BundleBuildData(
             string abName,
             string[] assets,
@@ -106,10 +105,10 @@ namespace Chipstar.Downloads
         //===============================
         //  SerializeField
         //===============================
-        [SerializeField] private List<BundleBuildData>  m_abManifestList = new List<BundleBuildData>();
-        [SerializeField] private List<AssetBuildData>   m_assetDBList    = new List<AssetBuildData>();
+        [SerializeField] private List<BundleBuildData>  m_bundleList = new List<BundleBuildData>();
+        [SerializeField] private List<AssetBuildData>   m_assetDBList= new List<AssetBuildData>();
 
-        public IEnumerable<BundleBuildData> BundleList { get { return m_abManifestList; } }
+        public IEnumerable<BundleBuildData> BundleList { get { return m_bundleList; } }
         public IEnumerable<AssetBuildData>  AssetList  { get { return m_assetDBList   ; } }
 
         //===============================
@@ -120,10 +119,15 @@ namespace Chipstar.Downloads
         //===============================
         //  関数
         //===============================
+        public BuildMapDataTable()
+        {
+            m_bundleList = new List<BundleBuildData>();
+            m_assetDBList= new List<AssetBuildData>();
+        }
 
         public void Add(BundleBuildData data)
         {
-            m_abManifestList.Add(data);
+            m_bundleList.Add(data);
         }
 
         public void Add(AssetBuildData data)

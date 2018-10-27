@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections;
 using UnityEngine;
 
 namespace Chipstar.Downloads
 {
-    public interface ILoadDatabase<TRuntimeData>
+    public interface ILoadDatabase<TRuntimeData> : IDisposable
         where TRuntimeData  : IRuntimeBundleData<TRuntimeData>
     {
+        IEnumerable<TRuntimeData>            BundleList { get; }
+        IEnumerable<AssetData<TRuntimeData>> AssetList  { get; }
+
         void            Initialize  ( string json );
         TRuntimeData    Find        ( string path );
     }
@@ -22,20 +26,47 @@ namespace Chipstar.Downloads
             where TRuntimeData  : IRuntimeBundleData<TRuntimeData>, new()
     {
         //=========================================
+        //  class
+        //=========================================
+
+        //=========================================
         //  変数
         //=========================================
         private Dictionary<string, TRuntimeData>               m_bundleTable          = new Dictionary<string, TRuntimeData             >( StringComparer.OrdinalIgnoreCase ); // バンドル名   → バンドルデータテーブル
         private Dictionary<string, AssetData<TRuntimeData>>    m_assetsTable          = new Dictionary<string, AssetData<TRuntimeData>  >( StringComparer.OrdinalIgnoreCase ); // アセットパス → アセットデータテーブル
 
         //=========================================
+        //  プロパティ
+        //=========================================
+        public IEnumerable<TRuntimeData>            BundleList  { get { return m_bundleTable.Values; } }
+        public IEnumerable<AssetData<TRuntimeData>> AssetList   { get { return m_assetsTable.Values; } }
+
+        //=========================================
         //  関数
         //=========================================
 
+        /// <summary>
+        /// 破棄処理
+        /// </summary>
+        public void Dispose()
+        {
+            foreach (var item in m_bundleTable)
+            {
+                item.Value.Dispose();
+            }
+            m_bundleTable.Clear();
+            m_assetsTable.Clear();
+        }
         /// <summary>
         /// 
         /// </summary>
         public void Initialize( string json )
         {
+            if (string.IsNullOrEmpty(json))
+            {
+                Debug.LogError( "LoadError" );
+                return;
+            }
             var table = JsonUtility.FromJson<TTable>( json );
             //  アセットの一覧
             foreach (var asset in table.AssetList)

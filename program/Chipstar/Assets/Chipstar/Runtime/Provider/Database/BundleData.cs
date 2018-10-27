@@ -4,7 +4,8 @@ using System;
 
 namespace Chipstar.Downloads
 {
-    public interface IRuntimeBundleData<T> where T : IRuntimeBundleData<T>
+    public interface IRuntimeBundleData<T> : IDisposable
+        where T : IRuntimeBundleData<T>
     {
         string          Name        { get; }
         AssetData<T>[]  Assets      { get; }
@@ -61,6 +62,14 @@ namespace Chipstar.Downloads
         //========================================
         //  関数
         //========================================
+
+        public void Dispose()
+        {
+            Unload();
+            Assets       = null;
+            Dependencies = null;
+
+        }
 
         public void Set( string abName, string hash )
         {
