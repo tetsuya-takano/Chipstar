@@ -40,10 +40,6 @@ namespace Chipstar.Builder
             TResult             result,
             IList<T>            bundleList )
         {
-            foreach( var d in bundleList )
-            {
-                Debug.Log( d.ABName );
-            }
         }
     }
 }

@@ -23,12 +23,6 @@ namespace Chipstar.Builder
         {
             DoProcess( bundleList );
         }
-        protected virtual void DoProcess( IList<T> bundleList )
-        {
-            foreach( var d in bundleList )
-            {
-                Debug.Log( d.ABName );
-            }
-        }
+        protected virtual void DoProcess(IList<T> bundleList) { }
     }
 }
