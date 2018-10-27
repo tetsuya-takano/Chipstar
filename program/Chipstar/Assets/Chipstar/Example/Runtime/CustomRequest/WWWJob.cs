@@ -7,54 +7,36 @@ namespace Chipstar.Downloads
     /// <summary>
     /// 
     /// </summary>
-    public class WWWDLJob<THandler,T> 
-        : ILoadJob
-        where THandler : WWWDL.WWWHandler<T>, new()
+    public sealed class WWWDLJob<TData> : DLJob<WWWDL.WWWHandler<TData>, WWW, UrlLocation, TData>
     {
-        //===============================
-        //  プロパティ
-        //===============================
-        public  float               Progress     { get; set; }
-        public  bool                IsCompleted  { get; private set; }
-        public  Action<T>           OnLoaded     { set { m_handler.OnLoaded = value; } }
-
-        private string Url          { get; set; }
-
-        //===============================
-        //  変数
-        //===============================
-        private THandler    m_handler = null;
-        private WWW         m_www     = null;
-
-        //===============================
+        //=================================================
         //  関数
-        //===============================
+        //=================================================
+        public WWWDLJob( 
+            UrlLocation             location, 
+            WWWDL.WWWHandler<TData> handler
+        ) : base(location, handler) { }
+
+        public WWWDLJob
+            ( 
+            string                  url, 
+            WWWDL.WWWHandler<TData> handler
+            ) : this(new UrlLocation(url), handler) { }
 
         /// <summary>
-        /// コンストラクタ
+        /// 実行開始時
         /// </summary>
-        public WWWDLJob( string url )
+        protected override void DoRun(UrlLocation location)
         {
-            Url         = url;
-            m_handler   = new THandler();
+            Source = new WWW( location.Url );
         }
-
-        public void Run()
+        /// <summary>
+        /// 更新処理
+        /// </summary>
+        protected override void DoUpdate(WWW source, UrlLocation location)
         {
-            m_www = new WWW( Url );
+            Progress    = source.progress;
+            IsCompleted = source.isDone;
         }
-
-        public void Update()
-        {
-            Progress    = m_www.progress;
-            IsCompleted = m_www.isDone;
-        }
-
-        public void Done()
-        {
-            m_handler.Complete( m_www );
-        }
-
-        public void Dispose() { }
     }
 }

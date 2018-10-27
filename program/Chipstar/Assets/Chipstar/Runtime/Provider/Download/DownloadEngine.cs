@@ -24,19 +24,34 @@ namespace Chipstar.Downloads
         public void Update()
         {
             //  現在のリクエストを処理
-            if ( m_current != null && !m_current.IsCompleted )
+            if (UpdateCurrent())
             {
-                m_current.Update();
-                if( m_current.IsCompleted )
-                {
-                    m_current.Done();
-                    m_current = null;
-                    return;
-                }
+                //  実行中
+                return;
             }
-
             //  次のリクエストを処理
-            if( m_queue.Count <= 0 )
+            MoveNext();
+        }
+
+        protected virtual bool UpdateCurrent()
+        {
+            if (m_current == null)
+            {
+                return false;
+            }
+            m_current.Update();
+            if (!m_current.IsCompleted)
+            {
+                return true;
+            }
+            m_current.Done();
+            m_current = null;
+            return false;
+        }
+
+        protected virtual void MoveNext()
+        {
+            if (m_queue.Count <= 0)
             {
                 return;
             }

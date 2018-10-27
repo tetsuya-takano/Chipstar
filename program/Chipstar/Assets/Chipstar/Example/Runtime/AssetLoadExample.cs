@@ -10,12 +10,18 @@ public class AssetLoadExample : MonoBehaviour
     void Start()
     {
         engine  = new DownloadEngine();
-        var request = new WWWDLJob<WWWDL.TextDL, string >("https://www.google.com/");
-        engine.Enqueue( request );
-        request.OnLoaded = text =>
+
+        for (int i = 0; i < 10; i++)
         {
-            Debug.Log(text);
-        };
+            var request = new WWWDLJob<string>( "https://www.google.com/", new WWWDL.TextDL() );
+            var idx = i + 1;
+            request.OnLoaded = text =>
+            {
+                Debug.Log( idx + " ::::::::::::::: "+ text);
+            };
+
+            engine.Enqueue(request);
+        }
     }
 
 
