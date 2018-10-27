@@ -16,16 +16,20 @@
     /// <summary>
     /// 読み込みマネージャ
     /// </summary>
-    public class AssetLoadProvider<TData> 
-                    : IAssetLoadProvider
-        where TData : IRuntimeBundleData<TData>
-    {
-        private ILoadDatabase<TData>    LoadDatabase    { get; set; }
-        private IDownloadEngine         Engine          { get; set; }
+    public class AssetLoadProvider<TRuntimeData> 
+                                : IAssetLoadProvider
+            where TRuntimeData  : IRuntimeBundleData<TRuntimeData>
 
-        void Init()
-        {
-        }
+    {
+        //===============================
+        //  プロパティ
+        //===============================
+        private ILoadDatabase<TRuntimeData>     LoadDatabase    { get; set; }
+        private IDownloadEngine                 Engine          { get; set; }
+
+        //===============================
+        //  関数
+        //===============================
 
         /// <summary>
         /// アセットの取得
@@ -47,7 +51,7 @@
             return DoPreload( data );
         }
 
-        protected virtual ILoadTask DoPreload( TData data )
+        protected virtual ILoadTask DoPreload( TRuntimeData data )
         {
             return null;
         }

@@ -5,20 +5,19 @@ using UnityEngine;
 
 namespace Chipstar.Downloads
 {
-    public interface ILoadDatabase<TContentTable, TBundle, TAsset, TRuntimeBundle>
-        where TBundle       : IBundleBuildData
-        where TAsset        : IAssetBuildData
-        where TContentTable : IBuildMapDataTable<TBundle, TAsset>
-        where TRuntimeBundle: IRuntimeBundleData<TRuntimeBundle>
+    public interface ILoadDatabase<TRuntimeData>
+        where TRuntimeData  : IRuntimeBundleData<TRuntimeData>
     {
+        void            Initialize  ( string json );
+        TRuntimeData    Find        ( string path );
     }
 
-    public class LoadDatabase<TContentTable, TBundle, TAsset, TRuntimeData> 
-            :   ILoadDatabase<TContentTable, TBundle, TAsset, TRuntimeData>
+    public class LoadDatabase<TTable, TBundle, TAsset, TRuntimeData> 
+            :   ILoadDatabase<TRuntimeData>
 
             where TBundle       : IBundleBuildData
             where TAsset        : IAssetBuildData
-            where TContentTable : IBuildMapDataTable<TBundle, TAsset>
+            where TTable        : IBuildMapDataTable<TBundle, TAsset>
 
             where TRuntimeData  : IRuntimeBundleData<TRuntimeData>, new()
     {
@@ -35,8 +34,9 @@ namespace Chipstar.Downloads
         /// <summary>
         /// 
         /// </summary>
-        public void Initialize(TContentTable table)
+        public void Initialize( string json )
         {
+            var table = JsonUtility.FromJson<TTable>( json );
             //  アセットの一覧
             foreach (var asset in table.AssetList)
             {
