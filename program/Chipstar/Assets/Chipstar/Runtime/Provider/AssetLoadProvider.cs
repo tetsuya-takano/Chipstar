@@ -18,11 +18,14 @@
     /// </summary>
     public class AssetLoadProvider<TData> 
                     : IAssetLoadProvider
-        where TData : IRuntimeBundleData
+        where TData : IRuntimeBundleData<TData>
     {
         private ILoadDatabase<TData>    LoadDatabase    { get; set; }
-        private ILoadManager            LoadManager     { get; set; }
+        private IDownloadEngine         Engine          { get; set; }
 
+        void Init()
+        {
+        }
 
         /// <summary>
         /// アセットの取得
@@ -33,7 +36,7 @@
             var data    = LoadDatabase.Find( path );
             if( data.IsOnMemory )
             {
-                return LoadManager.LoadAsset<T>( data );
+                return null;
             }
             return null;
         }
@@ -44,9 +47,9 @@
             return DoPreload( data );
         }
 
-        protected virtual ILoadTask DoPreload( IRuntimeBundleData data )
+        protected virtual ILoadTask DoPreload( TData data )
         {
-            return LoadManager.PreloadBundleFile( data );
+            return null;
         }
 
         public ISceneLoadTask LoadLevel(string sceneName)

@@ -1,0 +1,134 @@
+﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using System;
+using System.Linq;
+
+namespace Chipstar.Downloads
+{
+    public interface IBundleBuildData
+    {
+        string      ABName       { get; }
+        string[]    Assets       { get; }
+        string      Hash         { get; }
+        string[]    Dependencies { get; }
+    }
+    public interface IAssetBuildData
+    {
+        string Path { get; }
+        string Guid { get; }
+    }
+    public interface IBuildMapDataTable<TBundle, TAssetData>
+        where TBundle   : IBundleBuildData
+        where TAssetData: IAssetBuildData
+    {
+        IEnumerable<TBundle>    BundleList    { get; }
+        IEnumerable<TAssetData> AssetList     { get; }
+
+        void Add(TAssetData asset  );
+        void Add(TBundle    bundle );
+    }
+
+    [Serializable]
+    public struct BundleBuildData : IBundleBuildData
+    {
+        //===============================
+        //  変数
+        //===============================
+        [SerializeField] private string m_abName;
+        [SerializeField] private string[] m_assets;
+        [SerializeField] private string[] m_dependencies;
+        [SerializeField] private string m_hash;
+
+        //===============================
+        //  関数
+        //===============================
+        public string ABName
+        {
+            get { return m_abName; }
+            set { m_abName = value; }
+        }
+        public string[] Assets
+        {
+            get { return m_assets; }
+            set { m_assets = value; }
+        }
+        public string Hash
+        {
+            get { return m_hash; }
+            set { m_hash = value; }
+        }
+        public string[] Dependencies
+        {
+            get { return m_dependencies; }
+            set { m_dependencies = value; }
+        }
+
+        //===============================
+        //  関数
+        //===============================
+
+        public BundleBuildData(
+            string abName,
+            string[] assets,
+            string[] dependenceis,
+            string hash
+            )
+        {
+            m_abName = abName;
+            m_assets = assets;
+            m_hash = hash;
+            m_dependencies = dependenceis;
+        }
+    }
+
+    [Serializable]
+    public struct AssetBuildData : IAssetBuildData
+    {
+        [SerializeField] private string m_path;
+        [SerializeField] private string m_guid;
+
+        public string Path
+        {
+            get { return m_path; }
+            set { m_path = value; }
+        }
+        public string Guid
+        {
+            get { return m_guid; }
+            set { m_guid = value; }
+        }
+    }
+
+    [Serializable]
+    public class BuildMapDataTable : IBuildMapDataTable<BundleBuildData, AssetBuildData>
+    {
+        //===============================
+        //  SerializeField
+        //===============================
+        [SerializeField] private List<BundleBuildData>  m_abManifestList = new List<BundleBuildData>();
+        [SerializeField] private List<AssetBuildData>   m_assetDBList    = new List<AssetBuildData>();
+
+        public IEnumerable<BundleBuildData> BundleList { get { return m_abManifestList; } }
+        public IEnumerable<AssetBuildData>  AssetList  { get { return m_assetDBList   ; } }
+
+        //===============================
+        //  プロパティ
+        //===============================
+
+
+        //===============================
+        //  関数
+        //===============================
+
+        public void Add(BundleBuildData data)
+        {
+            m_abManifestList.Add(data);
+        }
+
+        public void Add(AssetBuildData data)
+        {
+            m_assetDBList.Add(data);
+        }
+    }
+}

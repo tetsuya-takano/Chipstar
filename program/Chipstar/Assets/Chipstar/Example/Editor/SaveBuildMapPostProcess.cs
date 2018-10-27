@@ -4,6 +4,7 @@ using Chipstar.Builder;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Chipstar.Downloads;
 
 namespace Chipstar.Example
 {
@@ -30,7 +31,7 @@ namespace Chipstar.Example
         /// </summary>
         protected override void DoProcess( IABBuildConfig settings, ABBuildResult result, IList<ABBuildData> bundleList )
         {
-            var json        = new BuildMapContents();
+            var json        = new BuildMapDataTable();
             var manifest    = result.Manifest;
             foreach (var data in bundleList)
             {
@@ -41,7 +42,7 @@ namespace Chipstar.Example
                     Hash        = manifest.GetAssetBundleHash( data.ABName ).ToString(),
                     Dependencies= manifest.GetAllDependencies( data.ABName )
                 };
-                json.AddBundle( d );
+                json.Add( d );
             }
 
             var assetPaths = bundleList.SelectMany(c => c.Assets).Distinct();
@@ -52,7 +53,7 @@ namespace Chipstar.Example
                     Path = assetPath,
                     Guid = AssetDatabase.AssetPathToGUID( assetPath )
                 };
-                json.AddAsset( d );
+                json.Add( d );
             }
             var path        = Path.Combine( settings.OutputPath, FileName );
             var contents    = JsonUtility.ToJson( json, true );
