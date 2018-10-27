@@ -9,30 +9,35 @@ namespace Chipstar.Builder
     /// <summary>
     /// アセットバンドルビルド後にさせる動作
     /// </summary>
-    public interface IABBuildPostProcess<T> where T : IABBuildData
+    public interface IABBuildPostProcess<T, TResult>
+        where T         : IABBuildData
+        where TResult   : IABBuildResult
     {
-        void OnProcess( IABBuildConfig settings, AssetBundleManifest manifest, IList<T> assetbundleList );
+        void OnProcess( IABBuildConfig settings, TResult result, IList<T> assetbundleList );
     }
 
     /// <summary>
     /// 事後処理
     /// </summary>
-    public class ABBuildPostProcess<T> : IABBuildPostProcess<T> where T : IABBuildData
+    public class ABBuildPostProcess<T, TResult> 
+        : IABBuildPostProcess<T,TResult> 
+            where T         : IABBuildData
+            where TResult   : IABBuildResult
     {
-        public static ABBuildPostProcess<T> Empty = new ABBuildPostProcess<T>();
+        public static ABBuildPostProcess<T, TResult> Empty = new ABBuildPostProcess<T, TResult>();
 
 
         public void OnProcess( 
             IABBuildConfig      settings, 
-            AssetBundleManifest manifest, 
+            TResult             result, 
             IList<T>            bundleList )
         {
-            DoProcess( settings, manifest, bundleList );
+            DoProcess( settings, result, bundleList );
         }
 
         protected virtual void DoProcess( 
             IABBuildConfig      settings,
-            AssetBundleManifest manifest,
+            TResult             result,
             IList<T>            bundleList )
         {
             foreach( var d in bundleList )

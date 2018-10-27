@@ -9,9 +9,10 @@ namespace Chipstar.Builder
     /// <summary>
     /// ビルド用クラス
     /// </summary>
-	public class AssetBundleBuilder<TPackageData,TBuildData> 
-        where TPackageData  :IABPackageData<TBuildData>
+	public class AssetBundleBuilder<TPackageData,TBuildData,TBuildResult> 
+        where TPackageData  : IABPackageData<TBuildData>
         where TBuildData    : IABBuildData
+        where TBuildResult  : IABBuildResult
     {
         /// <summary>
         /// ビルド
@@ -20,9 +21,9 @@ namespace Chipstar.Builder
             IABBuildConfig                                  config       ,
             IABBuildFileFilter                              fileFilter   ,
             IABPackageSettings   <TPackageData,TBuildData>  packageSettings,
-            IABBuildProcess      <TBuildData>               buildProcess ,
+            IABBuildProcess      <TBuildData,TBuildResult>  buildProcess ,
             IABBuildPreProcess   <TBuildData>               preProcess   ,
-            IABBuildPostProcess  <TBuildData>               postProcess  
+            IABBuildPostProcess  <TBuildData,TBuildResult>  postProcess  
         )
         {
             //  ビルド対象アセットの絞り込み
@@ -37,10 +38,10 @@ namespace Chipstar.Builder
             preProcess.OnProcess( assetBundleList );
 			
 			//	ビルド実行
-			var manifest = buildProcess.Build( config, assetBundleList );
+			var result = buildProcess.Build( config, assetBundleList );
 
 			//	事後処理
-            postProcess.OnProcess( config, manifest, assetBundleList );
+            postProcess.OnProcess( config, result, assetBundleList );
 
             AssetDatabase.Refresh();
 		}

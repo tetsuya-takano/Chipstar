@@ -1,6 +1,6 @@
 ﻿namespace Chipstar.Downloads
 {
-    internal interface IRequestConverter
+    public interface IRequestConverter
     {
         ILoadJob Create( IRuntimeBundleData data );
     }

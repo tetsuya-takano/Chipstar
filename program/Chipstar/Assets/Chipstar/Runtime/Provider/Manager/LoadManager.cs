@@ -2,7 +2,7 @@
 
 namespace Chipstar.Downloads
 {
-    internal interface ILoadManager : IDisposable
+    public interface ILoadManager : IDisposable
     {
         IAssetLoadTask<T>   LoadAsset<T>     ( IRuntimeBundleData data );
         ILoadTask           PreloadBundleFile( IRuntimeBundleData data );

@@ -7,9 +7,9 @@ namespace Chipstar.Builder
     /// <summary>
     /// ビルドしない
     /// </summary>
-    public sealed class DisableBuildProcess<T> : ABBuildProcess<T> where T : IABBuildData
+    public sealed class DisableBuildProcess<T> : ABBuildProcess<T,SimpleResult> where T : IABBuildData
     {
-        protected override AssetBundleManifest DoBuild( string outputPath, AssetBundleBuild[] bundleList, BuildAssetBundleOptions option, BuildTarget platform )
+        protected override SimpleResult DoBuild( string outputPath, AssetBundleBuild[] bundleList, BuildAssetBundleOptions option, BuildTarget platform )
         {
             Debug.Log( " ----------------------------------- " );
             foreach( var b in bundleList)
@@ -17,7 +17,7 @@ namespace Chipstar.Builder
                 Debug.Log( b.assetBundleName );
             }
             Debug.Log( " ----------------------------------- ");
-            return null;
+            return new SimpleResult( true );
         }
     }
 }

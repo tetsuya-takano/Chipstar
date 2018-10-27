@@ -10,21 +10,29 @@ namespace Chipstar.Builder
     /// <summary>
     /// アセットバンドルビルド用インターフェース
     /// </summary>
-    public interface IABBuildProcess<T> where T : IABBuildData
-	{
-		AssetBundleManifest Build( IABBuildConfig settings, IList<T> assetBundleList );
+    public interface IABBuildProcess<TData, TResult> 
+        where TData     : IABBuildData
+        where TResult   : IABBuildResult
+    {
+		TResult Build( IABBuildConfig settings, IList<TData> assetBundleList );
 	}
 
-    public class ABBuildProcess<T> : IABBuildProcess<T> where T : IABBuildData
+    public interface IABBuildResult
     {
-        public static readonly ABBuildProcess<T> Empty = new ABBuildProcess<T>();
+        bool IsSuccess { get; }
 
+    }
+
+    public abstract class ABBuildProcess<TData,TResult> : IABBuildProcess<TData, TResult> 
+        where TData     : IABBuildData
+        where TResult   : IABBuildResult
+    {
         /// <summary>
         /// ビルド
         /// </summary>
-        public virtual AssetBundleManifest Build( 
+        public virtual TResult Build( 
             IABBuildConfig      settings, 
-            IList<T>            assetBundleList 
+            IList<TData>            assetBundleList 
         )
         {
             var outputPath = settings.OutputPath;
@@ -53,19 +61,11 @@ namespace Chipstar.Builder
             );
         }
 
-        protected virtual AssetBundleManifest DoBuild( 
+        protected abstract TResult DoBuild( 
             string                  outputPath,
             AssetBundleBuild[]      bundleList ,
             BuildAssetBundleOptions option,
             BuildTarget             platform
-        )
-        {
-            return BuildPipeline.BuildAssetBundles( 
-                outputPath          : outputPath,
-                builds              : bundleList,
-                assetBundleOptions  : option,
-                targetPlatform      : platform
-            );
-        }
+        );
     }
 }

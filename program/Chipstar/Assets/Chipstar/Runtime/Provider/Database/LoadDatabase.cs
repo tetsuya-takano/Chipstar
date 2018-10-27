@@ -2,7 +2,7 @@
 
 namespace Chipstar.Downloads
 {
-    internal interface ILoadDatabase<T> where T : IRuntimeBundleData
+    public interface ILoadDatabase<T> where T : IRuntimeBundleData
     {
         T Find( string path );
     }
