@@ -12,7 +12,7 @@ namespace Chipstar.Example
         [MenuItem( "Tools/Build" )]
         static void Hoge()
         {
-            var builder = new AssetBundleBuilder<ABPackageMst,ABBuildData, SimpleResult>();
+            var builder = new AssetBundleBuilder<ABPackageMst,ABBuildData, ABBuildResult>();
             var config  = new ABBuildConfig(
                 outputPath : Path.Combine( Application.dataPath, "../../build/windows/"),
                 option     : BuildAssetBundleOptions.ForceRebuildAssetBundle,
@@ -26,7 +26,7 @@ namespace Chipstar.Example
                 } 
             );
             //var buildProcess  = new DisableBuildProcess<ABBuildData>();
-            var buildProcess    = SimpleBuildProcess<ABBuildData>.Empty;
+            var buildProcess    = SimpleABBuildProcess<ABBuildData>.Empty;
 
             builder.Build
                 (
@@ -35,7 +35,7 @@ namespace Chipstar.Example
                     packageSettings : new ABPackageMstTable( "../settings/abPack.csv" ),
                     buildProcess    : buildProcess,
                     preProcess      : ABBuildPreProcess <ABBuildData>.Empty,
-                    postProcess     : ABBuildPostProcess<ABBuildData, SimpleResult>.Empty
+                    postProcess     : new SaveBuildMapPostProcess( "buildMap.json" )
                 );
         }
     }

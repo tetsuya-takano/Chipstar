@@ -4,13 +4,13 @@ using UnityEditor;
 namespace Chipstar.Builder
 {
 
-    public class SimpleBuildProcess<TData> 
-        : ABBuildProcess<TData, SimpleResult>
+    public class SimpleABBuildProcess<TData> 
+        : ABBuildProcess<TData, ABBuildResult>
         where TData : IABBuildData
     {
-        public static SimpleBuildProcess<TData> Empty = new SimpleBuildProcess<TData>();
+        public static SimpleABBuildProcess<TData> Empty = new SimpleABBuildProcess<TData>();
 
-        protected override SimpleResult DoBuild(string outputPath, AssetBundleBuild[] bundleList, BuildAssetBundleOptions option, BuildTarget platform)
+        protected override ABBuildResult DoBuild(string outputPath, AssetBundleBuild[] bundleList, BuildAssetBundleOptions option, BuildTarget platform)
         {
             var manifest = BuildPipeline.BuildAssetBundles( 
                 outputPath          : outputPath, 
@@ -19,7 +19,7 @@ namespace Chipstar.Builder
 
                 builds              : bundleList );
 
-            return new SimpleResult( manifest != null );
+            return new ABBuildResult( manifest );
         }
     }
 }

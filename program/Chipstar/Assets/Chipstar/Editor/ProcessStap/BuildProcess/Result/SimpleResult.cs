@@ -12,4 +12,15 @@ namespace Chipstar.Builder
             IsSuccess = success;
         }
     }
+
+    public class ABBuildResult : IABBuildResult
+    {
+        public AssetBundleManifest  Manifest  { get; private set; }
+        public bool                 IsSuccess { get { return Manifest != null; } }
+
+        public ABBuildResult(AssetBundleManifest manifest)
+        {
+            Manifest =  manifest;
+        }
+    }
 }
