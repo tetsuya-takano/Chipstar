@@ -7,21 +7,14 @@ namespace Chipstar.Downloads
     /// <summary>
     /// 
     /// </summary>
-    public sealed class WWWDLJob<TData> : DLJob<WWWDL.WWWHandler<TData>, WWW, UrlLocation, TData>
+    public sealed class WWWDLJob<TData>
+        : DLJob<WWWDL.WWWHandler<TData>, WWW, UrlLocation, TData>
     {
         //=================================================
         //  関数
         //=================================================
-        public WWWDLJob( 
-            UrlLocation             location, 
-            WWWDL.WWWHandler<TData> handler
-        ) : base(location, handler) { }
-
-        public WWWDLJob
-            ( 
-            string                  url, 
-            WWWDL.WWWHandler<TData> handler
-            ) : this(new UrlLocation(url), handler) { }
+        public WWWDLJob( UrlLocation    location, WWWDL.WWWHandler<TData> handler ) : base( location, handler ) { }
+        public WWWDLJob( string         url,      WWWDL.WWWHandler<TData> handler ) : this( new UrlLocation(url), handler) { }
 
         /// <summary>
         /// 実行開始時

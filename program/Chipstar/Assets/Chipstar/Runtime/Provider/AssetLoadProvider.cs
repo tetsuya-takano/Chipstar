@@ -1,4 +1,7 @@
-﻿namespace Chipstar.Downloads
+﻿using System.Collections;
+using UnityEngine;
+
+namespace Chipstar.Downloads
 {
     //==============================
     //  読み込み統括
@@ -9,8 +12,8 @@
 
     public interface IAssetLoadProvider
     {
-        IAssetLoadTask<T>   LoadAsset<T>( string path );
-        ISceneLoadTask      LoadLevel   ( string sceneName );
+        ILoadJob<T>   LoadAsset<T>( string path );
+        ILoadJob      LoadLevel   ( string sceneName );
     }
 
     /// <summary>
@@ -26,20 +29,28 @@
         //===============================
         private ILoadDatabase<TRuntimeData>     LoadDatabase    { get; set; } // コンテンツテーブルから作成したDB
         private IDownloadEngine                 Engine          { get; set; } // DLエンジン
+        private IJobCreator                     JobCreator      { get; set; } // ジョブの作成
 
         //===============================
         //  関数
         //===============================
 
-        public void InitLoad()
+        public IEnumerator InitLoad()
         {
-            
+            var job = JobCreator.CreateTextLoad( new UrlLocation( "" ) );
+
+            Engine.Enqueue( job );
+
+            var waitForInit = new WaitWhile(() => job.IsCompleted );
+            yield return waitForInit;
+
+            LoadDatabase.Initialize( job.Content );
         }
 
         /// <summary>
         /// アセットの取得
         /// </summary>
-        public IAssetLoadTask<T> LoadAsset<T>(string path)
+        public ILoadJob<T> LoadAsset<T>(string path)
         {
             //  パスからバンドルデータを取得
             var data    = LoadDatabase.Find( path );
@@ -47,22 +58,15 @@
             {
                 return null;
             }
+
+            var job = JobCreator.CreateBundleFile( new UrlLocation( "" ) );
+            Engine.Enqueue( job );
+
             return null;
         }
-
-        public ILoadTask Preload( string path )
+        public ILoadJob LoadLevel(string sceneName)
         {
-            var data    = LoadDatabase.Find( path );
-            return DoPreload( data );
-        }
 
-        protected virtual ILoadTask DoPreload( TRuntimeData data )
-        {
-            return null;
-        }
-
-        public ISceneLoadTask LoadLevel(string sceneName)
-        {
             return null;
         }
     }

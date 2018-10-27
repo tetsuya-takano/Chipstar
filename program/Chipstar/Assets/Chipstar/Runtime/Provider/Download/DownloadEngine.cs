@@ -6,7 +6,7 @@ namespace Chipstar.Downloads
     public interface IDownloadEngine : IDisposable
     {
         void Update();
-        void Enqueue(IDLJob request);
+        void Enqueue(ILoadJob request);
     }
 
     //================================
@@ -17,8 +17,8 @@ namespace Chipstar.Downloads
         //================================
         //  
         //================================
-        private Queue<IDLJob> m_queue     = new Queue<IDLJob>();
-        private IDLJob        m_current   = null;
+        private Queue<ILoadJob> m_queue     = new Queue<ILoadJob>();
+        private ILoadJob        m_current   = null;
 
         //================================
         //  更新
@@ -53,7 +53,7 @@ namespace Chipstar.Downloads
                 return false;
             }
             m_current.Update();
-            if (!m_current.IsCompleted)
+            if (!m_current.IsCompleted )
             {
                 return true;
             }
@@ -76,7 +76,7 @@ namespace Chipstar.Downloads
         /// <summary>
         /// 追加
         /// </summary>
-        public virtual void Enqueue(IDLJob job)
+        public virtual void Enqueue(ILoadJob job)
         {
             m_queue.Enqueue( job );
         }

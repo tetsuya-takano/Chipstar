@@ -7,7 +7,7 @@ namespace Chipstar.Downloads
         private static IAssetLoadProvider LoadProvider { get; set; }
 
 
-        public static ISceneLoadTask LoadLevel( string sceneName )
+        public static ILoadTask LoadLevel( string sceneName )
         {
             return LoadProvider.LoadLevel( sceneName );
         }

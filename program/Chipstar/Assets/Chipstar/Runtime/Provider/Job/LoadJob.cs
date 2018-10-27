@@ -2,19 +2,23 @@
 
 namespace Chipstar.Downloads
 {
-    public interface IDLJob : ILoadTask
+    public interface ILoadJob : ILoadTask, IDisposable
     {
         void Run();
         void Update();
         void Done();
     }
 
+    public interface ILoadJob<T> : ILoadJob, ILoadTask<T>
+    {
+    }
+
+
     /// <summary>
     /// DLジョブ
     /// </summary>
-    public abstract class DLJob<THandler, TSource, TLocation, TData> 
-                        : IDLJob
-        where THandler  : IDLHandler<TSource,TData>
+    public abstract class DLJob<THandler, TSource, TLocation, TData> : ILoadJob<TData>
+        where THandler  : IDLHandler<TSource, TData>
         where TLocation : IDLLocation
     {
         //===============================
@@ -23,7 +27,8 @@ namespace Chipstar.Downloads
         public      TLocation       Location       { get; protected set; }
         public      float           Progress       { get; protected set; }
         public      bool            IsCompleted    { get; protected set; }
-        public      Action<TData>   OnLoaded       { protected get; set; }
+        public      TData           Content        { get; protected set; }
+        public      Action          OnLoaded       { protected get; set; }
 
         protected   TSource  Source         { get; set; }
         protected   THandler DLHandler      { get; set; }
@@ -81,11 +86,12 @@ namespace Chipstar.Downloads
 
         protected virtual void DoDone( TSource source )
         {
+            Content = DLHandler.Complete(source);
             if (OnLoaded == null)
             {
                 return;
             }
-            OnLoaded( DLHandler.Complete( source ));
+            OnLoaded( );
         }
 
         /// <summary>

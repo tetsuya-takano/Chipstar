@@ -13,7 +13,7 @@ namespace Chipstar.Downloads
         /// <summary>
         /// 読み込み
         /// </summary>
-        public static IAssetLoadTask<T> Load<T>( string path )
+        public static ILoadTask<T> Load<T>( string path )
         {
             return LoadProvider.LoadAsset<T>( path );
         }
