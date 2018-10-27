@@ -19,9 +19,9 @@ namespace Chipstar.Downloads
         /// </summary>
         public sealed class TextDL : WWWHandler<string>
         {
-            protected override void DoComplete(WWW source)
+            protected override string DoComplete(WWW source)
             {
-                OnLoaded( source.text );
+                return source.text;
             }
         }
 
@@ -30,9 +30,9 @@ namespace Chipstar.Downloads
         /// </summary>
         public sealed class AssetBundleDL : WWWHandler<AssetBundle>
         {
-            protected override void DoComplete(WWW source)
+            protected override AssetBundle DoComplete(WWW source)
             {
-                OnLoaded( source.assetBundle );
+                return source.assetBundle;
             }
         }
     }

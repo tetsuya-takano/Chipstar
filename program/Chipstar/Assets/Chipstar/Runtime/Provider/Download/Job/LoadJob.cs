@@ -23,7 +23,7 @@ namespace Chipstar.Downloads
         public      TLocation       Location       { get; protected set; }
         public      float           Progress       { get; protected set; }
         public      bool            IsCompleted    { get; protected set; }
-        public      Action<TData>   OnLoaded       { set { DLHandler.OnLoaded = value; } }
+        public      Action<TData>   OnLoaded       { protected get; set; }
 
         protected   TSource  Source         { get; set; }
         protected   THandler DLHandler      { get; set; }
@@ -81,7 +81,11 @@ namespace Chipstar.Downloads
 
         protected virtual void DoDone( TSource source )
         {
-            DLHandler.Complete( source );
+            if (OnLoaded == null)
+            {
+                return;
+            }
+            OnLoaded( DLHandler.Complete( source ));
         }
 
         /// <summary>
