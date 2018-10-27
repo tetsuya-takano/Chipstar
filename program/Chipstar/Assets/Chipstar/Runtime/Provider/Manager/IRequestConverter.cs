@@ -2,6 +2,6 @@
 {
     internal interface IRequestConverter
     {
-        ILoadRequest Create( IRuntimeBundleData data );
+        ILoadJob Create( IRuntimeBundleData data );
     }
 }

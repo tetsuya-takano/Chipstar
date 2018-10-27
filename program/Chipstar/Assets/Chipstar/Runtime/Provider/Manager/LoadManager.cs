@@ -1,9 +1,13 @@
-﻿namespace Chipstar.Downloads
+﻿using System;
+
+namespace Chipstar.Downloads
 {
-    internal interface ILoadManager
+    internal interface ILoadManager : IDisposable
     {
         IAssetLoadTask<T>   LoadAsset<T>     ( IRuntimeBundleData data );
         ILoadTask           PreloadBundleFile( IRuntimeBundleData data );
+
+        void Update();
     }
 
 
@@ -18,6 +22,10 @@
         //==================================
         //
         //==================================
+        public void Dispose()
+        {
+            DLEngine.Dispose();
+        }
 
         /// <summary>
         /// 読み込み管理
@@ -40,6 +48,8 @@
 
         protected virtual ILoadTask CreateFileLoad( IRuntimeBundleData data )
         {
+            var job = ReqConverter.Create( data );
+            DLEngine.Enqueue( job );
 
             return null;
         }

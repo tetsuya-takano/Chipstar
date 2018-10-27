@@ -2,31 +2,30 @@
 using System.Collections;
 using Chipstar.Downloads;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 public class AssetLoadExample : MonoBehaviour
 {
-    IDownloadEngine engine = null;
+    [SerializeField] RawImage m_image = null;
+    ILoadManager manager = null;
     // Use this for initialization
     void Start()
     {
-        engine  = new DownloadEngine();
 
-        for (int i = 0; i < 10; i++)
+        //  https://www.google.co.jp/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png
+
+        manager = new LoadManager();
+
+        var task = manager.LoadAsset<Texture>(null);
+        task.OnLoaded = texture =>
         {
-            var request = new WWWDLJob<string>( "https://www.google.com/", new WWWDL.TextDL() );
-            var idx = i + 1;
-            request.OnLoaded = text =>
-            {
-                Debug.Log( idx + " ::::::::::::::: "+ text);
-            };
-
-            engine.Enqueue(request);
-        }
+            m_image.texture = texture;
+        };
     }
 
 
     private void Update()
     {
-        engine.Update();
+        manager.Update();
     }
 }

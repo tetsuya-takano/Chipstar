@@ -3,12 +3,15 @@ using System.Collections.Generic;
 
 namespace Chipstar.Downloads
 {
-    public interface IDownloadEngine
+    public interface IDownloadEngine : IDisposable
     {
         void Update();
         void Enqueue(ILoadJob request);
     }
 
+    //================================
+    //  DL用のリクエストを積んで順次処理する
+    //================================
     public class DownloadEngine : IDownloadEngine
     {
         //================================
@@ -20,6 +23,16 @@ namespace Chipstar.Downloads
         //================================
         //  更新
         //================================
+
+        public void Dispose()
+        {
+            if (m_current != null )
+            {
+                m_current.Dispose();
+            }
+            m_current = null;
+            m_queue.Clear();
+        }
 
         public void Update()
         {
@@ -45,6 +58,7 @@ namespace Chipstar.Downloads
                 return true;
             }
             m_current.Done();
+            m_current.Dispose();
             m_current = null;
             return false;
         }
