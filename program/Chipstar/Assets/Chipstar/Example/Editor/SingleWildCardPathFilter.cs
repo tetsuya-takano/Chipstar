@@ -11,7 +11,7 @@ namespace Chipstar.Example
     public class SingleWildCardPathFilter : ABPathFilter
     {
         private Regex m_pattern = null;
-        public SingleWildCardPathFilter( string pattern )
+        public SingleWildCardPathFilter(string pattern) : base(pattern)
         {
             m_pattern = new Regex( pattern.Replace( "*", "(.*?)" ) );
         }

@@ -19,8 +19,8 @@ namespace Chipstar.Example
             PathPattern     = args[ 0 ];
             PackName        = args[ 1 ];
             Priority        = int.Parse( args[ 2 ] );
-            PathFilter      = ABPathFilter   .Empty;
-            NameConverter   = ABNameConverter.Empty;
+            PathFilter      = new SingleWildCardPathFilter  ( PathPattern );
+            NameConverter   = new NameOverrideConverter     ( PackName, ".ab" );
         }
     }
 

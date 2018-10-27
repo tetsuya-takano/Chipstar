@@ -9,12 +9,32 @@
 	}
     public class ABPathFilter : IABPathFilter
     {
-        public static readonly ABPathFilter Empty = new ABPathFilter();
+        //====================================
+        //  変数
+        //====================================
+        
+        //====================================
+        //  プロパティ
+        //====================================
+
+        protected string Pattern { get; set; }
+
+        //====================================
+        //  関数
+        //====================================
+
+        public ABPathFilter(string pattern)
+        {
+            Pattern = pattern;
+        }
 
         public virtual bool IsMatch( string path )
         {
             return DoMatch( path );
         }
-        protected virtual bool DoMatch( string path ) { return true; }
+        protected virtual bool DoMatch( string path )
+        {
+            return path.Contains( Pattern );
+        }
     }
 }

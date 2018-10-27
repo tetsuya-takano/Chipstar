@@ -1,1 +1,3 @@
 *.prefab,prefab,1
+*.png,sprite,2
+*.unity,,100
