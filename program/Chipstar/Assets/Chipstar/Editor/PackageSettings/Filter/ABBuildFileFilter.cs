@@ -16,7 +16,7 @@ namespace Chipstar.Builder
     {
         public static readonly ABBuildFileFilter Empty = new ABBuildFileFilter( null );
 
-        protected virtual string[] Extensions { get; private set; }
+        protected string[] Extensions { get; private set; }
 
 
         public ABBuildFileFilter( 

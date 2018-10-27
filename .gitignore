@@ -3,3 +3,4 @@ program/Chipstar/Temp/
 program/Chipstar/.vs/
 *.sln
 *.csproj*
+program/build/
