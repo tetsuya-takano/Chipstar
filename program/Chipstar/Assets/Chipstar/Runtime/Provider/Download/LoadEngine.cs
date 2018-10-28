@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Chipstar.Downloads
 {
-    public interface IDownloadEngine : IDisposable
+    public interface ILoadEngine : IDisposable
     {
         void Update();
         void Enqueue(ILoadJob request);
@@ -12,7 +12,7 @@ namespace Chipstar.Downloads
     //================================
     //  DL用のリクエストを積んで順次処理する
     //================================
-    public class DownloadEngine : IDownloadEngine
+    public class LoadEngine : ILoadEngine
     {
         //================================
         //  

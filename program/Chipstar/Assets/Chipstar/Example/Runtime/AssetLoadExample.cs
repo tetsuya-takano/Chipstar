@@ -8,16 +8,46 @@ using System.Collections.Generic;
 public class AssetLoadExample : MonoBehaviour
 {
     [SerializeField] RawImage m_image = null;
-
+    IAssetLoadProvider m_provider = null;
     // Use this for initialization
-    void Start()
+    IEnumerator Start()
     {
         //  https://www.google.co.jp/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png
 
+        var creator = new JobCreator
+            ( 
+                onTextLoad  : location => new WWWDLJob<string>      ( location, new WWWDL.TextDL()),
+                onBundleLoad: location => new WWWDLJob<AssetBundle> ( location, new WWWDL.AssetBundleDL()),
+                onAssetLoad : location => new AssetLoadJob(location, new AssetLoad.AsyncLoad())
+            );
+        var database    = new LoadDatabase<BuildMapDataTable, BundleBuildData, AssetBuildData, RuntimeBundlleData>();
+        var loadEngine  = new LoadEngine();
+        var dlEngine    = new LoadEngine();
 
+
+        m_provider = new AssetLoadProvider<RuntimeBundlleData>
+            (
+                database    : database,
+                jobCreator  : creator,
+                loadEngine  : loadEngine,
+                dlEngine    : dlEngine
+            );
+
+        yield return null;
+
+        var contentLocation = new UrlLocation(@"D:\Programming\Unity\Chipstar\program\build\windows\buildMap.json");
+        yield return m_provider.InitLoad( contentLocation );
+
+
+        m_provider.LoadAsset<Texture>("Assets/BundleTarget/Square 3.png", texture =>
+       {
+           m_image.texture = texture;
+       });
     }
 
     private void Update()
     {
+        if (m_provider == null) { return; }
+        m_provider.DoUpdate();
     }
 }

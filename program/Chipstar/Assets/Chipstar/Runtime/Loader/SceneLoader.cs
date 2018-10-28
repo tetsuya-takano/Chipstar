@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
+
 namespace Chipstar.Downloads
 {
     public static class SceneLoader
@@ -7,7 +9,7 @@ namespace Chipstar.Downloads
         private static IAssetLoadProvider LoadProvider { get; set; }
 
 
-        public static ILoadTask LoadLevel( string sceneName )
+        public static IDisposable LoadLevel( string sceneName )
         {
             return LoadProvider.LoadLevel( sceneName );
         }

@@ -8,7 +8,7 @@ namespace Chipstar.Downloads
     /// 
     /// </summary>
     public sealed class WWWDLJob<TData>
-        : DLJob<WWWDL.WWWHandler<TData>, WWW, UrlLocation, TData>
+        : LoadJob<WWWDL.WWWHandler<TData>, WWW, UrlLocation, TData>
     {
         //=================================================
         //  関数

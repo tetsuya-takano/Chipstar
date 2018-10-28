@@ -11,13 +11,14 @@ namespace Chipstar.Downloads
 
     public interface ILoadJob<T> : ILoadJob, ILoadTask<T>
     {
+        Action OnLoaded { set; }
     }
 
 
     /// <summary>
     /// DLジョブ
     /// </summary>
-    public abstract class DLJob<THandler, TSource, TLocation, TData> : ILoadJob<TData>
+    public abstract class LoadJob<THandler, TSource, TLocation, TData> : ILoadJob<TData>
         where THandler  : IDLHandler<TSource, TData>
         where TLocation : IDLLocation
     {
@@ -43,7 +44,7 @@ namespace Chipstar.Downloads
         //  関数
         //===============================
 
-        public DLJob( TLocation location, THandler handler )
+        public LoadJob( TLocation location, THandler handler )
         {
             Location    = location;
             DLHandler   = handler;
@@ -65,6 +66,8 @@ namespace Chipstar.Downloads
             Source    = default(TSource);
             DLHandler = default(THandler);
             Location  = default(TLocation);
+            OnLoaded  = null;
+
         }
 
         /// <summary>

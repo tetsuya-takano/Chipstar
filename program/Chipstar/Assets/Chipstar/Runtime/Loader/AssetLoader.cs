@@ -13,9 +13,9 @@ namespace Chipstar.Downloads
         /// <summary>
         /// 読み込み
         /// </summary>
-        public static ILoadTask<T> Load<T>( string path )
+        public static IDisposable Load<T>( string path, Action<T> onLoaded  ) where T : UnityEngine.Object
         {
-            return LoadProvider.LoadAsset<T>( path );
+            return LoadProvider.LoadAsset<T>( path, onLoaded  );
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Chipstar.Downloads
         T[]             Dependencies{ get; }
         bool            IsOnMemory  { get; }
 
-        AsyncOperation LoadAsync<TAsset>( string path );
+        AssetBundleRequest LoadAsync<TAsset>( string path );
         void Unload();
         void OnMemory( AssetBundle bundle );
 
@@ -93,7 +93,7 @@ namespace Chipstar.Downloads
         {
             Bundle = bundle;
         }
-        public AsyncOperation LoadAsync<TAsset>( string path )
+        public AssetBundleRequest LoadAsync<TAsset>( string path )
         {
             return Bundle.LoadAssetAsync<T>( path );
         }
