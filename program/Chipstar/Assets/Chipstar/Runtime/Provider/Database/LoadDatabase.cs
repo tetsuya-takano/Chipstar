@@ -12,7 +12,7 @@ namespace Chipstar.Downloads
         IEnumerable<TRuntimeData>            BundleList { get; }
         IEnumerable<AssetData<TRuntimeData>> AssetList  { get; }
 
-        void                    Initialize  ( string json );
+        void                    Initialize  ( byte[] data );
         AssetData<TRuntimeData> Find        ( string path );
         IDisposable             AddReference( TRuntimeData data );
     }
@@ -61,14 +61,9 @@ namespace Chipstar.Downloads
         /// <summary>
         /// 
         /// </summary>
-        public void Initialize( string json )
+        public void Initialize( byte[] datas )
         {
-            if (string.IsNullOrEmpty(json))
-            {
-                Debug.LogError( "LoadError" );
-                return;
-            }
-            var table = JsonUtility.FromJson<TTable>( json );
+            var table = ParseContentData( datas );
             //  アセットの一覧
             foreach (var asset in table.AssetList)
             {
@@ -99,6 +94,13 @@ namespace Chipstar.Downloads
                 runtime.Set( dependencies );
                 runtime.Set( assets );
             }
+        }
+
+        protected virtual TTable ParseContentData( byte[] data )
+        {
+            var json = BitConverter.ToString( data );
+
+            return JsonUtility.FromJson<TTable>( json );
         }
         /// <summary>
         /// 依存関係データ作成

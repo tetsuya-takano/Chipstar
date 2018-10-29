@@ -32,7 +32,7 @@ namespace Chipstar.Downloads
         //  プロパティ
         //===============================
         private ILoadDatabase<TRuntimeData>     LoadDatabase    { get; set; } // コンテンツテーブルから作成したDB
-        private IJobEngine                      JobEngine        { get; set; } // DLエンジン
+        private IJobEngine                      JobEngine       { get; set; } // DLエンジン
         private IJobCreator                     JobCreator      { get; set; } // ジョブの作成
 
         //===============================
@@ -47,7 +47,7 @@ namespace Chipstar.Downloads
             )
         {
             LoadDatabase    = database;
-            JobEngine        = dlEngine;
+            JobEngine       = dlEngine;
             JobCreator      = jobCreator;
         }
 
@@ -64,13 +64,9 @@ namespace Chipstar.Downloads
             yield break;
         }
 
-        private ILoadJob<string> InitielizeLoad( UrlLocation location )
+        private ILoadJob<byte[]> InitielizeLoad( UrlLocation location )
         {
-            var job = JobCreator.CreateTextLoad( location );
-
-            JobEngine.Enqueue(job);
-
-            return job;
+            return JobCreator.CreateBytesLoad( JobEngine, location ); ;
         }
 
         /// <summary>
@@ -91,22 +87,43 @@ namespace Chipstar.Downloads
             var path    = assetData.Path;
             if( data.IsOnMemory )
             {
-                CreateLoadAsset<T>( assetData, onLoaded);
+                CreateLoadAsset<T>( assetData, onLoaded );
                 return LoadDatabase.AddReference( data );
             }
-            return DoDownload( data, path, () => CreateLoadAsset<T>( assetData, onLoaded ) );
+            return DoLoadAssetWithNeedAll( assetData, onLoaded );
         }
 
-        protected virtual IDisposable DoDownload( TRuntimeData data, string path, Action onLoaded )
+        /// <summary>
+        /// アセットを取得するため必要なデータを一通りロード
+        /// </summary>
+        protected virtual IDisposable DoLoadAssetWithNeedAll<T>( AssetData<TRuntimeData> data, Action<T> onLoaded ) where T : UnityEngine.Object
         {
-            var job = JobCreator.CreateBundleFile( new UrlLocation( "" ));
+            return DoDownloadWithNeedAll( data.BundleData, () => CreateLoadAsset<T>( data, onLoaded ) );
+        }
+
+        /// <summary>
+        /// 依存アセットバンドルを一通りロード
+        /// </summary>
+        protected virtual IDisposable DoDownloadWithNeedAll( TRuntimeData data, Action onLoaded )
+        {
+            foreach( var d in data.Dependencies)
+            {
+                DoDownload( d, null );
+            }
+            return DoDownload( data, onLoaded );
+        }
+
+        /// <summary>
+        /// ダウンロード処理
+        /// </summary>
+        protected virtual IDisposable DoDownload( TRuntimeData data, Action onLoaded )
+        {
+            var job = JobCreator.CreateBundleFile( JobEngine, new UrlLocation( "" ));
             job.OnLoaded = () =>
             {
                 data.OnMemory( job.Content );
                 onLoaded();
             };
-            JobEngine.Enqueue(job);
-
             return LoadDatabase.AddReference( data );
         }
         
@@ -115,7 +132,7 @@ namespace Chipstar.Downloads
         /// </summary>
         private void CreateLoadAsset<T>( AssetData<TRuntimeData> assetData, Action<T> onLoaded ) where T : UnityEngine.Object
         {
-            var job = JobCreator.CreateAssetLoad( assetData.Path );
+            var job = JobCreator.CreateAssetLoad( JobEngine, new UrlLocation( assetData.Path ));
             job.OnLoaded = () => onLoaded( job.Content as T );
         }
 

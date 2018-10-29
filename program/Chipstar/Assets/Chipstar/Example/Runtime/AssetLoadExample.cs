@@ -15,8 +15,9 @@ public class AssetLoadExample : MonoBehaviour
         //  https://www.google.co.jp/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png
 
         var creator = new JobCreator
-            ( 
-                onTextLoad  : location => new WWWDLJob<string>      ( location, new WWWDL.TextDL()),
+            (
+                onBytesLoad : location => new WWWDLJob<byte[]>      ( location, new WWWDL.BytesDL()),
+                onTextLoad  : location => new WWWDLJob<string>      ( location, new WWWDL.TextDL ()),
                 onBundleLoad: location => new WWWDLJob<AssetBundle> ( location, new WWWDL.AssetBundleDL()),
                 onAssetLoad : null
             );
@@ -38,9 +39,9 @@ public class AssetLoadExample : MonoBehaviour
 
 
         m_provider.LoadAsset<Texture>("Assets/BundleTarget/Square 3.png", texture =>
-       {
-           m_image.texture = texture;
-       });
+        {
+            m_image.texture = texture;
+        });
     }
 
     private void Update()

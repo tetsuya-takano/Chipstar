@@ -39,6 +39,7 @@ namespace Chipstar.Downloads
         [SerializeField] private string[] m_assets;
         [SerializeField] private string[] m_dependencies;
         [SerializeField] private string m_hash;
+        [SerializeField] private long   m_fileSize;
 
         //===============================
         //  関数
@@ -64,20 +65,28 @@ namespace Chipstar.Downloads
             set { m_dependencies = value; }
         }
 
+        public long FileSize
+        {
+            get { return m_fileSize; }
+            set { m_fileSize = value; }
+        }
+
         //===============================
         //  関数
         //===============================
         public BundleBuildData(
-            string abName,
-            string[] assets,
-            string[] dependenceis,
-            string hash
+            string  abName,
+            string[]assets,
+            string[]dependenceis,
+            string  hash,
+            long    size
             )
         {
-            m_abName = abName;
-            m_assets = assets;
-            m_hash = hash;
-            m_dependencies = dependenceis;
+            m_abName        = abName;
+            m_assets        = assets;
+            m_hash          = hash;
+            m_dependencies  = dependenceis;
+            m_fileSize      = size;
         }
     }
 

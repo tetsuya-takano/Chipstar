@@ -36,12 +36,15 @@ namespace Chipstar.Example
             var manifest    = result.Manifest;
             foreach (var data in bundleList)
             {
+                var absPath  = Path.Combine( settings.OutputPath, data.ABName );
+                var fileInfo = new FileInfo( absPath );
                 var d = new BundleBuildData
                 {
                     ABName      = data.ABName,
                     Assets      = data.Assets,
                     Hash        = manifest.GetAssetBundleHash( data.ABName ).ToString(),
-                    Dependencies= manifest.GetAllDependencies( data.ABName )
+                    Dependencies= manifest.GetAllDependencies( data.ABName ),
+                    FileSize    = fileInfo.Length
                 };
                 json.Add( d );
             }

@@ -24,6 +24,16 @@ namespace Chipstar.Downloads
                 return source.text;
             }
         }
+        /// <summary>
+        /// 生Bytes
+        /// </summary>
+        public sealed class BytesDL : WWWHandler<byte[]>
+        {
+            protected override byte[] DoComplete( WWW source )
+            {
+                return source.bytes;
+            }
+        }
 
         /// <summary>
         /// バンドル
