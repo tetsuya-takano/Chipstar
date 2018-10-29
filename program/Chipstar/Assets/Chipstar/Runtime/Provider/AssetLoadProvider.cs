@@ -109,8 +109,12 @@ namespace Chipstar.Downloads
         /// </summary>
         protected virtual ILoadResult DoDownloadWithNeedAll( TRuntimeData data )
         {
-            var preloadJob = DoDownloadDependencies( data );
-            return preloadJob.ToJoin( () => DoDownload( data ) );
+            //  依存先がないなら自分だけ
+            if (data.Dependencies.Length == 0)
+            {
+                return DoDownload( data );
+            }
+            return DoDownloadDependencies( data );
         }
         /// <summary>
         /// 事前ロードのみ
@@ -124,7 +128,7 @@ namespace Chipstar.Downloads
             {
                 preloadJob[i] = DoDownload( dependencies[i] );
             }
-            return preloadJob.ToParallel();
+            return preloadJob.ToParallel().ToJoin( () => DoDownload( data ));
         }
 
         /// <summary>

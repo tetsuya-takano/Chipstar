@@ -5,6 +5,7 @@ using UnityEngine.Networking;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System;
+using System.IO;
 
 public class AssetLoadExample : MonoBehaviour
 {
@@ -25,7 +26,7 @@ public class AssetLoadExample : MonoBehaviour
             );
         var database    = new LoadDatabase<BuildMapDataTable, BundleBuildData, AssetBuildData, RuntimeBundlleData>();
         var jobEngine   = new JobEngine();
-        var acccesPoint = new AccessPoint( @"D:\Projects\work\Chipstar\program\build\windows\" );
+        var acccesPoint = new AccessPoint( Path.Combine( Application.dataPath, "../../build/windows/" ) );
 
         m_provider = new AssetLoadProvider<RuntimeBundlleData>
             (
