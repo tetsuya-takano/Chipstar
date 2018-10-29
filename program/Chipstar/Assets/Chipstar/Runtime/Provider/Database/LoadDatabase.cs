@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
 using UnityEngine;
+using System.Text;
 
 namespace Chipstar.Downloads
 {
@@ -98,8 +99,8 @@ namespace Chipstar.Downloads
 
         protected virtual TTable ParseContentData( byte[] data )
         {
-            var json = BitConverter.ToString( data );
-
+            var json = Encoding.UTF8.GetString( data );
+            Debug.Log( json );
             return JsonUtility.FromJson<TTable>( json );
         }
         /// <summary>

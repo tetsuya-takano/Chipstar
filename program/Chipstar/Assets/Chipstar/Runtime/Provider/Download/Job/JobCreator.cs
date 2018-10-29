@@ -3,14 +3,16 @@ using System;
 
 namespace Chipstar.Downloads
 {
-    public interface IJobCreator : IDisposable
+    public interface IJobCreator<TRuntimeData> : IDisposable
+        where TRuntimeData : IRuntimeBundleData<TRuntimeData>
     {
-        ILoadJob<byte[]>            CreateBytesLoad   ( IJobEngine engine, IAccessLocation location );
-        ILoadJob<string>            CreateTextLoad    ( IJobEngine engine, IAccessLocation location );
-        ILoadJob<AssetBundle>       CreateBundleFile  ( IJobEngine engine, IAccessLocation location );
-        ILoadJob<UnityEngine.Object>CreateAssetLoad   ( IJobEngine engine, IAccessLocation location );
+        ILoadJob<byte[]>            CreateBytesLoad     ( IJobEngine engine, IAccessLocation location );
+        ILoadJob<string>            CreateTextLoad      ( IJobEngine engine, IAccessLocation location );
+        ILoadJob<AssetBundle>       CreateBundleFile    ( IJobEngine engine, IAccessLocation location );
+        ILoadJob<UnityEngine.Object>CreateAssetLoad     ( IJobEngine engine, AssetData<TRuntimeData> data );
     }
-    public class JobCreator : IJobCreator
+    public class JobCreator<TRuntimeData> : IJobCreator<TRuntimeData>
+        where TRuntimeData : IRuntimeBundleData<TRuntimeData>
     {
         //=======================================
         //  変数
@@ -64,7 +66,7 @@ namespace Chipstar.Downloads
             return AddJob( engine, OnBundleLoad( location ) );
         }
 
-        public ILoadJob<UnityEngine.Object> CreateAssetLoad( IJobEngine engine, IAccessLocation location )
+        public ILoadJob<UnityEngine.Object> CreateAssetLoad( IJobEngine engine, AssetData<TRuntimeData> assetData )
         {
             return AddJob( engine, OnAssetLoad( location ) );
         }

@@ -42,8 +42,8 @@ namespace Chipstar.Downloads
         public AssetLoadProvider
             ( 
                 ILoadDatabase<TRuntimeData> database,
-                IJobEngine                 dlEngine,
-                IJobCreator                 jobCreator
+                IJobEngine                  dlEngine,
+                IJobCreator<TRuntimeData>   jobCreator
             )
         {
             LoadDatabase    = database;
@@ -54,7 +54,7 @@ namespace Chipstar.Downloads
         public IEnumerator InitLoad( UrlLocation location )
         {
             var job = InitielizeLoad( location );
-            while( job.IsCompleted )
+            while( !job.IsCompleted )
             {
                 yield return null;
             }
@@ -87,7 +87,7 @@ namespace Chipstar.Downloads
             var path    = assetData.Path;
             if( data.IsOnMemory )
             {
-                CreateLoadAsset<T>( assetData, onLoaded );
+                CreateLoadAsset( assetData, onLoaded );
                 return LoadDatabase.AddReference( data );
             }
             return DoLoadAssetWithNeedAll( assetData, onLoaded );
@@ -98,7 +98,7 @@ namespace Chipstar.Downloads
         /// </summary>
         protected virtual IDisposable DoLoadAssetWithNeedAll<T>( AssetData<TRuntimeData> data, Action<T> onLoaded ) where T : UnityEngine.Object
         {
-            return DoDownloadWithNeedAll( data.BundleData ).OnComplete( () => CreateLoadAsset<T>( data, onLoaded ) );
+            return DoDownloadWithNeedAll( data.BundleData ).OnComplete( () => CreateLoadAsset( data, onLoaded ) );
         }
 
         /// <summary>
@@ -140,13 +140,14 @@ namespace Chipstar.Downloads
                 dispose : LoadDatabase.AddReference( data )
             );
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
-        private void CreateLoadAsset<T>( AssetData<TRuntimeData> assetData, Action<T> onLoaded ) where T : UnityEngine.Object
+        private void CreateLoadAsset<T>( AssetData<TRuntimeData> assetData, Action<T> onLoaded )
+            where T          : UnityEngine.Object
         {
-            var job = JobCreator.CreateAssetLoad( JobEngine, new UrlLocation( assetData.Path ));
+            var job = JobCreator.CreateAssetLoad( JobEngine, assetData );
             job.OnLoaded = () =>
             {
                 onLoaded( job.Content as T );
