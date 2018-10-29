@@ -41,9 +41,15 @@ public class AssetLoadExample : MonoBehaviour
         yield return m_provider.InitLoad( "buildMap.json" );
 
 
-        m_loadDispose = m_provider.LoadAsset<Texture>("Assets/BundleTarget/Square 3.png", texture =>
+        m_loadDispose = m_provider.LoadAsset<GameObject>("Assets/BundleTarget/Container 1.prefab", prefab =>
         {
-            m_image.texture = texture;
+            var container = prefab.GetComponent<Container>();
+            var parent = m_image.transform.parent;
+            foreach (var item in container.List)
+            {
+                var img = Instantiate(m_image, parent);
+                img.texture = item as Texture;
+            }
         });
     }
     private void OnDestroy()
