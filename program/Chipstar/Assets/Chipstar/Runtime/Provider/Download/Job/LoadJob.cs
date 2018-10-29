@@ -102,9 +102,9 @@ namespace Chipstar.Downloads
         /// </summary>
         public virtual void Update()
         {
-            DoUpdate( Source, Location );
+            DoUpdate( Source );
         }
 
-        protected abstract void DoUpdate(TSource source, IAccessLocation location);
+        protected abstract void DoUpdate( TSource source );
     }
 }

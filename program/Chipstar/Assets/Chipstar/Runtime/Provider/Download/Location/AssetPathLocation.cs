@@ -1,17 +1,28 @@
 ﻿using UnityEngine;
 
-public class AssetPathLocation : MonoBehaviour
+namespace Chipstar.Downloads
 {
-
-    // Use this for initialization
-    void Start()
+    /// <summary>
+    /// アセットキーでアクセスするため
+    /// </summary>
+    public sealed class AssetPathLocation : IAccessLocation
     {
+        //===============================
+        //  プロパティ
+        //===============================
+        public string AccessPath { get; private set; }
 
-    }
+        //===============================
+        //  関数
+        //===============================
 
-    // Update is called once per frame
-    void Update()
-    {
+        public AssetPathLocation( string key )
+        {
+            AccessPath = key;
+        }
 
+        public void Dispose()
+        {
+        }
     }
 }

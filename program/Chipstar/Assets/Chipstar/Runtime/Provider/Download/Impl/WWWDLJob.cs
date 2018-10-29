@@ -26,7 +26,7 @@ namespace Chipstar.Downloads
         /// <summary>
         /// 更新処理
         /// </summary>
-        protected override void DoUpdate( WWW source, IAccessLocation location )
+        protected override void DoUpdate( WWW source )
         {
             Progress    = source.progress;
             IsCompleted = source.isDone;

@@ -17,19 +17,19 @@ namespace Chipstar.Downloads
         //=======================================
         //  変数
         //=======================================
-        protected Func<IAccessLocation, ILoadJob<string>>             OnTextLoad     { get; set; }
-        protected Func<IAccessLocation, ILoadJob<byte[]>>             OnBytesLoad    { get; set; }
-        protected Func<IAccessLocation, ILoadJob<AssetBundle>>        OnBundleLoad   { get; set; }
-        protected Func<IAccessLocation, ILoadJob<UnityEngine.Object>> OnAssetLoad    { get; set; }
+        protected Func<IAccessLocation          , ILoadJob<string>>             OnTextLoad     { get; set; }
+        protected Func<IAccessLocation          , ILoadJob<byte[]>>             OnBytesLoad    { get; set; }
+        protected Func<IAccessLocation          , ILoadJob<AssetBundle>>        OnBundleLoad   { get; set; }
+        protected Func<AssetData<TRuntimeData>  , ILoadJob<UnityEngine.Object>> OnAssetLoad    { get; set; }
 
         //=======================================
         //  関数
         //=======================================
         public JobCreator(
-            Func<IAccessLocation, ILoadJob<byte[]>>             onBytesLoad,
-            Func<IAccessLocation, ILoadJob<string>>             onTextLoad,
-            Func<IAccessLocation, ILoadJob<AssetBundle>>        onBundleLoad,
-            Func<IAccessLocation, ILoadJob<UnityEngine.Object>> onAssetLoad 
+            Func<IAccessLocation,           ILoadJob<byte[]>>             onBytesLoad,
+            Func<IAccessLocation,           ILoadJob<string>>             onTextLoad,
+            Func<IAccessLocation,           ILoadJob<AssetBundle>>        onBundleLoad,
+            Func<AssetData<TRuntimeData>,   ILoadJob<UnityEngine.Object>> onAssetLoad 
         )
         {
             OnTextLoad   = onTextLoad;
@@ -68,7 +68,7 @@ namespace Chipstar.Downloads
 
         public ILoadJob<UnityEngine.Object> CreateAssetLoad( IJobEngine engine, AssetData<TRuntimeData> assetData )
         {
-            return AddJob( engine, OnAssetLoad( location ) );
+            return AddJob( engine, OnAssetLoad( assetData ) );
         }
 
         protected virtual ILoadJob<T> AddJob<T>( IJobEngine engine, ILoadJob<T> job )

@@ -18,17 +18,18 @@ public class AssetLoadExample : MonoBehaviour
 
         var creator = new JobCreator<RuntimeBundlleData>
             (
-                onBytesLoad : location => new WWWDLJob<byte[]>      ( location, new WWWDL.BytesDL()),
-                onTextLoad  : location => new WWWDLJob<string>      ( location, new WWWDL.TextDL ()),
-                onBundleLoad: location => new WWWDLJob<AssetBundle> ( location, new WWWDL.AssetBundleDL() ),
-                onAssetLoad : location => new AssetLoadJob          ( location, new AssetLoad.AsyncLoad() )
+                onBytesLoad : location => new WWWDLJob<byte[]>                  ( location, new WWWDL.BytesDL()),
+                onTextLoad  : location => new WWWDLJob<string>                  ( location, new WWWDL.TextDL ()),
+                onBundleLoad: location => new WWWDLJob<AssetBundle>             ( location, new WWWDL.AssetBundleDL() ),
+                onAssetLoad : assetData=> new AssetLoadJob<RuntimeBundlleData>  ( assetData )
             );
         var database    = new LoadDatabase<BuildMapDataTable, BundleBuildData, AssetBuildData, RuntimeBundlleData>();
         var jobEngine   = new JobEngine();
-
+        var acccesPoint = new AccessPoint( @"D:\Projects\work\Chipstar\program\build\windows\" );
 
         m_provider = new AssetLoadProvider<RuntimeBundlleData>
             (
+                accessPoint : acccesPoint,
                 database    : database,
                 jobCreator  : creator,
                 dlEngine    : jobEngine
@@ -36,8 +37,7 @@ public class AssetLoadExample : MonoBehaviour
 
         yield return null;
 
-        var contentLocation = new UrlLocation(@"D:\Projects\work\Chipstar\program\build\windows\buildMap.json");
-        yield return m_provider.InitLoad( contentLocation );
+        yield return m_provider.InitLoad( "buildMap.json" );
 
 
         m_loadDispose = m_provider.LoadAsset<Texture>("Assets/BundleTarget/Square 3.png", texture =>

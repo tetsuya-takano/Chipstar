@@ -13,7 +13,7 @@ namespace Chipstar.Downloads
 
     public interface IAssetLoadProvider
     {
-        IEnumerator   InitLoad    ( UrlLocation location );
+        IEnumerator   InitLoad    ( string fileName );
         IDisposable   LoadAsset<T>( string path,        Action<T> onLoaded ) where T : UnityEngine.Object;
         IDisposable   LoadLevel   ( string sceneName );
 
@@ -31,9 +31,10 @@ namespace Chipstar.Downloads
         //===============================
         //  プロパティ
         //===============================
+        private IAccessPoint                    AccessPoint     { get; set; } // 接続先
         private ILoadDatabase<TRuntimeData>     LoadDatabase    { get; set; } // コンテンツテーブルから作成したDB
         private IJobEngine                      JobEngine       { get; set; } // DLエンジン
-        private IJobCreator                     JobCreator      { get; set; } // ジョブの作成
+        private IJobCreator<TRuntimeData>       JobCreator      { get; set; } // ジョブの作成
 
         //===============================
         //  関数
@@ -41,19 +42,21 @@ namespace Chipstar.Downloads
 
         public AssetLoadProvider
             ( 
+                IAccessPoint                accessPoint,
                 ILoadDatabase<TRuntimeData> database,
                 IJobEngine                  dlEngine,
                 IJobCreator<TRuntimeData>   jobCreator
             )
         {
+            AccessPoint     = accessPoint;
             LoadDatabase    = database;
             JobEngine       = dlEngine;
             JobCreator      = jobCreator;
         }
 
-        public IEnumerator InitLoad( UrlLocation location )
+        public IEnumerator InitLoad( string fileName )
         {
-            var job = InitielizeLoad( location );
+            var job = InitielizeLoad( AccessPoint.ToLocation( fileName  ) );
             while( !job.IsCompleted )
             {
                 yield return null;
@@ -64,7 +67,7 @@ namespace Chipstar.Downloads
             yield break;
         }
 
-        private ILoadJob<byte[]> InitielizeLoad( UrlLocation location )
+        private ILoadJob<byte[]> InitielizeLoad( IAccessLocation location )
         {
             return JobCreator.CreateBytesLoad( JobEngine, location ); ;
         }
@@ -129,7 +132,8 @@ namespace Chipstar.Downloads
         /// </summary>
         protected virtual ILoadResult DoDownload( TRuntimeData data )
         {
-            var job = JobCreator.CreateBundleFile( JobEngine, new UrlLocation( "" ));
+            var location    = AccessPoint.ToLocation( data );
+            var job         = JobCreator.CreateBundleFile( JobEngine, location );
 
             return new LoadResult<AssetBundle>(
                 job,
