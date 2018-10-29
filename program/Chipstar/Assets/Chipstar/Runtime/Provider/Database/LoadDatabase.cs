@@ -12,8 +12,9 @@ namespace Chipstar.Downloads
         IEnumerable<TRuntimeData>            BundleList { get; }
         IEnumerable<AssetData<TRuntimeData>> AssetList  { get; }
 
-        void            Initialize  ( string json );
-        TRuntimeData    Find        ( string path );
+        void                    Initialize  ( string json );
+        AssetData<TRuntimeData> Find        ( string path );
+        IDisposable             AddReference( TRuntimeData data );
     }
 
     public class LoadDatabase<TTable, TBundle, TAsset, TRuntimeData> 
@@ -128,12 +129,21 @@ namespace Chipstar.Downloads
             }
             return list;
         }
+
         /// <summary>
         /// 取得
         /// </summary>
-        public TRuntimeData Find( string path )
+        public AssetData<TRuntimeData> Find( string path )
         {
-            return m_assetsTable[ path ].BundleData;
+            return m_assetsTable[ path ];
+        }
+
+        /// <summary>
+        /// 参照カウンタの追加
+        /// </summary>
+        public IDisposable AddReference( TRuntimeData data )
+        {
+            return new RefCalclater( data );
         }
     }
 }

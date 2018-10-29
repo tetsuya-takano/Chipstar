@@ -18,7 +18,7 @@ public class AssetLoadExample : MonoBehaviour
             ( 
                 onTextLoad  : location => new WWWDLJob<string>      ( location, new WWWDL.TextDL()),
                 onBundleLoad: location => new WWWDLJob<AssetBundle> ( location, new WWWDL.AssetBundleDL()),
-                onAssetLoad : location => new AssetLoadJob(location, new AssetLoad.AsyncLoad())
+                onAssetLoad : null
             );
         var database    = new LoadDatabase<BuildMapDataTable, BundleBuildData, AssetBuildData, RuntimeBundlleData>();
         var loadEngine  = new LoadEngine();

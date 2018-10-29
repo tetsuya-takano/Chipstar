@@ -18,14 +18,13 @@ namespace Chipstar.Downloads
     /// <summary>
     /// DLジョブ
     /// </summary>
-    public abstract class LoadJob<THandler, TSource, TLocation, TData> : ILoadJob<TData>
+    public abstract class LoadJob<THandler, TSource, TData> : ILoadJob<TData>
         where THandler  : IDLHandler<TSource, TData>
-        where TLocation : IDLLocation
     {
         //===============================
         //  プロパティ
         //===============================
-        public      TLocation       Location       { get; protected set; }
+        public      IAccessLocation Location       { get; protected set; }
         public      float           Progress       { get; protected set; }
         public      bool            IsCompleted    { get; protected set; }
         public      TData           Content        { get; protected set; }
@@ -44,7 +43,7 @@ namespace Chipstar.Downloads
         //  関数
         //===============================
 
-        public LoadJob( TLocation location, THandler handler )
+        public LoadJob( IAccessLocation location, THandler handler )
         {
             Location    = location;
             DLHandler   = handler;
@@ -65,7 +64,7 @@ namespace Chipstar.Downloads
             Location .Dispose();
             Source    = default(TSource);
             DLHandler = default(THandler);
-            Location  = default(TLocation);
+            Location  = null;
             OnLoaded  = null;
 
         }
@@ -77,7 +76,7 @@ namespace Chipstar.Downloads
         {
             DoRun( Location );
         }
-        protected abstract void DoRun(TLocation location);
+        protected abstract void DoRun( IAccessLocation location );
 
         /// <summary>
         /// 終了
@@ -105,6 +104,6 @@ namespace Chipstar.Downloads
             DoUpdate( Source, Location );
         }
 
-        protected abstract void DoUpdate(TSource source, TLocation location);
+        protected abstract void DoUpdate(TSource source, IAccessLocation location);
     }
 }

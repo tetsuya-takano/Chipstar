@@ -4,7 +4,7 @@ using System;
 
 namespace Chipstar.Downloads
 {
-    public interface IRuntimeBundleData<T> : IDisposable
+    public interface IRuntimeBundleData<T> : IDisposable, IRefCountable
         where T : IRuntimeBundleData<T>
     {
         string          Name        { get; }
@@ -57,7 +57,10 @@ namespace Chipstar.Downloads
         public      T[]             Dependencies{ get; private set; }
         public      bool            IsOnMemory  { get { return Bundle != null; } }
 
+        public      bool            IsFree      { get { return RefCount <= 0; } }
+
         protected   AssetBundle     Bundle      { get; set; }
+        private     int             RefCount    { get; set; }
 
         //========================================
         //  関数
@@ -87,8 +90,9 @@ namespace Chipstar.Downloads
             Dependencies = dependencies;
         }
 
-
-
+        /// <summary>
+        /// アセットバンドル保持
+        /// </summary>
         public void OnMemory( AssetBundle bundle )
         {
             Bundle = bundle;
@@ -107,5 +111,28 @@ namespace Chipstar.Downloads
             Bundle = null;
         }
 
+        /// <summary>
+        /// 参照カウンタ加算
+        /// </summary>
+        public void AddRef()
+        {
+            RefCount++;
+        }
+
+        /// <summary>
+        /// 参照カウンタ減算
+        /// </summary>
+        public void ReleaseRef()
+        {
+            RefCount = Mathf.Max( 0, RefCount - 1 );
+        }
+
+        /// <summary>
+        /// 参照カウンタ破棄
+        /// </summary>
+        public void ClearRef()
+        {
+            RefCount = 0;
+        }
     }
 }

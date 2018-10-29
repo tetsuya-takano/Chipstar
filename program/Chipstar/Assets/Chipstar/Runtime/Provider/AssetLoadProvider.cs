@@ -76,23 +76,32 @@ namespace Chipstar.Downloads
         }
 
         /// <summary>
+        /// パスからアセットの取得
+        /// </summary>
+        public virtual IDisposable LoadAsset<T>( string path, Action<T> onLoaded ) where T : UnityEngine.Object
+        {
+            var data = LoadDatabase.Find( path );
+            return DoLoadAsset( data, onLoaded );
+        }
+        /// <summary>
         /// アセットの取得
         /// </summary>
-        public IDisposable LoadAsset<T>( string path, Action<T> onLoaded ) where T : UnityEngine.Object
+        protected virtual IDisposable DoLoadAsset<T>( AssetData<TRuntimeData> assetData, Action<T> onLoaded ) where T : UnityEngine.Object
         {
             //  パスからバンドルデータを取得
-            var data    = LoadDatabase.Find( path );
+            var data    = assetData.BundleData;
+            var path    = assetData.Path;
             if( data.IsOnMemory )
             {
-                CreateLoadAsset<T>(data, path, onLoaded);
-                return null;
+                CreateLoadAsset<T>( assetData, onLoaded);
+                return LoadDatabase.AddReference( data );
             }
-            return DoDownload( data, path, () => CreateLoadAsset<T>(data, path, onLoaded ) );
+            return DoDownload( data, path, () => CreateLoadAsset<T>( assetData, onLoaded ) );
         }
 
         protected virtual IDisposable DoDownload( TRuntimeData data, string path, Action onLoaded )
         {
-            var job = JobCreator.CreateBundleFile(new UrlLocation(path));
+            var job = JobCreator.CreateBundleFile( new UrlLocation( "" ));
             job.OnLoaded = () =>
             {
                 data.OnMemory( job.Content );
@@ -100,15 +109,15 @@ namespace Chipstar.Downloads
             };
             DLEngine.Enqueue(job);
 
-            return null;
+            return LoadDatabase.AddReference( data );
         }
         
         /// <summary>
         /// 
         /// </summary>
-        private void CreateLoadAsset<T>( TRuntimeData data, string path, Action<T> onLoaded ) where T : UnityEngine.Object
+        private void CreateLoadAsset<T>( AssetData<TRuntimeData> assetData, Action<T> onLoaded ) where T : UnityEngine.Object
         {
-            var job = JobCreator.CreateAssetLoad(path);
+            var job = JobCreator.CreateAssetLoad( assetData.Path );
             job.OnLoaded = () => onLoaded( job.Content as T );
 
             LoadEngine.Enqueue( job );

@@ -16,17 +16,17 @@ namespace Chipstar.Downloads
         //=======================================
         //  変数
         //=======================================
-        protected Func<UrlLocation          , ILoadJob<string>>             OnTextLoad     { get; set; }
-        protected Func<UrlLocation          , ILoadJob<AssetBundle>>        OnBundleLoad   { get; set; }
-        protected Func<UrlLocation          , ILoadJob<UnityEngine.Object>> OnAssetLoad    { get; set; }
+        protected Func<IAccessLocation, ILoadJob<string>>             OnTextLoad     { get; set; }
+        protected Func<IAccessLocation, ILoadJob<AssetBundle>>        OnBundleLoad   { get; set; }
+        protected Func<IAccessLocation, ILoadJob<UnityEngine.Object>> OnAssetLoad    { get; set; }
 
         //=======================================
         //  関数
         //=======================================
         public JobCreator( 
-            Func<UrlLocation, ILoadJob<string>>             onTextLoad,
-            Func<UrlLocation, ILoadJob<AssetBundle>>        onBundleLoad,
-            Func<UrlLocation, ILoadJob<UnityEngine.Object>> onAssetLoad
+            Func<IAccessLocation, ILoadJob<string>>             onTextLoad,
+            Func<IAccessLocation, ILoadJob<AssetBundle>>        onBundleLoad,
+            Func<IAccessLocation, ILoadJob<UnityEngine.Object>> onAssetLoad
         )
         {
             OnTextLoad   = onTextLoad;
