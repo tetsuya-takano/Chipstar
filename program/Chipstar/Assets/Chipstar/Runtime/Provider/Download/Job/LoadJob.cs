@@ -4,6 +4,8 @@ namespace Chipstar.Downloads
 {
     public interface ILoadJob : ILoadTask, IDisposable
     {
+        Action OnLoaded { set; }
+
         void Run();
         void Update();
         void Done();
@@ -11,7 +13,6 @@ namespace Chipstar.Downloads
 
     public interface ILoadJob<T> : ILoadJob, ILoadTask<T>
     {
-        Action OnLoaded { set; }
     }
 
 
