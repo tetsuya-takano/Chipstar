@@ -1,8 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-using System;
-
-namespace Chipstar.Downloads
+﻿namespace Chipstar.Downloads
 {
     /// <summary>
     /// URLで場所を知らせる

@@ -32,8 +32,7 @@ namespace Chipstar.Downloads
         //  プロパティ
         //===============================
         private ILoadDatabase<TRuntimeData>     LoadDatabase    { get; set; } // コンテンツテーブルから作成したDB
-        private ILoadEngine                     DLEngine        { get; set; } // DLエンジン
-        private ILoadEngine                     LoadEngine      { get; set; } // DLエンジン
+        private IJobEngine                      JobEngine        { get; set; } // DLエンジン
         private IJobCreator                     JobCreator      { get; set; } // ジョブの作成
 
         //===============================
@@ -43,34 +42,33 @@ namespace Chipstar.Downloads
         public AssetLoadProvider
             ( 
                 ILoadDatabase<TRuntimeData> database,
-                ILoadEngine                 dlEngine,
-                ILoadEngine                 loadEngine,
+                IJobEngine                 dlEngine,
                 IJobCreator                 jobCreator
             )
         {
             LoadDatabase    = database;
-            DLEngine        = dlEngine;
-            LoadEngine      = loadEngine;
+            JobEngine        = dlEngine;
             JobCreator      = jobCreator;
         }
 
         public IEnumerator InitLoad( UrlLocation location )
         {
             var job = InitielizeLoad( location );
-
-            var waitForInit = new WaitUntil(() => job.IsCompleted );
-            yield return waitForInit;
+            while( job.IsCompleted )
+            {
+                yield return null;
+            }
 
             LoadDatabase.Initialize( job.Content );
 
             yield break;
         }
 
-        private ILoadJob<string> InitielizeLoad(  UrlLocation location )
+        private ILoadJob<string> InitielizeLoad( UrlLocation location )
         {
             var job = JobCreator.CreateTextLoad( location );
 
-            DLEngine.Enqueue(job);
+            JobEngine.Enqueue(job);
 
             return job;
         }
@@ -107,7 +105,7 @@ namespace Chipstar.Downloads
                 data.OnMemory( job.Content );
                 onLoaded();
             };
-            DLEngine.Enqueue(job);
+            JobEngine.Enqueue(job);
 
             return LoadDatabase.AddReference( data );
         }
@@ -119,8 +117,6 @@ namespace Chipstar.Downloads
         {
             var job = JobCreator.CreateAssetLoad( assetData.Path );
             job.OnLoaded = () => onLoaded( job.Content as T );
-
-            LoadEngine.Enqueue( job );
         }
 
 
@@ -131,8 +127,7 @@ namespace Chipstar.Downloads
 
         public void DoUpdate()
         {
-            DLEngine    .Update();
-            LoadEngine  .Update();
+            JobEngine.Update( );
         }
     }
 }

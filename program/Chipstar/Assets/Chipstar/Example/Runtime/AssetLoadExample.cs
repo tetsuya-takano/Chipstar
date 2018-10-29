@@ -21,16 +21,14 @@ public class AssetLoadExample : MonoBehaviour
                 onAssetLoad : null
             );
         var database    = new LoadDatabase<BuildMapDataTable, BundleBuildData, AssetBuildData, RuntimeBundlleData>();
-        var loadEngine  = new LoadEngine();
-        var dlEngine    = new LoadEngine();
+        var jobEngine   = new JobEngine();
 
 
         m_provider = new AssetLoadProvider<RuntimeBundlleData>
             (
                 database    : database,
                 jobCreator  : creator,
-                loadEngine  : loadEngine,
-                dlEngine    : dlEngine
+                dlEngine    : jobEngine
             );
 
         yield return null;

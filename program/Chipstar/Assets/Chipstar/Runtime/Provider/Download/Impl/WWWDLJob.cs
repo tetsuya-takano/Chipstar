@@ -19,7 +19,7 @@ namespace Chipstar.Downloads
         /// <summary>
         /// 実行開始時
         /// </summary>
-        protected override void DoRun( IAccessLocation location)
+        protected override void DoRun( IAccessLocation location )
         {
             Source = new WWW( location.AccessPath );
         }
