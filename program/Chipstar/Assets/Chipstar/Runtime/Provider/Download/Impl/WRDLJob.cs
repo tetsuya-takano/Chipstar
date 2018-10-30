@@ -23,6 +23,12 @@ namespace Chipstar.Downloads
 
         }
 
+        protected override void DoDispose()
+        {
+            Source.Dispose();
+            base.DoDispose();
+        }
+
         /// <summary>
         /// 開始時
         /// </summary>

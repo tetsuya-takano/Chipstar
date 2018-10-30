@@ -10,9 +10,10 @@ namespace Chipstar.Downloads
     /// <summary>
     /// アセット読み込み処理
     /// </summary>
-    public sealed class AssetLoadJob<TRuntimeData> 
-        : LoadJob<AssetLoad.AsyncLoad, AssetBundleRequest, UnityEngine.Object>
+    public sealed class AssetLoadJob<T, TRuntimeData>
+        : LoadJob<AssetLoad.AsyncLoad<T>, AssetBundleRequest, T>
         where TRuntimeData : IRuntimeBundleData<TRuntimeData>
+        where T : UnityEngine.Object
     {
         //=====================================
         //  関数
@@ -22,7 +23,7 @@ namespace Chipstar.Downloads
         /// コンストラクタ
         /// </summary>
         public AssetLoadJob( AssetData<TRuntimeData> assetData )
-            : base(new AssetPathLocation( assetData.Path ), new AssetLoad.AsyncLoad())
+            : base( new AssetPathLocation( assetData.Path ), new AssetLoad.AsyncLoad<T>() )
         {
             m_bundle = assetData.BundleData;
         }

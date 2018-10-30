@@ -10,12 +10,15 @@ namespace Chipstar.Downloads
     {
         Action OnCompleted { set; }
     }
-
+    public interface ILoadResult<T> : ILoadResult
+    {
+        T Content { get; }
+    }
     public interface ICompositeLoadResult : ILoadResult
     {
     }
 
-    public sealed class LoadResult<T> : ILoadResult
+    public sealed class LoadResult<T> : ILoadResult, ILoadResult<T>
     {
         //=====================================
         //  変数
@@ -28,6 +31,14 @@ namespace Chipstar.Downloads
         //=====================================
 
         public Action OnCompleted { private get; set; }
+
+        T ILoadResult<T>.Content
+        {
+            get
+            {
+                return m_job.Content;
+            }
+        }
 
         //=====================================
         //  関数

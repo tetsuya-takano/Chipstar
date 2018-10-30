@@ -9,72 +9,60 @@ namespace Chipstar.Downloads
         ILoadJob<byte[]>            CreateBytesLoad     ( IJobEngine engine, IAccessLocation location );
         ILoadJob<string>            CreateTextLoad      ( IJobEngine engine, IAccessLocation location );
         ILoadJob<AssetBundle>       CreateBundleFile    ( IJobEngine engine, IAccessLocation location );
-        ILoadJob<UnityEngine.Object>CreateAssetLoad     ( IJobEngine engine, AssetData<TRuntimeData> data );
+        ILoadJob<T>                 CreateAssetLoad<T>  ( IJobEngine engine, AssetData<TRuntimeData> data ) where T : UnityEngine.Object;
     }
-    public class JobCreator<TRuntimeData> : IJobCreator<TRuntimeData>
+    public abstract class JobCreator<TRuntimeData> : IJobCreator<TRuntimeData>
         where TRuntimeData : IRuntimeBundleData<TRuntimeData>
     {
         //=======================================
         //  変数
         //=======================================
-        protected Func<IAccessLocation          , ILoadJob<string>>             OnTextLoad     { get; set; }
-        protected Func<IAccessLocation          , ILoadJob<byte[]>>             OnBytesLoad    { get; set; }
-        protected Func<IAccessLocation          , ILoadJob<AssetBundle>>        OnBundleLoad   { get; set; }
-        protected Func<AssetData<TRuntimeData>  , ILoadJob<UnityEngine.Object>> OnAssetLoad    { get; set; }
 
         //=======================================
         //  関数
         //=======================================
-        public JobCreator(
-            Func<IAccessLocation,           ILoadJob<byte[]>>             onBytesLoad,
-            Func<IAccessLocation,           ILoadJob<string>>             onTextLoad,
-            Func<IAccessLocation,           ILoadJob<AssetBundle>>        onBundleLoad,
-            Func<AssetData<TRuntimeData>,   ILoadJob<UnityEngine.Object>> onAssetLoad 
-        )
-        {
-            OnTextLoad   = onTextLoad;
-            OnBundleLoad = onBundleLoad;
-            OnAssetLoad  = onAssetLoad;
-            OnBytesLoad  = onBytesLoad;
-        }
 
+        /// <summary>
+        /// 破棄処理
+        /// </summary>
         public void Dispose()
         {
-            OnTextLoad  = null;
-            OnBundleLoad= null;
-            OnAssetLoad = null;
-            OnBytesLoad = null;
+            DoDispose();
         }
+        protected virtual void DoDispose() { }
+
         /// <summary>
-        /// テキスト取得リクエスト
+        /// 生データ取得リクエスト
         /// </summary>
         public ILoadJob<byte[]> CreateBytesLoad( IJobEngine engine, IAccessLocation location )
         {
-            return AddJob( engine, OnBytesLoad( location ) );
+            return AddJob( engine, DoCreateBytesLoad( location ) );
         }
-
         /// <summary>
         /// テキスト取得リクエスト
         /// </summary>
         public ILoadJob<string> CreateTextLoad( IJobEngine engine, IAccessLocation location )
         {
-            return AddJob( engine, OnTextLoad( location ) );
+            return AddJob( engine, DoCreateTextLoad( location ) );
         }
-
         public ILoadJob<AssetBundle> CreateBundleFile( IJobEngine engine, IAccessLocation location )
         {
-            return AddJob( engine, OnBundleLoad( location ) );
+            return AddJob( engine, DoCreateBundleLoad( location ) );
         }
-
-        public ILoadJob<UnityEngine.Object> CreateAssetLoad( IJobEngine engine, AssetData<TRuntimeData> assetData )
+        public ILoadJob<T> CreateAssetLoad<T>( IJobEngine engine, AssetData<TRuntimeData> assetData ) 
+            where T : UnityEngine.Object
         {
-            return AddJob( engine, OnAssetLoad( assetData ) );
+            return AddJob( engine, DoCreateAssetLoad<T>( assetData ) );
         }
-
         protected virtual ILoadJob<T> AddJob<T>( IJobEngine engine, ILoadJob<T> job )
         {
             engine.Enqueue( job );
             return job;
         }
+
+        protected abstract ILoadJob<byte[]>         DoCreateBytesLoad   ( IAccessLocation location );
+        protected abstract ILoadJob<string>         DoCreateTextLoad    ( IAccessLocation location );
+        protected abstract ILoadJob<AssetBundle>    DoCreateBundleLoad  ( IAccessLocation location );
+        protected abstract ILoadJob<T>              DoCreateAssetLoad<T>( AssetData<TRuntimeData> location ) where T : UnityEngine.Object;
     }
 }

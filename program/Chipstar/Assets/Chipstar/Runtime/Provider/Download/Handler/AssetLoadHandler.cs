@@ -7,16 +7,17 @@ namespace Chipstar.Downloads
         /// <summary>
         /// アセットのロードで取る機能
         /// </summary>
-        public abstract class AssetLoadHandler
-            : DLHandler<AssetBundleRequest, UnityEngine.Object>
+        public abstract class AssetLoadHandler<T>
+            : DLHandler<AssetBundleRequest, T>
+            where T : UnityEngine.Object
         {
         }
 
-        public sealed class AsyncLoad : AssetLoadHandler
+        public sealed class AsyncLoad<T> : AssetLoadHandler<T> where T : UnityEngine.Object
         {
-            protected override UnityEngine.Object DoComplete(AssetBundleRequest source)
+            protected override T DoComplete(AssetBundleRequest source)
             {
-                return source.asset;
+                return source.asset as T;
             }
         }
 

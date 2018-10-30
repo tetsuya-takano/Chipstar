@@ -152,14 +152,15 @@ namespace Chipstar.Downloads
         /// <summary>
         /// 
         /// </summary>
-        private void CreateLoadAsset<T>( AssetData<TRuntimeData> assetData, Action<T> onLoaded )
+        private ILoadResult<T> CreateLoadAsset<T>( AssetData<TRuntimeData> assetData, Action<T> onLoaded )
             where T          : UnityEngine.Object
         {
-            var job = JobCreator.CreateAssetLoad( JobEngine, assetData );
+            var job = JobCreator.CreateAssetLoad<T>( JobEngine, assetData );
             job.OnLoaded = () =>
             {
-                onLoaded( job.Content as T );
+                onLoaded( job.Content );
             };
+            return new LoadResult<T>( job, null, null);
         }
 
 
