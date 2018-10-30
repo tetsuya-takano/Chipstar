@@ -9,6 +9,25 @@ namespace Chipstar.Downloads
     /// </summary>
     public static partial class WWWDL
     {
+        //==================================
+        //  各通信用ジョブの作成
+        //==================================
+        public static ILoadJob<string>      GetString       ( IAccessLocation location )
+        {
+            return new WWWDLJob<string>( location, new WWWDL.TextDL() );
+        }
+        public static ILoadJob<byte[]>      GetBytes        ( IAccessLocation location )
+        {
+            return new WWWDLJob<byte[]>( location, new WWWDL.BytesDL() );
+        }
+        public static ILoadJob<AssetBundle> GetAssetBundle  ( IAccessLocation location )
+        {
+            return new WWWDLJob<AssetBundle>( location, new WWWDL.AssetBundleDL() );
+        }
+
+        //==================================
+        //  各データ取得用ハンドラ定義
+        //==================================
         /// <summary>
         /// WWWで取る機能
         /// </summary>

@@ -16,6 +16,12 @@ namespace Chipstar.Downloads
         public WWWDLJob( IAccessLocation    location, WWWDL.WWWHandler<TData> handler ) : base( location, handler ) { }
         public WWWDLJob( string             url,      WWWDL.WWWHandler<TData> handler ) : this( new UrlLocation(url), handler) { }
 
+
+        protected override void DoDispose()
+        {
+            Source.Dispose();
+            base.DoDispose();
+        }
         /// <summary>
         /// 実行開始時
         /// </summary>

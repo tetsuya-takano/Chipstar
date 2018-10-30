@@ -19,9 +19,9 @@ public class AssetLoadExample : MonoBehaviour
 
         var creator = new JobCreator<RuntimeBundlleData>
             (
-                onBytesLoad : location => new WWWDLJob<byte[]>                  ( location, new WWWDL.BytesDL()),
-                onTextLoad  : location => new WWWDLJob<string>                  ( location, new WWWDL.TextDL ()),
-                onBundleLoad: location => new WWWDLJob<AssetBundle>             ( location, new WWWDL.AssetBundleDL() ),
+                onBytesLoad : location => WRDL.GetBytes        ( location ),
+                onTextLoad  : location => WRDL.GetString       ( location ),
+                onBundleLoad: location => WRDL.GetAssetBundle  ( location ),
                 onAssetLoad : assetData=> new AssetLoadJob<RuntimeBundlleData>  ( assetData )
             );
         var database    = new LoadDatabase<BuildMapDataTable, BundleBuildData, AssetBuildData, RuntimeBundlleData>();
