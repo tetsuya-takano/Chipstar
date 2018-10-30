@@ -100,7 +100,7 @@ namespace Chipstar.Downloads
         /// </summary>
         protected virtual ILoadResult<T> DoLoadAssetWithNeedAll<T>( AssetData<TRuntimeData> data, Action<T> onLoaded ) where T : UnityEngine.Object
         {
-            return DoDownloadWithNeedAll( data.BundleData ).ToJoin( () => CreateLoadAsset<T>( data ) );
+            return DoDownloadWithNeedAll( data.BundleData ).ToJoin<T>( () => CreateLoadAsset<T>( data ) );
         }
 
         /// <summary>
@@ -140,9 +140,9 @@ namespace Chipstar.Downloads
 
             return new LoadResult<AssetBundle>(
                 job,
-                onCompleted: ( j ) =>
+                onCompleted: ( content ) =>
                 {
-                    data.OnMemory( j.Content );
+                    data.OnMemory( content );
                 },
                 dispose : LoadDatabase.AddReference( data )
             );

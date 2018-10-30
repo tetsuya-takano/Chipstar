@@ -6,6 +6,10 @@ using UnityEngine;
 
 namespace Chipstar.Downloads
 {
+    public sealed class Empty
+    {
+        public static readonly Empty Default = new Empty();
+    }
     public interface ILoadResult : IDisposable
     {
         Action OnCompleted { set; }
@@ -13,12 +17,6 @@ namespace Chipstar.Downloads
     public interface ILoadResult<T> : ILoadResult
     {
         T Content { get; }
-    }
-    public interface ICompositeLoadResult : ILoadResult
-    {
-    }
-    public interface ICompositeLoadResult<T> : ILoadResult<T>
-    {
     }
 
     public sealed class LoadResult<T> : ILoadResult, ILoadResult<T>
@@ -32,16 +30,8 @@ namespace Chipstar.Downloads
         //=====================================
         //  プロパティ
         //=====================================
-
-        public Action OnCompleted { private get; set; }
-
-        T ILoadResult<T>.Content
-        {
-            get
-            {
-                return m_job.Content;
-            }
-        }
+        public Action   OnCompleted { private get; set; }
+        public T        Content     { get; private set; }
 
         //=====================================
         //  関数
@@ -49,14 +39,15 @@ namespace Chipstar.Downloads
 
         public LoadResult(
             ILoadJob<T>             job, 
-            Action<ILoadTask<T>>    onCompleted, 
+            Action<T>    onCompleted, 
             IDisposable             dispose 
         )
         {
             m_job           = job;
             m_job.OnLoaded  = () =>
             {
-                onCompleted( m_job );
+                Content = m_job.Content;
+                onCompleted( Content );
                 OnCompleted( );
             };
             m_dispose       = dispose;
@@ -76,30 +67,35 @@ namespace Chipstar.Downloads
     /// <summary>
     /// ロード結果処理を直列にする
     /// </summary>
-    public class JoinLoadResult : ICompositeLoadResult
+    public class JoinLoadResult<T> : ILoadResult<T>
     {
         //================================
         //  変数
         //================================
-        private ILoadResult m_prev = null;
-        private ILoadResult m_next = null;
+        private ILoadResult     m_prev = null;
+        private ILoadResult<T>  m_next = null;
 
         //================================
         //  プロパティ
         //================================
-        public Action OnCompleted { set; private get; }
+        public Action   OnCompleted { set; private get; }
+        public T        Content     { get; private set; }
 
         //================================
         //  関数
         //================================
 
-        public JoinLoadResult( ILoadResult prev, Func<ILoadResult> onNext )
+        public JoinLoadResult( ILoadResult prev, Func<ILoadResult<T>> onNext )
         {
             m_prev = prev;
             m_prev.OnCompleted = () =>
             {
                 m_next = onNext();
-                m_next.OnCompleted = OnCompleted;
+                m_next.OnCompleted = () =>
+                {
+                    Content = m_next.Content;
+                    OnCompleted();
+                };
             };
         }
 
@@ -112,16 +108,29 @@ namespace Chipstar.Downloads
             if( m_next != null )
             {
                 m_next.Dispose();
+                Content = default(T);
             }
             OnCompleted = null;
         }
     }
-    public sealed class ParallelLoadResult : ICompositeLoadResult
+    public class JoinLoadResult : JoinLoadResult<Empty>
     {
         //================================
         //  変数
         //================================
-        private ILoadResult[] m_list        = null;
+        public JoinLoadResult(
+            ILoadResult prev, Func<ILoadResult> onNext ) 
+            : base(prev, onNext)
+        {
+        }
+    }
+
+    public sealed class ParallelLoadResult : ILoadResult
+    {
+     //================================
+        //  変数
+        //================================
+        private ILoadResult[] m_list     = null;
         private int           m_compCount   = 0;
         //================================
         //  プロパティ
@@ -168,13 +177,17 @@ namespace Chipstar.Downloads
 
     public static class ILoadResultExtensions
     {
-        public static ICompositeLoadResult ToParallel( this ILoadResult[] self )
-        {
+        public static ILoadResult ToParallel ( this ILoadResult[] self )
+     {
             return new ParallelLoadResult( self );
         }
-        public static ICompositeLoadResult ToJoin( this ILoadResult self, Func<ILoadResult> onNext )
+        public static ILoadResult<T> ToJoin<T>( this ILoadResult self, Func<ILoadResult<T>> onNext )
         {
-            return new JoinLoadResult( self, onNext );
+            return new JoinLoadResult<T>( self, onNext );
+        }
+        public static ILoadResult<Empty> ToJoin(this ILoadResult self, Func<ILoadResult> onNext)
+        {
+            return new JoinLoadResult<Empty>(self, onNext);
         }
         public static IDisposable          OnComplete( this ILoadResult self, Action onCompleted )
         {
