@@ -17,6 +17,9 @@ namespace Chipstar.Downloads
     public interface ICompositeLoadResult : ILoadResult
     {
     }
+    public interface ICompositeLoadResult<T> : ILoadResult<T>
+    {
+    }
 
     public sealed class LoadResult<T> : ILoadResult, ILoadResult<T>
     {
@@ -73,7 +76,7 @@ namespace Chipstar.Downloads
     /// <summary>
     /// ロード結果処理を直列にする
     /// </summary>
-    public sealed class JoinLoadResult : ICompositeLoadResult
+    public class JoinLoadResult : ICompositeLoadResult
     {
         //================================
         //  変数
@@ -113,7 +116,6 @@ namespace Chipstar.Downloads
             OnCompleted = null;
         }
     }
-
     public sealed class ParallelLoadResult : ICompositeLoadResult
     {
         //================================

@@ -90,8 +90,7 @@ namespace Chipstar.Downloads
             var path    = assetData.Path;
             if( data.IsOnMemory )
             {
-                CreateLoadAsset( assetData, onLoaded );
-                return LoadDatabase.AddReference( data );
+                return CreateLoadAsset<T>( assetData );
             }
             return DoLoadAssetWithNeedAll( assetData, onLoaded );
         }
@@ -99,9 +98,9 @@ namespace Chipstar.Downloads
         /// <summary>
         /// アセットを取得するため必要なデータを一通りロード
         /// </summary>
-        protected virtual IDisposable DoLoadAssetWithNeedAll<T>( AssetData<TRuntimeData> data, Action<T> onLoaded ) where T : UnityEngine.Object
+        protected virtual ILoadResult<T> DoLoadAssetWithNeedAll<T>( AssetData<TRuntimeData> data, Action<T> onLoaded ) where T : UnityEngine.Object
         {
-            return DoDownloadWithNeedAll( data.BundleData ).OnComplete( () => CreateLoadAsset( data, onLoaded ) );
+            return DoDownloadWithNeedAll( data.BundleData ).ToJoin( () => CreateLoadAsset<T>( data ) );
         }
 
         /// <summary>
@@ -152,15 +151,15 @@ namespace Chipstar.Downloads
         /// <summary>
         /// 
         /// </summary>
-        private ILoadResult<T> CreateLoadAsset<T>( AssetData<TRuntimeData> assetData, Action<T> onLoaded )
+        private ILoadResult<T> CreateLoadAsset<T>( AssetData<TRuntimeData> assetData )
             where T          : UnityEngine.Object
         {
             var job = JobCreator.CreateAssetLoad<T>( JobEngine, assetData );
-            job.OnLoaded = () =>
-            {
-                onLoaded( job.Content );
-            };
-            return new LoadResult<T>( job, null, null);
+            return new LoadResult<T>( 
+                job         : job,
+                onCompleted : j => { },
+                dispose     : LoadDatabase.AddReference( assetData.BundleData )
+            );
         }
 
 
