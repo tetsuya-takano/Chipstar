@@ -35,10 +35,11 @@ namespace Chipstar.Example
             yield return null;
 
             yield return m_provider.InitLoad( "buildMap.json" );
-
-
-            m_loadDispose = m_provider.LoadAsset<GameObject>( "Assets/BundleTarget/Container 1.prefab", prefab =>
-             {
+            var result = m_provider.LoadAsset<GameObject>("Assets/BundleTarget/Container 1.prefab" );
+            yield return new WaitWhile(() => result.IsCompleted );
+            result.OnCompleted = () => 
+            {
+                 var prefab = result.Content;
                  var container = prefab.GetComponent<Container>();
                  var parent = m_image.transform.parent;
                  foreach( var item in container.List )
@@ -46,11 +47,10 @@ namespace Chipstar.Example
                      var img = Instantiate(m_image, parent);
                      img.texture = item as Texture;
                  }
-             } );
+            };
         }
         private void OnDestroy()
         {
-            m_loadDispose.Dispose();
         }
 
         private void Update()

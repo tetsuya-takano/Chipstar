@@ -12,7 +12,8 @@ namespace Chipstar.Downloads
     }
     public interface ILoadResult : IDisposable
     {
-        Action OnCompleted { set; }
+        bool    IsCompleted { get; }
+        Action  OnCompleted { set; }
     }
     public interface ILoadResult<T> : ILoadResult
     {
@@ -32,6 +33,7 @@ namespace Chipstar.Downloads
         //=====================================
         public Action   OnCompleted { private get; set; }
         public T        Content     { get; private set; }
+        public bool     IsCompleted { get; private set; }
 
         //=====================================
         //  関数
@@ -46,7 +48,8 @@ namespace Chipstar.Downloads
             m_job           = job;
             m_job.OnLoaded  = () =>
             {
-                Content = m_job.Content;
+                IsCompleted = true;
+                Content     = m_job.Content;
                 onCompleted( Content );
                 OnCompleted( );
             };
@@ -78,6 +81,7 @@ namespace Chipstar.Downloads
         //================================
         //  プロパティ
         //================================
+        public bool     IsCompleted { get; private set; }
         public Action   OnCompleted { set; private get; }
         public T        Content     { get; private set; }
 
@@ -93,8 +97,12 @@ namespace Chipstar.Downloads
                 m_next = onNext();
                 m_next.OnCompleted = () =>
                 {
-                    Content = m_next.Content;
-                    OnCompleted();
+                    IsCompleted = true;
+                    Content     = m_next.Content;
+                    if (OnCompleted != null)
+                    {
+                        OnCompleted();
+                    }
                 };
             };
         }
@@ -124,6 +132,7 @@ namespace Chipstar.Downloads
         //================================
         //  プロパティ
         //================================
+        public bool     IsCompleted { private set; get; }
         public Action   OnCompleted { set; private get; }
         public IList<T> Content     { get { return m_datas; } }
 
@@ -136,21 +145,22 @@ namespace Chipstar.Downloads
             m_list      = args;
             m_datas     = new T[ m_list.Length ];
             m_compCount = 0;
-            Action<T, ParallelLoadResult<T>> onCopletedOnce = (c, result) =>
+            Action<T, ParallelLoadResult<T>> onDoneCallback = (c, result) =>
             {
                 var i = result.m_compCount;
                 result.m_datas[ i ] = c;
                 result.m_compCount++;
-                if( result.m_compCount > 0 )
+                if( result.m_compCount < result.m_list.Length )
                 {
                     return;
                 }
+                IsCompleted = true;
                 result.OnCompleted();
             };
 
             foreach( var ret in m_list )
             {
-                ret.OnCompleted = () => onCopletedOnce(ret.Content, this);
+                ret.OnCompleted = () => onDoneCallback(ret.Content, this);
             }
         }
 
@@ -164,6 +174,7 @@ namespace Chipstar.Downloads
                 r.Dispose();
             }
             m_list      = null;
+            m_datas     = null;
             OnCompleted = null;
         }
     }
@@ -186,6 +197,11 @@ namespace Chipstar.Downloads
         public static IDisposable OnComplete( this ILoadResult self, Action onCompleted )
         {
             self.OnCompleted = onCompleted;
+            return self;
+        }
+        public static IDisposable OnComplete<T>(this ILoadResult<T> self, Action<T> onCompleted )
+        {
+            self.OnCompleted = () => onCompleted( self.Content );
             return self;
         }
     }

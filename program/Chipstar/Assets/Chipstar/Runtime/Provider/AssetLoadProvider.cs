@@ -13,9 +13,9 @@ namespace Chipstar.Downloads
 
     public interface IAssetLoadProvider
     {
-        IEnumerator   InitLoad    ( string fileName );
-        IDisposable   LoadAsset<T>( string path,        Action<T> onLoaded ) where T : UnityEngine.Object;
-        IDisposable   LoadLevel   ( string sceneName );
+        IEnumerator     InitLoad    ( string fileName );
+        ILoadResult<T>  LoadAsset<T>( string path     ) where T : UnityEngine.Object;
+        IDisposable     LoadLevel   ( string sceneName);
 
         void DoUpdate();
     }
@@ -75,15 +75,15 @@ namespace Chipstar.Downloads
         /// <summary>
         /// パスからアセットの取得
         /// </summary>
-        public virtual IDisposable LoadAsset<T>( string path, Action<T> onLoaded ) where T : UnityEngine.Object
+        public virtual ILoadResult<T> LoadAsset<T>( string path ) where T : UnityEngine.Object
         {
             var data = LoadDatabase.Find( path );
-            return DoLoadAsset( data, onLoaded );
+            return DoLoadAsset<T>( data );
         }
         /// <summary>
         /// アセットの取得
         /// </summary>
-        protected virtual IDisposable DoLoadAsset<T>( AssetData<TRuntimeData> assetData, Action<T> onLoaded ) where T : UnityEngine.Object
+        protected virtual ILoadResult<T> DoLoadAsset<T>( AssetData<TRuntimeData> assetData ) where T : UnityEngine.Object
         {
             //  パスからバンドルデータを取得
             var data    = assetData.BundleData;
@@ -92,13 +92,13 @@ namespace Chipstar.Downloads
             {
                 return CreateLoadAsset<T>( assetData );
             }
-            return DoLoadAssetWithNeedAll( assetData, onLoaded );
+            return DoLoadAssetWithNeedAll<T>( assetData );
         }
 
         /// <summary>
         /// アセットを取得するため必要なデータを一通りロード
         /// </summary>
-        protected virtual ILoadResult<T> DoLoadAssetWithNeedAll<T>( AssetData<TRuntimeData> data, Action<T> onLoaded ) where T : UnityEngine.Object
+        protected virtual ILoadResult<T> DoLoadAssetWithNeedAll<T>( AssetData<TRuntimeData> data ) where T : UnityEngine.Object
         {
             return DoDownloadWithNeedAll( data.BundleData ).ToJoin( () => CreateLoadAsset<T>( data ) );
         }
@@ -127,7 +127,8 @@ namespace Chipstar.Downloads
             {
                 preloadJob[i] = DoDownload( dependencies[i] );
             }
-            return preloadJob.ToParallel()
+            return preloadJob
+                .ToParallel()
                 .ToJoin( () => DoDownload( data ))
                 .AsEmpty();
         }
