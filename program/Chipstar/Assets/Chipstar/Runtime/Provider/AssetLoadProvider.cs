@@ -100,7 +100,7 @@ namespace Chipstar.Downloads
         /// </summary>
         protected virtual ILoadResult<T> DoLoadAssetWithNeedAll<T>( AssetData<TRuntimeData> data, Action<T> onLoaded ) where T : UnityEngine.Object
         {
-            return DoDownloadWithNeedAll( data.BundleData ).ToJoin<T>( () => CreateLoadAsset<T>( data ) );
+            return DoDownloadWithNeedAll( data.BundleData ).ToJoin( () => CreateLoadAsset<T>( data ) );
         }
 
         /// <summary>
@@ -122,18 +122,20 @@ namespace Chipstar.Downloads
         {
             //  事前に必要な分を合成
             var dependencies= data.Dependencies;
-            var preloadJob  = new ILoadResult[ dependencies.Length ];
+            var preloadJob  = new ILoadResult<AssetBundle>[ dependencies.Length ];
             for( int i = 0; i < preloadJob.Length; i++ )
             {
                 preloadJob[i] = DoDownload( dependencies[i] );
             }
-            return preloadJob.ToParallel().ToJoin( () => DoDownload( data ));
+            return preloadJob.ToParallel()
+                .ToJoin( () => DoDownload( data ))
+                .AsEmpty();
         }
 
         /// <summary>
         /// ダウンロード処理
         /// </summary>
-        protected virtual ILoadResult DoDownload( TRuntimeData data )
+        protected virtual ILoadResult<AssetBundle> DoDownload( TRuntimeData data )
         {
             var location    = AccessPoint.ToLocation( data );
             var job         = JobCreator.CreateBundleFile( JobEngine, location );

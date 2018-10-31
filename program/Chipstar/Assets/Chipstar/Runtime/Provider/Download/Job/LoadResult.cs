@@ -113,41 +113,34 @@ namespace Chipstar.Downloads
             OnCompleted = null;
         }
     }
-    public class JoinLoadResult : JoinLoadResult<Empty>
-    {
-        //================================
-        //  変数
-        //================================
-        public JoinLoadResult(
-            ILoadResult prev, Func<ILoadResult> onNext ) 
-            : base(prev, onNext)
-        {
-        }
-    }
-
-    public sealed class ParallelLoadResult : ILoadResult
+    public sealed class ParallelLoadResult<T> : ILoadResult<IList<T>>
     {
      //================================
         //  変数
         //================================
-        private ILoadResult[] m_list     = null;
-        private int           m_compCount   = 0;
+        private ILoadResult<T>[] m_list  = null;
+        private T[]              m_datas = null;
+        private int              m_compCount   = 0;
         //================================
         //  プロパティ
         //================================
-        public Action OnCompleted { set; private get; }
+        public Action   OnCompleted { set; private get; }
+        public IList<T> Content     { get { return m_datas; } }
 
         //================================
         //  関数
         //================================
 
-        public ParallelLoadResult( ILoadResult[] args )
+        public ParallelLoadResult( ILoadResult<T>[] args )
         {
             m_list      = args;
-            m_compCount = m_list.Length;
-            Action<ParallelLoadResult> onCopletedOnce = (result) =>
+            m_datas     = new T[ m_list.Length ];
+            m_compCount = 0;
+            Action<T, ParallelLoadResult<T>> onCopletedOnce = (c, result) =>
             {
-                result.m_compCount--;
+                var i = result.m_compCount;
+                result.m_datas[ i ] = c;
+                result.m_compCount++;
                 if( result.m_compCount > 0 )
                 {
                     return;
@@ -157,7 +150,7 @@ namespace Chipstar.Downloads
 
             foreach( var ret in m_list )
             {
-                ret.OnCompleted = () => onCopletedOnce( this );
+                ret.OnCompleted = () => onCopletedOnce(ret.Content, this);
             }
         }
 
@@ -177,19 +170,20 @@ namespace Chipstar.Downloads
 
     public static class ILoadResultExtensions
     {
-        public static ILoadResult ToParallel ( this ILoadResult[] self )
-     {
-            return new ParallelLoadResult( self );
-        }
-        public static ILoadResult<T> ToJoin<T>( this ILoadResult self, Func<ILoadResult<T>> onNext )
+        public static ILoadResult<IList<T>> ToParallel<T>(this ILoadResult<T>[] self)
         {
-            return new JoinLoadResult<T>( self, onNext );
+            return new ParallelLoadResult<T>( self );
         }
-        public static ILoadResult<Empty> ToJoin(this ILoadResult self, Func<ILoadResult> onNext)
+        
+        public static ILoadResult<TNext> ToJoin<TNext>( this ILoadResult self, Func<ILoadResult<TNext>> onNext )
         {
-            return new JoinLoadResult<Empty>(self, onNext);
+            return new JoinLoadResult<TNext>( self, onNext );
         }
-        public static IDisposable          OnComplete( this ILoadResult self, Action onCompleted )
+        public static ILoadResult AsEmpty<T>( this ILoadResult<T> self )
+        {
+            return self;
+        }
+        public static IDisposable OnComplete( this ILoadResult self, Action onCompleted )
         {
             self.OnCompleted = onCompleted;
             return self;
