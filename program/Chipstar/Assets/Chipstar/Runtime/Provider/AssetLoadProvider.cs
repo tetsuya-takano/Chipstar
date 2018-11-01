@@ -31,7 +31,7 @@ namespace Chipstar.Downloads
         //===============================
         //  プロパティ
         //===============================
-        private IAccessPoint                    AccessPoint     { get; set; } // 接続先
+        private IEntryPoint                    AccessPoint     { get; set; } // 接続先
         private ILoadDatabase<TRuntimeData>     LoadDatabase    { get; set; } // コンテンツテーブルから作成したDB
         private IJobEngine                      JobEngine       { get; set; } // DLエンジン
         private IJobCreator<TRuntimeData>       JobCreator      { get; set; } // ジョブの作成
@@ -42,7 +42,7 @@ namespace Chipstar.Downloads
 
         public AssetLoadProvider
             ( 
-                IAccessPoint                accessPoint,
+                IEntryPoint                accessPoint,
                 ILoadDatabase<TRuntimeData> database,
                 IJobEngine                  dlEngine,
                 IJobCreator<TRuntimeData>   jobCreator

@@ -4,13 +4,13 @@ using System.IO;
 
 namespace Chipstar.Downloads
 {
-    public interface IAccessPoint
+    public interface IEntryPoint
     {
         string BasePath { get; }
         IAccessLocation ToLocation( string path );
         IAccessLocation ToLocation<TRuntimeData>(TRuntimeData data) where TRuntimeData : IRuntimeBundleData<TRuntimeData>;
     }
-    public class AccessPoint : IAccessPoint
+    public class EntryPoint : IEntryPoint
     {
         //==================================
         //  プロパティ
@@ -21,7 +21,7 @@ namespace Chipstar.Downloads
         //  関数
         //==================================
 
-        public AccessPoint( string path )
+        public EntryPoint( string path )
         {
             BasePath = path;
         }

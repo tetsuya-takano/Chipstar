@@ -22,7 +22,7 @@ namespace Chipstar.Example
             var creator     = new SampleJobCreator<RuntimeBundlleData>();
             var database    = new LoadDatabase<BuildMapDataTable, BundleBuildData, AssetBuildData, RuntimeBundlleData>();
             var jobEngine   = new JobEngine();
-            var acccesPoint = new AccessPoint( Path.Combine( Application.dataPath, "../../build/windows/" ) );
+            var acccesPoint = new EntryPoint( Path.Combine( Application.dataPath, "../../build/windows/" ) );
 
             m_provider = new AssetLoadProvider<RuntimeBundlleData>
                 (
