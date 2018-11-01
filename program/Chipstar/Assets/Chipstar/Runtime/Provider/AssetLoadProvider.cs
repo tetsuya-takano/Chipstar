@@ -31,7 +31,8 @@ namespace Chipstar.Downloads
         //===============================
         //  プロパティ
         //===============================
-        private IEntryPoint                    AccessPoint     { get; set; } // 接続先
+        private IEntryPoint                     AccessPoint     { get; set; } // 接続先
+        private ICacheDatabase                  CacheDatabase   { get; set; } // ローカルストレージのキャッシュ情報
         private ILoadDatabase<TRuntimeData>     LoadDatabase    { get; set; } // コンテンツテーブルから作成したDB
         private IJobEngine                      JobEngine       { get; set; } // DLエンジン
         private IJobCreator<TRuntimeData>       JobCreator      { get; set; } // ジョブの作成
@@ -100,7 +101,29 @@ namespace Chipstar.Downloads
         /// </summary>
         protected virtual ILoadResult<T> DoLoadAssetWithNeedAll<T>( AssetData<TRuntimeData> data ) where T : UnityEngine.Object
         {
-            return DoDownloadWithNeedAll( data.BundleData ).ToJoin( () => CreateLoadAsset<T>( data ) );
+            var bundleData = data.BundleData;
+            ILoadResult preloadJob = null;
+
+            //  ローカルにキャッシュがあったらそっちをロードする
+            if ( CacheDatabase.HasCache( bundleData ))
+            {
+                preloadJob = DoOpenLocalBundleDependencies( bundleData );
+            }
+            else
+            {
+                //  なかったらサーバからダウンロード
+                preloadJob = DoDownloadWithNeedAll(bundleData);
+            }
+            //  ロード
+            return preloadJob.ToJoin( () => CreateLoadAsset<T>( data ) );
+        }
+
+        /// <summary>
+        /// ローカルからロード
+        /// </summary>
+        protected virtual ILoadResult DoOpenLocalBundleDependencies(TRuntimeData bundleData)
+        {
+            return null;
         }
 
         /// <summary>
