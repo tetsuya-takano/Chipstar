@@ -9,20 +9,19 @@ namespace Chipstar.Example
 {
     public static class BatchBuild
     {
-        [MenuItem( "Tools/Build" )]
-        static void Hoge()
+        static void Build( string prefix, BuildAssetBundleOptions addOption )
         {
             var builder = new AssetBundleBuilder<ABPackageMst,ABBuildData, ABBuildResult>();
             var config  = new ABBuildConfig(
-                outputPath : Path.Combine( Application.dataPath, "../../build/windows/"),
-                option     : BuildAssetBundleOptions.ForceRebuildAssetBundle,
+                outputPath : Path.Combine( Application.dataPath, "../../build/windows/" + prefix + "/"),
+                option     : BuildAssetBundleOptions.ForceRebuildAssetBundle | addOption,
                 platform   : BuildTarget.StandaloneWindows64
             );
 
             var fileFilter      = new ABBuildFileFilter( 
                 ignoreExtensions: new string[] 
                 {
-                    ".cs", ".meta"
+                    ".cs", ".meta", ".asmdef"
                 } 
             );
             //var buildProcess  = new DisableBuildProcess<ABBuildData>();
@@ -37,6 +36,22 @@ namespace Chipstar.Example
                     preProcess      : ABBuildPreProcess <ABBuildData>.Empty,
                     postProcess     : new SaveBuildMapPostProcess( "buildMap.json" )
                 );
+        }
+
+        [MenuItem( "Tools/Build/LZ4" )]
+        static void BuildLZ4()
+        {
+            Build( "lz4", BuildAssetBundleOptions.ChunkBasedCompression );
+        }
+        [MenuItem( "Tools/Build/LZMA" )]
+        static void BuildLZMA()
+        {
+            Build( "lzma", BuildAssetBundleOptions.None );
+        }
+        [MenuItem( "Tools/Build/Raw" )]
+        static void BuildRaw()
+        {
+            Build( "raw", BuildAssetBundleOptions.UncompressedAssetBundle );
         }
     }
 }
