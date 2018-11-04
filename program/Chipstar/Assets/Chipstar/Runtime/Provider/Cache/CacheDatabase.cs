@@ -14,6 +14,7 @@ namespace Chipstar.Downloads
         bool HasCache<TRuntimeData>(TRuntimeData bundleData) where TRuntimeData : IRuntimeBundleData<TRuntimeData>;
     }
     public class CacheDatabase<TLocalData> : ICacheDatabase
+        where TLocalData : ILocalBundleData
     {
         //===============================================
         //  class
@@ -21,7 +22,18 @@ namespace Chipstar.Downloads
         [Serializable]
         protected sealed class Table
         {
-            [SerializeField] TLocalData[] m_list;
+            [SerializeField] TLocalData[] m_list = null;
+            public TLocalData Find( string key )
+            {
+                foreach (var d in m_list)
+                {
+                    if (d.IsMatchKey( key ))
+                    {
+                        return d;
+                    }
+                }
+                return default(TLocalData);
+            }
         }
         //===============================================
         //  変数
@@ -58,7 +70,13 @@ namespace Chipstar.Downloads
         public bool HasCache<TRuntimeData>(TRuntimeData bundleData) 
             where TRuntimeData : IRuntimeBundleData<TRuntimeData>
         {
-            return false;
+            var data = m_table.Find( bundleData.Name );
+            if ( data == null )
+            {
+                return false;
+            }
+
+            return data.IsMatchVersion( bundleData.Hash );
         }
     }
 }

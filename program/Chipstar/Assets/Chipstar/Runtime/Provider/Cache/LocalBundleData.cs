@@ -5,19 +5,18 @@ using System.Collections.Generic;
 
 namespace Chipstar.Downloads
 {
-    public interface ILocalBundleData<TKey, TVersion> : IDisposable
+    public interface ILocalBundleData : IDisposable
     {
-        bool IsExist ( TKey     key     ); // 存在するかどうか
-        bool IsCached( TVersion version ); // キャッシュ済みかどうか
+        bool IsMatchKey     ( string    key     ); // 存在するかどうか
+        bool IsMatchVersion ( Hash128   version ); // キャッシュ済みかどうか
     }
     /// <summary>
     /// ローカルに保持してるデータ
     /// </summary>
-    public abstract class LocalBundleData<TKey, TVersion> 
-        : ILocalBundleData<TKey, TVersion>
+    public abstract class LocalBundleData: ILocalBundleData
     {
-        protected TKey      Key     { get; private set; }
-        protected TVersion  Version { get; private set; }
+        protected string    Key     { get; private set; }
+        protected Hash128   Version { get; private set; }
         /// <summary>
         /// 破棄処理
         /// </summary>
@@ -28,16 +27,16 @@ namespace Chipstar.Downloads
         /// <summary>
         /// キャッシュ済みかどうか
         /// </summary>
-        public virtual bool IsCached( TVersion version )
+        public virtual bool IsMatchVersion( Hash128 version )
         {
-            return EqualityComparer<TVersion>.Default.Equals( version, Version );
+            return EqualityComparer<Hash128>.Default.Equals( version, Version );
         }
         /// <summary>
         /// ファイルが存在するかどうか
         /// </summary>
-        public virtual bool IsExist(TKey key)
+        public virtual bool IsMatchKey( string key )
         {
-            return EqualityComparer<TKey>.Default.Equals(key, Key);
+            return EqualityComparer<string>.Default.Equals(key, Key);
         }
     }
 }
