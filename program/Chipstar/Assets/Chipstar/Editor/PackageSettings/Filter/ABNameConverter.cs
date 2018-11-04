@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace Chipstar.Builder
 {
@@ -26,7 +27,12 @@ namespace Chipstar.Builder
 
         public virtual string Convert( string assetPath )
         {
-            return DoConvert( assetPath ) + Extension;
+            var name = DoConvert( assetPath );
+            if( name[ name.Length - 1 ] == '/' )
+            {
+                name = name.Remove( name.Length - 1 );
+            }
+            return name + Extension;
         }
 
         protected virtual string DoConvert( string assetPath )

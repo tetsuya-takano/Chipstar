@@ -13,6 +13,7 @@ namespace Chipstar.Example
     {
         public string	PathPattern { get; private set; }	// ファイルパス
 		public string	PackName    { get; private set; }	// アセットバンドル名
+        public string	MatchKey    { get; private set; }	// 名前の共通部分抜き出し用
 
         protected override void DoRead( string[] args )
         {
@@ -20,7 +21,7 @@ namespace Chipstar.Example
             PackName        = args[ 1 ];
             Priority        = int.Parse( args[ 2 ] );
             PathFilter      = new SingleWildCardPathFilter  ( PathPattern );
-            NameConverter   = new NameOverrideConverter     ( PackName, ".ab" );
+            NameConverter   = new NameOverrideConverter     ( PackName,".ab" );
         }
     }
 
