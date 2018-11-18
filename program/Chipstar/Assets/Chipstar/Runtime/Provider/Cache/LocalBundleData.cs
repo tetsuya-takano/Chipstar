@@ -9,14 +9,51 @@ namespace Chipstar.Downloads
     {
         bool IsMatchKey     ( string    key     ); // 存在するかどうか
         bool IsMatchVersion ( Hash128   version ); // キャッシュ済みかどうか
+        void Apply(Hash128 hash );
     }
     /// <summary>
     /// ローカルに保持してるデータ
     /// </summary>
-    public abstract class LocalBundleData: ILocalBundleData
+    [Serializable]
+    public class LocalBundleData: ILocalBundleData
     {
-        protected string    Key     { get; private set; }
-        protected Hash128   Version { get; private set; }
+        //=================================
+        //  SerializeField
+        //=================================
+        [SerializeField] private string m_key  = null;
+        [SerializeField] private string m_hash = null;
+        [NonSerialized] private Hash128 m_version;
+        //=================================
+        //  プロパティ
+        //=================================
+        protected string            Key
+        {
+            get { return m_key; }
+            set { m_key = value; }
+        }
+        protected Hash128           Version
+        {
+            get { return m_version; }
+            set
+            {
+                m_version   = value;
+                m_hash      = m_version.ToString();
+            }
+        }
+
+        //=================================
+        //  関数
+        //=================================
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public LocalBundleData( string key, Hash128 hash )
+        {
+            Key         = key;
+            Version     = hash;
+        }
+
         /// <summary>
         /// 破棄処理
         /// </summary>
@@ -37,6 +74,14 @@ namespace Chipstar.Downloads
         public virtual bool IsMatchKey( string key )
         {
             return EqualityComparer<string>.Default.Equals(key, Key);
+        }
+
+        /// <summary>
+        /// バージョンを上書き
+        /// </summary>
+        public void Apply(Hash128 version)
+        {
+            Version = version;
         }
     }
 }

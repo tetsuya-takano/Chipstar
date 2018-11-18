@@ -6,10 +6,10 @@ namespace Chipstar.Downloads
     public interface IJobCreator<TRuntimeData> : IDisposable
         where TRuntimeData : IRuntimeBundleData<TRuntimeData>
     {
-        ILoadJob<byte[]>            CreateBytesLoad     ( IJobEngine engine, IAccessLocation location );
-        ILoadJob<string>            CreateTextLoad      ( IJobEngine engine, IAccessLocation location );
-        ILoadJob<AssetBundle>       CreateBundleFile    ( IJobEngine engine, IAccessLocation location );
-        ILoadJob<T>                 CreateAssetLoad<T>  ( IJobEngine engine, AssetData<TRuntimeData> data ) where T : UnityEngine.Object;
+        ILoadJob<byte[]>        BytesLoad       ( IJobEngine engine, IAccessLocation location );
+        ILoadJob<string>        TextLoad        ( IJobEngine engine, IAccessLocation location );
+        ILoadJob<AssetBundle>   DownloadBundle  ( IJobEngine engine, IAccessLocation location );
+        ILoadJob<T>             AssetLoad<T>    ( IJobEngine engine, AssetData<TRuntimeData> data ) where T : UnityEngine.Object;
     }
     public abstract class JobCreator<TRuntimeData> : IJobCreator<TRuntimeData>
         where TRuntimeData : IRuntimeBundleData<TRuntimeData>
@@ -34,22 +34,22 @@ namespace Chipstar.Downloads
         /// <summary>
         /// 生データ取得リクエスト
         /// </summary>
-        public ILoadJob<byte[]> CreateBytesLoad( IJobEngine engine, IAccessLocation location )
+        public ILoadJob<byte[]> BytesLoad( IJobEngine engine, IAccessLocation location )
         {
             return AddJob( engine, DoCreateBytesLoad( location ) );
         }
         /// <summary>
         /// テキスト取得リクエスト
         /// </summary>
-        public ILoadJob<string> CreateTextLoad( IJobEngine engine, IAccessLocation location )
+        public ILoadJob<string> TextLoad( IJobEngine engine, IAccessLocation location )
         {
             return AddJob( engine, DoCreateTextLoad( location ) );
         }
-        public ILoadJob<AssetBundle> CreateBundleFile( IJobEngine engine, IAccessLocation location )
+        public ILoadJob<AssetBundle> DownloadBundle( IJobEngine engine, IAccessLocation location )
         {
             return AddJob( engine, DoCreateBundleLoad( location ) );
         }
-        public ILoadJob<T> CreateAssetLoad<T>( IJobEngine engine, AssetData<TRuntimeData> assetData ) 
+        public ILoadJob<T> AssetLoad<T>( IJobEngine engine, AssetData<TRuntimeData> assetData ) 
             where T : UnityEngine.Object
         {
             return AddJob( engine, DoCreateAssetLoad<T>( assetData ) );

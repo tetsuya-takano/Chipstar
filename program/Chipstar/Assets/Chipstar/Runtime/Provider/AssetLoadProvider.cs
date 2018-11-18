@@ -43,7 +43,7 @@ namespace Chipstar.Downloads
 
         public AssetLoadProvider
             ( 
-                IEntryPoint                accessPoint,
+                IEntryPoint                 accessPoint,
                 ILoadDatabase<TRuntimeData> database,
                 IJobEngine                  dlEngine,
                 IJobCreator<TRuntimeData>   jobCreator
@@ -57,6 +57,7 @@ namespace Chipstar.Downloads
 
         public IEnumerator InitLoad( string fileName )
         {
+
             var job = InitielizeLoad( AccessPoint.ToLocation( fileName  ) );
             while( !job.IsCompleted )
             {
@@ -70,7 +71,7 @@ namespace Chipstar.Downloads
 
         private ILoadJob<byte[]> InitielizeLoad( IAccessLocation location )
         {
-            return JobCreator.CreateBytesLoad( JobEngine, location ); ;
+            return JobCreator.BytesLoad( JobEngine, location ); ;
         }
 
         /// <summary>
@@ -162,13 +163,14 @@ namespace Chipstar.Downloads
         protected virtual ILoadResult<AssetBundle> DoDownload( TRuntimeData data )
         {
             var location    = AccessPoint.ToLocation( data );
-            var job         = JobCreator.CreateBundleFile( JobEngine, location );
+            var job         = JobCreator.DownloadBundle( JobEngine, location );
 
             return new LoadResult<AssetBundle>(
                 job,
                 onCompleted: ( content ) =>
                 {
                     data.OnMemory( content );
+                    CacheDatabase.SaveVersion( data );
                 },
                 dispose : LoadDatabase.AddReference( data )
             );
@@ -180,7 +182,7 @@ namespace Chipstar.Downloads
         private ILoadResult<T> CreateLoadAsset<T>( AssetData<TRuntimeData> assetData )
             where T          : UnityEngine.Object
         {
-            var job = JobCreator.CreateAssetLoad<T>( JobEngine, assetData );
+            var job = JobCreator.AssetLoad<T>( JobEngine, assetData );
             return new LoadResult<T>( 
                 job         : job,
                 onCompleted : j => { },

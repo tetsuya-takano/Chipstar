@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using System.Text;
+using System.Collections.Generic;
 
 namespace Chipstar.Downloads
 {
@@ -12,9 +13,10 @@ namespace Chipstar.Downloads
     {
         void Load   ( byte[] data );
         bool HasCache<TRuntimeData>(TRuntimeData bundleData) where TRuntimeData : IRuntimeBundleData<TRuntimeData>;
+        void SaveVersion<TRuntimeData>(TRuntimeData data) where TRuntimeData : IRuntimeBundleData<TRuntimeData>;
+        void Apply( );
     }
-    public class CacheDatabase<TLocalData> : ICacheDatabase
-        where TLocalData : ILocalBundleData
+    public class CacheDatabase : ICacheDatabase
     {
         //===============================================
         //  class
@@ -22,8 +24,8 @@ namespace Chipstar.Downloads
         [Serializable]
         protected sealed class Table
         {
-            [SerializeField] TLocalData[] m_list = null;
-            public TLocalData Find( string key )
+            [SerializeField] List<LocalBundleData> m_list = new List<LocalBundleData>();
+            public LocalBundleData Find( string key )
             {
                 foreach (var d in m_list)
                 {
@@ -32,7 +34,15 @@ namespace Chipstar.Downloads
                         return d;
                     }
                 }
-                return default(TLocalData);
+                return null;
+            }
+
+            /// <summary>
+            /// 追加
+            /// </summary>
+            internal void Add( string key, Hash128 hash )
+            {
+                m_list.Add(new LocalBundleData(key, hash));
             }
         }
         //===============================================
@@ -76,7 +86,33 @@ namespace Chipstar.Downloads
                 return false;
             }
 
+
             return data.IsMatchVersion( bundleData.Hash );
+        }
+
+        /// <summary>
+        /// バージョンの保存
+        /// </summary>
+        public virtual void SaveVersion<TRuntimeData>(TRuntimeData data) where TRuntimeData : IRuntimeBundleData<TRuntimeData>
+        {
+            //  キャッシュテーブルにあるかどうか
+            var cache = m_table.Find(data.Name);
+            if (cache == null)
+            {
+                //  なければ追加書き込み
+                m_table.Add(data.Name, data.Hash);
+                return;
+            }
+            //  あったらバージョン情報を上書き
+            cache.Apply( data.Hash );
+        }
+
+        /// <summary>
+        /// 保存
+        /// </summary>
+        public virtual void Apply( )
+        {
+            
         }
     }
 }
