@@ -17,39 +17,48 @@ namespace Chipstar.Example
         // Use this for initialization
         IEnumerator Start()
         {
-            //  https://www.google.co.jp/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png
+			//  https://www.google.co.jp/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png
+			var acccesPoint  = new EntryPoint( Path.Combine( Application.dataPath, "../../build/windows/lz4" ) );
 
-            var creator     = new SampleJobCreator<RuntimeBundlleData>();
-            var database    = new LoadDatabase<BuildMapDataTable, BundleBuildData, AssetBuildData, RuntimeBundlleData>();
-            var jobEngine   = new JobEngine();
-            var acccesPoint = new EntryPoint( Path.Combine( Application.dataPath, "../../build/windows/lz4" ) );
+			var loadDatabase = new LoadDatabase<BuildMapDataTable, BundleBuildData, AssetBuildData, RuntimeBundlleData>();
+			var cacheDatabase= new CacheDatabase( new UrlLocation( Path.Combine( Application.dataPath, "localVersion.json" )) );
+
+			var creator      = new SampleJobCreator<RuntimeBundlleData>();
+            var jobEngine    = new JobEngine();
 
             m_provider = new AssetLoadProvider<RuntimeBundlleData>
                 (
-                    accessPoint: acccesPoint,
-                    database: database,
-                    jobCreator: creator,
-                    dlEngine: jobEngine
+                    accessPoint		: acccesPoint,
+                    loadDatabase	: loadDatabase,
+					cacheDatabase	: cacheDatabase,
+                    jobCreator		: creator,
+                    dlEngine		: jobEngine
                 );
 
             yield return null;
 
             yield return m_provider.InitLoad( "buildMap.json" );
-            var downloadTask = m_provider.Load("Assets/BundleTarget/Container 1.prefab" );
-            yield return new WaitWhile(() => downloadTask.IsCompleted );
+			var path = "Assets/BundleTarget/Container 1.prefab";
+			var downloadTask = m_provider.Load( path );
+            yield return new WaitWhile(() => !downloadTask.IsCompleted );
+			yield return null;
+			var assetData	= loadDatabase.Find( path );
+			var bundle      = assetData.BundleData;
+			var operation   = bundle.LoadAsync( path );
+			yield return new WaitWhile( () => !operation.isDone );
 
-            //downloadTask.OnCompleted = () => 
-            //{
-            //     var prefab = downloadTask.Content;
-            //     var container = prefab.GetComponent<Container>();
-            //     var parent = m_image.transform.parent;
-            //     foreach( var item in container.List )
-            //     {
-            //         var img = Instantiate(m_image, parent);
-            //         img.texture = item as Texture;
-            //     }
-            //};
-        }
+			var prefab		= operation.asset as GameObject;
+			var container	= prefab.GetComponent<Container>();
+			var parent		= m_image.transform.parent;
+			foreach( var item in container.List )
+			{
+				var img = Instantiate(m_image, parent);
+				img.texture = item as Texture;
+			}
+
+			//	保存
+			cacheDatabase.Apply();
+		}
         private void OnDestroy()
         {
         }

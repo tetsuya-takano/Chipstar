@@ -15,7 +15,7 @@ namespace Chipstar.Downloads
     /// ローカルに保持してるデータ
     /// </summary>
     [Serializable]
-    public class LocalBundleData: ILocalBundleData
+    public class LocalBundleData: ILocalBundleData, ISerializationCallbackReceiver
     {
         //=================================
         //  SerializeField
@@ -34,12 +34,8 @@ namespace Chipstar.Downloads
         protected Hash128           Version
         {
             get { return m_version; }
-            set
-            {
-                m_version   = value;
-                m_hash      = m_version.ToString();
-            }
-        }
+			set { m_version = value; }
+		}
 
         //=================================
         //  関数
@@ -83,5 +79,20 @@ namespace Chipstar.Downloads
         {
             Version = version;
         }
-    }
+
+		/// <summary>
+		/// 書き込み時の挙動
+		/// </summary>
+		void ISerializationCallbackReceiver.OnBeforeSerialize()
+		{
+			m_hash = m_version.ToString();
+		}
+		/// <summary>
+		/// 取得時の挙動
+		/// </summary>
+		void ISerializationCallbackReceiver.OnAfterDeserialize()
+		{
+			m_version = Hash128.Parse( m_hash );
+		}
+	}
 }
