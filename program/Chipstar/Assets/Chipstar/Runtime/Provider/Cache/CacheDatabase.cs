@@ -148,11 +148,13 @@ namespace Chipstar.Downloads
         /// </summary>
         public virtual void Apply( )
         {
-			var path = m_versionFile.AccessPath;
+			var path	= m_versionFile.AccessPath;
+			var dirPath = Path.GetDirectoryName( path );
+
 			var json = JsonUtility.ToJson( m_table, true );
-			if( !Directory.Exists( path ))
+			if( !Directory.Exists( dirPath ) )
 			{
-				Directory.CreateDirectory( path );
+				Directory.CreateDirectory( dirPath );
 			}
 			File.WriteAllText( path, json );
         }
