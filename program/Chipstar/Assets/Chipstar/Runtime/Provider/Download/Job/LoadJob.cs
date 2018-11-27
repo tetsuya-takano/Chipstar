@@ -20,7 +20,7 @@ namespace Chipstar.Downloads
     /// DLジョブ
     /// </summary>
     public abstract class LoadJob<THandler, TSource, TData> : ILoadJob<TData>
-        where THandler  : IDLHandler<TSource, TData>
+        where THandler  : ILoadJobHandler<TSource, TData>
     {
         //===============================
         //  プロパティ

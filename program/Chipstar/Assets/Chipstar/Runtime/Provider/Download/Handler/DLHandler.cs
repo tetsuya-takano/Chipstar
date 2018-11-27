@@ -4,12 +4,12 @@ using System;
 
 namespace Chipstar.Downloads
 {
-    public interface IDLHandler<TSource, TData> : IDisposable
+    public interface ILoadJobHandler<TSource, TData> : IDisposable
     {
         TData Complete( TSource source );
     }
     public abstract class DLHandler<TSource, TData>
-        : IDLHandler<TSource, TData>
+        : ILoadJobHandler<TSource, TData>
     {
         public virtual TData Complete(TSource source)
         {
