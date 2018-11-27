@@ -11,7 +11,7 @@ namespace Chipstar.Downloads
 
         public static IDisposable LoadLevel( string sceneName )
         {
-            return LoadProvider.LoadLevel( sceneName );
+			return null;
         }
     }
 }

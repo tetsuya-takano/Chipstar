@@ -15,7 +15,7 @@ namespace Chipstar.Downloads
         /// </summary>
         public static IDisposable Load<T>( string path, Action<T> onLoaded  ) where T : UnityEngine.Object
         {
-            return LoadProvider.LoadAsset<T>( path ).OnComplete<T>( onLoaded );
+			return null;
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Chipstar.Example
             var creator     = new SampleJobCreator<RuntimeBundlleData>();
             var database    = new LoadDatabase<BuildMapDataTable, BundleBuildData, AssetBuildData, RuntimeBundlleData>();
             var jobEngine   = new JobEngine();
-            var acccesPoint = new EntryPoint( Path.Combine( Application.dataPath, "../../build/windows/" ) );
+            var acccesPoint = new EntryPoint( Path.Combine( Application.dataPath, "../../build/windows/lz4" ) );
 
             m_provider = new AssetLoadProvider<RuntimeBundlleData>
                 (
@@ -35,19 +35,20 @@ namespace Chipstar.Example
             yield return null;
 
             yield return m_provider.InitLoad( "buildMap.json" );
-            var result = m_provider.LoadAsset<GameObject>("Assets/BundleTarget/Container 1.prefab" );
-            yield return new WaitWhile(() => result.IsCompleted );
-            result.OnCompleted = () => 
-            {
-                 var prefab = result.Content;
-                 var container = prefab.GetComponent<Container>();
-                 var parent = m_image.transform.parent;
-                 foreach( var item in container.List )
-                 {
-                     var img = Instantiate(m_image, parent);
-                     img.texture = item as Texture;
-                 }
-            };
+            var downloadTask = m_provider.Load("Assets/BundleTarget/Container 1.prefab" );
+            yield return new WaitWhile(() => downloadTask.IsCompleted );
+
+            //downloadTask.OnCompleted = () => 
+            //{
+            //     var prefab = downloadTask.Content;
+            //     var container = prefab.GetComponent<Container>();
+            //     var parent = m_image.transform.parent;
+            //     foreach( var item in container.List )
+            //     {
+            //         var img = Instantiate(m_image, parent);
+            //         img.texture = item as Texture;
+            //     }
+            //};
         }
         private void OnDestroy()
         {

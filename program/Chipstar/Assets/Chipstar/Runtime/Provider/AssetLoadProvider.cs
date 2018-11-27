@@ -14,9 +14,7 @@ namespace Chipstar.Downloads
     public interface IAssetLoadProvider
     {
         IEnumerator     InitLoad    ( string fileName );
-        ILoadResult<T>  LoadAsset<T>( string path     ) where T : UnityEngine.Object;
-        IDisposable     LoadLevel   ( string sceneName);
-
+		ILoadResult		Load		( string path );
         void DoUpdate();
     }
 
@@ -55,10 +53,13 @@ namespace Chipstar.Downloads
             JobCreator      = jobCreator;
         }
 
+		/// <summary>
+		/// 初期化処理
+		/// </summary>
         public IEnumerator InitLoad( string fileName )
         {
 
-            var job = InitielizeLoad( AccessPoint.ToLocation( fileName  ) );
+            var job = DoInitielizeLoad( AccessPoint.ToLocation( fileName  ) );
             while( !job.IsCompleted )
             {
                 yield return null;
@@ -69,38 +70,35 @@ namespace Chipstar.Downloads
             yield break;
         }
 
-        private ILoadJob<byte[]> InitielizeLoad( IAccessLocation location )
-        {
-            return JobCreator.BytesLoad( JobEngine, location ); ;
-        }
+		/// <summary>
+		/// ロード処理
+		/// </summary>
+		public ILoadResult Load( string path )
+		{
+			var data = LoadDatabase.Find( path );
+			return DoLoad( data );
+		}
 
-        /// <summary>
-        /// パスからアセットの取得
-        /// </summary>
-        public virtual ILoadResult<T> LoadAsset<T>( string path ) where T : UnityEngine.Object
-        {
-            var data = LoadDatabase.Find( path );
-            return DoLoadAsset<T>( data );
-        }
-        /// <summary>
-        /// アセットの取得
-        /// </summary>
-        protected virtual ILoadResult<T> DoLoadAsset<T>( AssetData<TRuntimeData> assetData ) where T : UnityEngine.Object
-        {
-            //  パスからバンドルデータを取得
-            var data    = assetData.BundleData;
-            var path    = assetData.Path;
-            if( data.IsOnMemory )
-            {
-                return CreateLoadAsset<T>( assetData );
-            }
-            return DoLoadAssetWithNeedAll<T>( assetData );
-        }
+		/// <summary>
+		/// 更新処理
+		/// </summary>
+		public void DoUpdate()
+		{
+			JobEngine.Update();
+		}
 
-        /// <summary>
-        /// アセットを取得するため必要なデータを一通りロード
-        /// </summary>
-        protected virtual ILoadResult<T> DoLoadAssetWithNeedAll<T>( AssetData<TRuntimeData> data ) where T : UnityEngine.Object
+		/// <summary>
+		/// 初期化ロード処理
+		/// </summary>
+		protected virtual ILoadJob<byte[]> DoInitielizeLoad( IAccessLocation location )
+		{
+			return JobCreator.BytesLoad( JobEngine, location ); ;
+		}
+
+		/// <summary>
+		/// アセットを取得するため必要なデータを一通りロード
+		/// </summary>
+		protected virtual ILoadResult DoLoad( AssetData<TRuntimeData> data )
         {
             var bundleData = data.BundleData;
             ILoadResult preloadJob = null;
@@ -108,7 +106,7 @@ namespace Chipstar.Downloads
             //  ローカルにキャッシュがあったらそっちをロードする
             if ( CacheDatabase.HasCache( bundleData ))
             {
-                preloadJob = DoOpenLocalBundleDependencies( bundleData );
+                preloadJob = DoLoadCacheWithNeedAll( bundleData );
             }
             else
             {
@@ -116,15 +114,7 @@ namespace Chipstar.Downloads
                 preloadJob = DoDownloadWithNeedAll(bundleData);
             }
             //  ロード
-            return preloadJob.ToJoin( () => CreateLoadAsset<T>( data ) );
-        }
-
-        /// <summary>
-        /// ローカルからロード
-        /// </summary>
-        protected virtual ILoadResult DoOpenLocalBundleDependencies(TRuntimeData bundleData)
-        {
-            return null;
+            return preloadJob;
         }
 
         /// <summary>
@@ -157,10 +147,19 @@ namespace Chipstar.Downloads
                 .AsEmpty();
         }
 
-        /// <summary>
-        /// ダウンロード処理
-        /// </summary>
-        protected virtual ILoadResult<AssetBundle> DoDownload( TRuntimeData data )
+		/// <summary>
+		/// ローカルからロード
+		/// </summary>
+		protected virtual ILoadResult DoLoadCacheWithNeedAll( TRuntimeData bundleData )
+		{
+			return null;
+		}
+
+
+		/// <summary>
+		/// ダウンロード処理
+		/// </summary>
+		protected virtual ILoadResult<AssetBundle> DoDownload( TRuntimeData data )
         {
             var location    = AccessPoint.ToLocation( data );
             var job         = JobCreator.DownloadBundle( JobEngine, location );
@@ -176,29 +175,5 @@ namespace Chipstar.Downloads
             );
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        private ILoadResult<T> CreateLoadAsset<T>( AssetData<TRuntimeData> assetData )
-            where T          : UnityEngine.Object
-        {
-            var job = JobCreator.AssetLoad<T>( JobEngine, assetData );
-            return new LoadResult<T>( 
-                job         : job,
-                onCompleted : j => { },
-                dispose     : LoadDatabase.AddReference( assetData.BundleData )
-            );
-        }
-
-
-        public IDisposable LoadLevel(string sceneName)
-        {
-            return null;
-        }
-
-        public void DoUpdate()
-        {
-            JobEngine.Update( );
-        }
-    }
+	}
 }
