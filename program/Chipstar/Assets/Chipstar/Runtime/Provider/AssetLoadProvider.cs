@@ -13,15 +13,16 @@ namespace Chipstar.Downloads
 
     public interface IAssetLoadProvider
     {
-        IEnumerator     InitLoad    ( string fileName );
-		ILoadResult		Load		( string path );
-        void DoUpdate();
-    }
+        IEnumerator				InitLoad    ( string dbFile, string localVersion );
+		ILoadResult				Load		( string path );
 
-    /// <summary>
-    /// 読み込みマネージャ
-    /// </summary>
-    public class AssetLoadProvider<TRuntimeData> 
+		void DoUpdate();
+	}
+
+	/// <summary>
+	/// 読み込みマネージャ
+	/// </summary>
+	public class AssetLoadProvider<TRuntimeData> 
                                 : IAssetLoadProvider
             where TRuntimeData  : IRuntimeBundleData<TRuntimeData>
 
@@ -29,7 +30,6 @@ namespace Chipstar.Downloads
         //===============================
         //  プロパティ
         //===============================
-        private IEntryPoint                     AccessPoint     { get; set; } // 接続先
         private ICacheDatabase                  CacheDatabase   { get; set; } // ローカルストレージのキャッシュ情報
         private ILoadDatabase<TRuntimeData>     LoadDatabase    { get; set; } // コンテンツテーブルから作成したDB
         private IJobEngine                      JobEngine       { get; set; } // DLエンジン
@@ -41,14 +41,14 @@ namespace Chipstar.Downloads
 
         public AssetLoadProvider
             ( 
-                IEntryPoint                 accessPoint,
-                ILoadDatabase<TRuntimeData> database,
+                ILoadDatabase<TRuntimeData> loadDatabase,
+				ICacheDatabase				cacheDatabase,
                 IJobEngine                  dlEngine,
                 IJobCreator<TRuntimeData>   jobCreator
             )
         {
-            AccessPoint     = accessPoint;
-            LoadDatabase    = database;
+            LoadDatabase    = loadDatabase;
+			CacheDatabase   = cacheDatabase;
             JobEngine       = dlEngine;
             JobCreator      = jobCreator;
         }
@@ -56,16 +56,19 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// 初期化処理
 		/// </summary>
-        public IEnumerator InitLoad( string fileName )
+        public IEnumerator InitLoad( string fileName, string localVersionFile )
         {
-
-            var job = DoInitielizeLoad( AccessPoint.ToLocation( fileName  ) );
-            while( !job.IsCompleted )
+			//	コンテンツデータの取得
+			var location     = LoadDatabase.ToBuildMapLocation( fileName );
+            var loadBuildMap = DoInitielizeLoad( location );
+            while( !loadBuildMap.IsCompleted )
             {
                 yield return null;
             }
 
-            LoadDatabase.Initialize( job.Content );
+            LoadDatabase.Initialize( loadBuildMap.Content );
+
+			yield return CacheDatabase.Initialize( localVersionFile );
 
             yield break;
         }
@@ -92,7 +95,7 @@ namespace Chipstar.Downloads
 		/// </summary>
 		protected virtual ILoadJob<byte[]> DoInitielizeLoad( IAccessLocation location )
 		{
-			return JobCreator.BytesLoad( JobEngine, location ); ;
+			return JobCreator.BytesLoad( JobEngine, location );
 		}
 
 		/// <summary>
@@ -161,14 +164,14 @@ namespace Chipstar.Downloads
 		/// </summary>
 		protected virtual ILoadResult<AssetBundle> DoDownload( TRuntimeData data )
         {
-            var location    = AccessPoint.ToLocation( data );
+            var location    = LoadDatabase.ToBundleLocation( data );
             var job         = JobCreator.DownloadBundle( JobEngine, location );
-
             return new LoadResult<AssetBundle>(
                 job,
                 onCompleted: ( content ) =>
                 {
-                    data.OnMemory( content );
+					Debug.Log( location.AccessPath );
+					data.OnMemory( content );
                     CacheDatabase.SaveVersion( data );
                 },
                 dispose : LoadDatabase.AddReference( data )

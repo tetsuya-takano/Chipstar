@@ -9,10 +9,12 @@ namespace Chipstar.Downloads
         ILoadJob<byte[]>        BytesLoad       ( IJobEngine engine, IAccessLocation location );
         ILoadJob<string>        TextLoad        ( IJobEngine engine, IAccessLocation location );
         ILoadJob<AssetBundle>   DownloadBundle  ( IJobEngine engine, IAccessLocation location );
-        ILoadJob<T>             AssetLoad<T>    ( IJobEngine engine, AssetData<TRuntimeData> data ) where T : UnityEngine.Object;
+		ILoadJob<AssetBundle>	OpenLocalBundle	( IJobEngine engine, IAccessLocation location );
+		ILoadJob<T>             AssetLoad<T>    ( IJobEngine engine, AssetData<TRuntimeData> data ) where T : UnityEngine.Object;
     }
-    public abstract class JobCreator<TRuntimeData> : IJobCreator<TRuntimeData>
-        where TRuntimeData : IRuntimeBundleData<TRuntimeData>
+    public abstract class JobCreator<TRuntimeData> 
+		:	IJobCreator<TRuntimeData>
+			where TRuntimeData : IRuntimeBundleData<TRuntimeData>
     {
         //=======================================
         //  変数
@@ -45,11 +47,22 @@ namespace Chipstar.Downloads
         {
             return AddJob( engine, DoCreateTextLoad( location ) );
         }
+		/// <summary>
+		/// アセットバンドルDL
+		/// </summary>
         public ILoadJob<AssetBundle> DownloadBundle( IJobEngine engine, IAccessLocation location )
         {
-            return AddJob( engine, DoCreateBundleLoad( location ) );
+            return AddJob( engine, DoCreateDownload( location ) );
         }
-        public ILoadJob<T> AssetLoad<T>( IJobEngine engine, AssetData<TRuntimeData> assetData ) 
+		/// <summary>
+		/// ローカルアセットバンドルオープン
+		/// </summary>
+		public ILoadJob<AssetBundle> OpenLocalBundle( IJobEngine engine, IAccessLocation location )
+		{
+			return AddJob( engine, DoCreateLocalLoad( location ));
+		}
+
+		public ILoadJob<T> AssetLoad<T>( IJobEngine engine, AssetData<TRuntimeData> assetData ) 
             where T : UnityEngine.Object
         {
             return AddJob( engine, DoCreateAssetLoad<T>( assetData ) );
@@ -62,7 +75,8 @@ namespace Chipstar.Downloads
 
         protected abstract ILoadJob<byte[]>         DoCreateBytesLoad   ( IAccessLocation location );
         protected abstract ILoadJob<string>         DoCreateTextLoad    ( IAccessLocation location );
-        protected abstract ILoadJob<AssetBundle>    DoCreateBundleLoad  ( IAccessLocation location );
+        protected abstract ILoadJob<AssetBundle>    DoCreateDownload	( IAccessLocation location );
+		protected abstract ILoadJob<AssetBundle>    DoCreateLocalLoad	( IAccessLocation location );
         protected abstract ILoadJob<T>              DoCreateAssetLoad<T>( AssetData<TRuntimeData> location ) where T : UnityEngine.Object;
-    }
+	}
 }

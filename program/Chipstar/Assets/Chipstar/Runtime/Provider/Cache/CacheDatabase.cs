@@ -12,7 +12,7 @@ namespace Chipstar.Downloads
     /// </summary>
     public interface ICacheDatabase : IDisposable
     {
-		IEnumerator Initialize();
+		IEnumerator Initialize( string localVersionFile );
 
 		bool HasCache	( ICachableBundle data );
         void SaveVersion( ICachableBundle data );
@@ -57,16 +57,17 @@ namespace Chipstar.Downloads
 		//===============================================
 		//  変数
 		//===============================================
-		private IAccessLocation     m_location  = null;
-        private Table				m_table		= null;
+		private IEntryPoint     m_entryPoint	= null;
+		private IAccessLocation m_versionFile   = null;
+        private Table			m_table			= null;
 
         //===============================================
         //  関数
         //===============================================
         
-		public CacheDatabase( IAccessLocation location )
+		public CacheDatabase( IEntryPoint entryPoint )
 		{
-			m_location = location;
+			m_entryPoint = entryPoint;
 		}
 
 		/// <summary>
@@ -80,9 +81,11 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// 初期化
 		/// </summary>
-		public IEnumerator Initialize( )
+		public IEnumerator Initialize( string versionFile )
 		{
-			var path    = m_location.AccessPath;
+			//	TODO : 仮処理
+			m_versionFile	= m_entryPoint.ToLocation( versionFile );
+			var path		= m_versionFile.AccessPath;
 			var isExist = File.Exists( path );
 			if( isExist )
 			{
@@ -145,8 +148,13 @@ namespace Chipstar.Downloads
         /// </summary>
         public virtual void Apply( )
         {
+			var path = m_versionFile.AccessPath;
 			var json = JsonUtility.ToJson( m_table, true );
-			File.WriteAllText( m_location.AccessPath, json );
+			if( !Directory.Exists( path ))
+			{
+				Directory.CreateDirectory( path );
+			}
+			File.WriteAllText( path, json );
         }
 	}
 }

@@ -8,7 +8,6 @@ namespace Chipstar.Downloads
     {
         string BasePath { get; }
         IAccessLocation ToLocation( string path );
-        IAccessLocation ToLocation<TRuntimeData>(TRuntimeData data) where TRuntimeData : IRuntimeBundleData<TRuntimeData>;
     }
     public class EntryPoint : IEntryPoint
     {
@@ -29,11 +28,6 @@ namespace Chipstar.Downloads
         public IAccessLocation ToLocation( string fileName )
         {
             return new UrlLocation( ToAccessPath( fileName ));
-        }
-
-        public IAccessLocation ToLocation<TRuntimeData>(TRuntimeData data) where TRuntimeData : IRuntimeBundleData<TRuntimeData>
-        {
-            return new UrlLocation( ToAccessPath( data.Name ));
         }
 
         protected virtual string ToAccessPath( string file )

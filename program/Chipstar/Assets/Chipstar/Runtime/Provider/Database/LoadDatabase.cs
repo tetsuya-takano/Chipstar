@@ -13,10 +13,12 @@ namespace Chipstar.Downloads
         IEnumerable<TRuntimeData>            BundleList { get; }
         IEnumerable<AssetData<TRuntimeData>> AssetList  { get; }
 
-        void                    Initialize  ( byte[] data );
-        AssetData<TRuntimeData> Find        ( string path );
-        IDisposable             AddReference( TRuntimeData data );
-    }
+        void                    Initialize			( byte[] data );
+		IAccessLocation			ToBuildMapLocation	( string fileName );
+		AssetData<TRuntimeData> Find				( string path );
+        IDisposable             AddReference		( TRuntimeData data );
+		IAccessLocation			ToBundleLocation			( TRuntimeData data );
+	}
 
     public class LoadDatabase<TTable, TBundle, TAsset, TRuntimeData> 
             :   ILoadDatabase<TRuntimeData>
@@ -27,15 +29,16 @@ namespace Chipstar.Downloads
 
             where TRuntimeData  : IRuntimeBundleData<TRuntimeData>, new()
     {
-        //=========================================
-        //  class
-        //=========================================
+		//=========================================
+		//  class
+		//=========================================
 
-        //=========================================
-        //  変数
-        //=========================================
-        private Dictionary<string, TRuntimeData>               m_bundleTable          = new Dictionary<string, TRuntimeData             >( StringComparer.OrdinalIgnoreCase ); // バンドル名   → バンドルデータテーブル
-        private Dictionary<string, AssetData<TRuntimeData>>    m_assetsTable          = new Dictionary<string, AssetData<TRuntimeData>  >( StringComparer.OrdinalIgnoreCase ); // アセットパス → アセットデータテーブル
+		//=========================================
+		//  変数
+		//=========================================
+		private IEntryPoint                                 m_entryPoint    = null;
+        private Dictionary<string, TRuntimeData>            m_bundleTable	= new Dictionary<string, TRuntimeData             >( StringComparer.OrdinalIgnoreCase ); // バンドル名   → バンドルデータテーブル
+        private Dictionary<string, AssetData<TRuntimeData>> m_assetsTable	= new Dictionary<string, AssetData<TRuntimeData>  >( StringComparer.OrdinalIgnoreCase ); // アセットパス → アセットデータテーブル
 
         //=========================================
         //  プロパティ
@@ -46,6 +49,14 @@ namespace Chipstar.Downloads
         //=========================================
         //  関数
         //=========================================
+
+		/// <summary>
+		/// コンストラクタ
+		/// </summary>
+		public LoadDatabase( IEntryPoint entryPoint )
+		{
+			m_entryPoint = entryPoint;
+		}
 
         /// <summary>
         /// 破棄処理
@@ -148,5 +159,20 @@ namespace Chipstar.Downloads
         {
             return new RefCalclater( data );
         }
-    }
+
+		/// <summary>
+		/// コンテンツマニフェストの場所を取得
+		/// </summary>
+		public IAccessLocation ToBuildMapLocation( string fileName )
+		{
+			return m_entryPoint.ToLocation( fileName );
+		}
+		/// <summary>
+		/// アセットバンドルの場所を取得
+		/// </summary>
+		public IAccessLocation ToBundleLocation( TRuntimeData data )
+		{
+			return m_entryPoint.ToLocation( data.Name );
+		}
+	}
 }

@@ -14,12 +14,17 @@ namespace Chipstar.Example
             return new AssetLoadJob<T, TRuntimeData>( data );
         }
 
-        protected override ILoadJob<AssetBundle> DoCreateBundleLoad( IAccessLocation location )
-        {
+		protected override ILoadJob<AssetBundle> DoCreateDownload( IAccessLocation location )
+		{
             return WWWDL.GetAssetBundle( location );
         }
 
-        protected override ILoadJob<byte[]> DoCreateBytesLoad( IAccessLocation location )
+		protected override ILoadJob<AssetBundle> DoCreateLocalLoad( IAccessLocation location )
+		{
+			return new LocalFileLoadJob( location );
+		}
+
+		protected override ILoadJob<byte[]> DoCreateBytesLoad( IAccessLocation location )
         {
             return WWWDL.GetBytes( location );
         }

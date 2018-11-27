@@ -18,17 +18,17 @@ namespace Chipstar.Example
         IEnumerator Start()
         {
 			//  https://www.google.co.jp/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png
-			var acccesPoint  = new EntryPoint( Path.Combine( Application.dataPath, "../../build/windows/lz4" ) );
+			var acccesPoint   = new EntryPoint( Path.Combine( Application.dataPath, "../../build/windows/lz4" ) );
+			var cacheStorage  = new EntryPoint( Path.Combine( Application.dataPath, "../../cacheStorage/" ) );
 
-			var loadDatabase = new LoadDatabase<BuildMapDataTable, BundleBuildData, AssetBuildData, RuntimeBundlleData>();
-			var cacheDatabase= new CacheDatabase( new UrlLocation( Path.Combine( Application.dataPath, "localVersion.json" )) );
+			var loadDatabase = new LoadDatabase<BuildMapDataTable, BundleBuildData, AssetBuildData, RuntimeBundlleData>( acccesPoint );
+			var cacheDatabase= new CacheDatabase( cacheStorage );
 
 			var creator      = new SampleJobCreator<RuntimeBundlleData>();
             var jobEngine    = new JobEngine();
 
             m_provider = new AssetLoadProvider<RuntimeBundlleData>
                 (
-                    accessPoint		: acccesPoint,
                     loadDatabase	: loadDatabase,
 					cacheDatabase	: cacheDatabase,
                     jobCreator		: creator,
@@ -37,7 +37,7 @@ namespace Chipstar.Example
 
             yield return null;
 
-            yield return m_provider.InitLoad( "buildMap.json" );
+            yield return m_provider.InitLoad( "buildMap.json", "localVersion.json" );
 			var path = "Assets/BundleTarget/Container 1.prefab";
 			var downloadTask = m_provider.Load( path );
             yield return new WaitWhile(() => !downloadTask.IsCompleted );
