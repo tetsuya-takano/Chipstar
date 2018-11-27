@@ -12,8 +12,8 @@ namespace Chipstar.Downloads
     public interface ICacheDatabase : IDisposable
     {
         void Load   ( byte[] data );
-        bool HasCache<TRuntimeData>(TRuntimeData bundleData) where TRuntimeData : IRuntimeBundleData<TRuntimeData>;
-        void SaveVersion<TRuntimeData>(TRuntimeData data) where TRuntimeData : IRuntimeBundleData<TRuntimeData>;
+        bool HasCache	( ICachableBundle data );
+        void SaveVersion( ICachableBundle data );
         void Apply( );
     }
     public class CacheDatabase : ICacheDatabase
@@ -77,8 +77,7 @@ namespace Chipstar.Downloads
         /// <summary>
         /// キャッシュ保持
         /// </summary>
-        public bool HasCache<TRuntimeData>(TRuntimeData bundleData) 
-            where TRuntimeData : IRuntimeBundleData<TRuntimeData>
+        public bool HasCache( ICachableBundle bundleData ) 
         {
             var data = m_table.Find( bundleData.Name );
             if ( data == null )
@@ -93,7 +92,7 @@ namespace Chipstar.Downloads
         /// <summary>
         /// バージョンの保存
         /// </summary>
-        public virtual void SaveVersion<TRuntimeData>(TRuntimeData data) where TRuntimeData : IRuntimeBundleData<TRuntimeData>
+        public virtual void SaveVersion( ICachableBundle data )
         {
             //  キャッシュテーブルにあるかどうか
             var cache = m_table.Find(data.Name);

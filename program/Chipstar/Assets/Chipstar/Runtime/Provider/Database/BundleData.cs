@@ -4,12 +4,13 @@ using System;
 
 namespace Chipstar.Downloads
 {
-    public interface IRuntimeBundleData<T> : IDisposable, IRefCountable
+    public interface IRuntimeBundleData<T> 
+		: IDisposable,
+		ICachableBundle,
+		IRefCountable
         where T : IRuntimeBundleData<T>
     {
-        string          Name        { get; }
         AssetData<T>[]  Assets      { get; }
-        Hash128         Hash        { get; }
         T[]             Dependencies{ get; }
         bool            IsOnMemory  { get; }
 
