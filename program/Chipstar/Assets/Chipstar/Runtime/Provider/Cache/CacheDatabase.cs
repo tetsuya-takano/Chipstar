@@ -12,10 +12,11 @@ namespace Chipstar.Downloads
     /// </summary>
     public interface ICacheDatabase : IDisposable
     {
-		IEnumerator Initialize( string localVersionFile );
+		IEnumerator		Initialize( string localVersionFile );
+		IAccessLocation ToLocation( string fileName );
 
 		bool HasCache	( ICachableBundle data );
-        void SaveVersion( ICachableBundle data );
+        void SaveVersion( ICachableBundle data, byte[] content );
         void Apply( );
 	}
     public class CacheDatabase : ICacheDatabase
@@ -87,14 +88,17 @@ namespace Chipstar.Downloads
 			m_versionFile	= m_entryPoint.ToLocation( versionFile );
 			var path		= m_versionFile.AccessPath;
 			var isExist = File.Exists( path );
-			if( isExist )
+			if( !isExist )
+			{
+				//	なければ空データ
+				m_table = new Table();
+			}
+			else
 			{
 				var bytes = File.ReadAllBytes( path );
-				Load( bytes );
-				yield break;
+					Load( bytes );
 			}
-			//	なければ空データ
-			m_table = new Table();
+			yield return null;
 		}
 
 		/// <summary>
@@ -129,8 +133,10 @@ namespace Chipstar.Downloads
         /// <summary>
         /// バージョンの保存
         /// </summary>
-        public virtual void SaveVersion( ICachableBundle data )
+        public virtual void SaveVersion( ICachableBundle data, byte[] content )
         {
+			//	ファイルの書き込み
+			WriteBundle( data, content );
             //  キャッシュテーブルにあるかどうか
             var cache = m_table.Find(data.Name);
             if (cache == null)
@@ -158,5 +164,27 @@ namespace Chipstar.Downloads
 			}
 			File.WriteAllText( path, json );
         }
+
+		/// <summary>
+		/// 場所の取得
+		/// </summary>
+		public IAccessLocation ToLocation( string fileName )
+		{
+			return m_entryPoint.ToLocation( fileName );
+		}
+
+		/// <summary>
+		/// アセットバンドル書き込み
+		/// </summary>
+		private void WriteBundle( ICachableBundle data, byte[] content )
+		{
+			var location = m_entryPoint.ToLocation( data.Name );
+			var dirPath  = Path.GetDirectoryName( location.AccessPath );
+			if( !Directory.Exists( dirPath ) )
+			{
+				Directory.CreateDirectory( dirPath );
+			}
+			File.WriteAllBytes( location.AccessPath, content );
+		}
 	}
 }

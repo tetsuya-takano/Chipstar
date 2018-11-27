@@ -69,6 +69,7 @@ namespace Chipstar.Downloads
             }
             m_bundleTable.Clear();
             m_assetsTable.Clear();
+			m_entryPoint = null;
         }
         /// <summary>
         /// 

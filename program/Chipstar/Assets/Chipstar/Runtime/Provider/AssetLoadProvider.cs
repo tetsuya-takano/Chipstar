@@ -113,8 +113,9 @@ namespace Chipstar.Downloads
             }
             else
             {
-                //  なかったらサーバからダウンロード
-                preloadJob = DoDownloadWithNeedAll(bundleData);
+				//  なかったらサーバからダウンロードして
+				//	ダウンロード済みファイルをローカルからロード
+				preloadJob = DoDownloadWithNeedAll( bundleData );
             }
             //  ロード
             return preloadJob;
@@ -139,7 +140,7 @@ namespace Chipstar.Downloads
         {
             //  事前に必要な分を合成
             var dependencies= data.Dependencies;
-            var preloadJob  = new ILoadResult<AssetBundle>[ dependencies.Length ];
+            var preloadJob  = new ILoadResult<byte[]>[ dependencies.Length ];
             for( int i = 0; i < preloadJob.Length; i++ )
             {
                 preloadJob[i] = DoDownload( dependencies[i] );
@@ -151,32 +152,67 @@ namespace Chipstar.Downloads
         }
 
 		/// <summary>
-		/// ローカルからロード
-		/// </summary>
-		protected virtual ILoadResult DoLoadCacheWithNeedAll( TRuntimeData bundleData )
-		{
-			return null;
-		}
-
-
-		/// <summary>
 		/// ダウンロード処理
 		/// </summary>
-		protected virtual ILoadResult<AssetBundle> DoDownload( TRuntimeData data )
+		protected virtual ILoadResult<byte[]> DoDownload( TRuntimeData data )
         {
             var location    = LoadDatabase.ToBundleLocation( data );
-            var job         = JobCreator.DownloadBundle( JobEngine, location );
-            return new LoadResult<AssetBundle>(
+            var job         = JobCreator.BytesLoad( JobEngine, location );
+            return new LoadResult<byte[]>(
                 job,
                 onCompleted: ( content ) =>
                 {
 					Debug.Log( location.AccessPath );
-					data.OnMemory( content );
-                    CacheDatabase.SaveVersion( data );
-                },
+					var ab = AssetBundle.LoadFromMemory( content );
+					data.OnMemory( ab );
+					CacheDatabase.SaveVersion( data, content );
+					CacheDatabase.Apply();
+				},
                 dispose : LoadDatabase.AddReference( data )
             );
         }
 
+		/// <summary>
+		/// ローカルからロード
+		/// </summary>
+		protected virtual ILoadResult DoLoadCacheWithNeedAll( TRuntimeData bundleData )
+		{
+			if( bundleData.Dependencies.Length == 0 )
+			{
+				return DoLocalOpen( bundleData );
+			}
+			return DoLocalOpenDependencies( bundleData );
+		}
+		/// <summary>
+		/// 事前ロードのみ
+		/// </summary>
+		protected virtual ILoadResult DoLocalOpenDependencies( TRuntimeData data )
+		{
+			//  事前に必要な分を合成
+			var dependencies= data.Dependencies;
+			var preloadJob  = new ILoadResult<AssetBundle>[ dependencies.Length ];
+			for( int i = 0; i < preloadJob.Length; i++ )
+			{
+				preloadJob[i] = DoLocalOpen( dependencies[i] );
+			}
+			return preloadJob
+				.ToParallel()
+				.ToJoin( () => DoLocalOpen( data ) )
+				.AsEmpty();
+		}
+		protected virtual ILoadResult<AssetBundle> DoLocalOpen( TRuntimeData data )
+		{
+			var location	= CacheDatabase.ToLocation( data.Name );
+			var job			= JobCreator.OpenLocalBundle( JobEngine, location );
+			return new LoadResult<AssetBundle>(
+				job,
+				onCompleted: ( content ) =>
+				{
+					Debug.Log( location.AccessPath );
+					data.OnMemory( content );
+				},
+				dispose: LoadDatabase.AddReference( data )
+			);
+		}
 	}
 }
