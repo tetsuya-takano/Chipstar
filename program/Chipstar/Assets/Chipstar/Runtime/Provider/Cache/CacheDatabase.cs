@@ -12,7 +12,7 @@ namespace Chipstar.Downloads
     /// </summary>
     public interface ICacheDatabase : IDisposable
     {
-		IEnumerator		Initialize( string localVersionFile );
+		IEnumerator		Initialize( );
 		IAccessLocation ToLocation( string fileName );
 
 		bool HasCache	( ICachableBundle data );
@@ -25,7 +25,7 @@ namespace Chipstar.Downloads
         //  class
         //===============================================
         [Serializable]
-        protected sealed class Table
+        protected sealed class Table : IEnumerable<LocalBundleData>
         {
 			//============================================
 			//	SerializeField
@@ -47,17 +47,28 @@ namespace Chipstar.Downloads
                 return null;
             }
 
-            /// <summary>
-            /// 追加
-            /// </summary>
-            internal void Add( string key, Hash128 hash )
+			public IEnumerator<LocalBundleData> GetEnumerator()
+			{
+				return ( (IEnumerable<LocalBundleData>)m_list ).GetEnumerator();
+			}
+
+			/// <summary>
+			/// 追加
+			/// </summary>
+			internal void Add( string key, Hash128 hash )
             {
                 m_list.Add(new LocalBundleData(key, hash));
             }
-        }
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				return ( (IEnumerable<LocalBundleData>)m_list ).GetEnumerator();
+			}
+		}
 		//===============================================
 		//  変数
 		//===============================================
+		private string          m_fileName      = null;
 		private IEntryPoint     m_entryPoint	= null;
 		private IAccessLocation m_versionFile   = null;
         private Table			m_table			= null;
@@ -66,9 +77,10 @@ namespace Chipstar.Downloads
         //  関数
         //===============================================
         
-		public CacheDatabase( IEntryPoint entryPoint )
+		public CacheDatabase( IEntryPoint entryPoint, string cacheDbName )
 		{
 			m_entryPoint = entryPoint;
+			m_fileName   = cacheDbName;
 		}
 
 		/// <summary>
@@ -82,10 +94,10 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// 初期化
 		/// </summary>
-		public IEnumerator Initialize( string versionFile )
+		public IEnumerator Initialize( )
 		{
 			//	TODO : 仮処理
-			m_versionFile	= m_entryPoint.ToLocation( versionFile );
+			m_versionFile	= m_entryPoint.ToLocation( m_fileName );
 			var path		= m_versionFile.AccessPath;
 			var isExist = File.Exists( path );
 			if( !isExist )
@@ -185,6 +197,17 @@ namespace Chipstar.Downloads
 				Directory.CreateDirectory( dirPath );
 			}
 			File.WriteAllBytes( location.AccessPath, content );
+		}
+
+		public override string ToString()
+		{
+			var builder = new StringBuilder();
+
+			foreach( var item in m_table )
+			{
+				builder.AppendLine( item.ToString() );
+			}
+			return builder.ToString();
 		}
 	}
 }

@@ -80,6 +80,11 @@ namespace Chipstar.Downloads
             Version = version;
         }
 
+		public override string ToString()
+		{
+			return string.Format( "{0} == {1}", Key, Version );
+		}
+
 		/// <summary>
 		/// 書き込み時の挙動
 		/// </summary>

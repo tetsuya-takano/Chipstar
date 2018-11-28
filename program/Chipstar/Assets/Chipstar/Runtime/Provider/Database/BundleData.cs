@@ -135,5 +135,10 @@ namespace Chipstar.Downloads
         {
             RefCount = 0;
         }
-    }
+
+		public override string ToString()
+		{
+			return this.ToCacheDataStr();
+		}
+	}
 }

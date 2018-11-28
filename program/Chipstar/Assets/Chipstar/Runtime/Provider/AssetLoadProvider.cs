@@ -13,7 +13,7 @@ namespace Chipstar.Downloads
 
     public interface IAssetLoadProvider
     {
-        IEnumerator				InitLoad    ( string dbFile, string localVersion );
+        IEnumerator				InitLoad    ( );
 		ILoadResult				Load		( string path );
 
 		void DoUpdate();
@@ -56,10 +56,10 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// 初期化処理
 		/// </summary>
-        public IEnumerator InitLoad( string fileName, string localVersionFile )
+        public IEnumerator InitLoad( )
         {
 			//	コンテンツデータの取得
-			var location     = LoadDatabase.ToBuildMapLocation( fileName );
+			var location     = LoadDatabase.ToBuildMapLocation( );
             var loadBuildMap = DoInitielizeLoad( location );
             while( !loadBuildMap.IsCompleted )
             {
@@ -68,7 +68,7 @@ namespace Chipstar.Downloads
 
             LoadDatabase.Initialize( loadBuildMap.Content );
 
-			yield return CacheDatabase.Initialize( localVersionFile );
+			yield return CacheDatabase.Initialize( );
 
             yield break;
         }

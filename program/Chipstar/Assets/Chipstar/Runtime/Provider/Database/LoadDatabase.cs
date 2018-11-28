@@ -14,10 +14,10 @@ namespace Chipstar.Downloads
         IEnumerable<AssetData<TRuntimeData>> AssetList  { get; }
 
         void                    Initialize			( byte[] data );
-		IAccessLocation			ToBuildMapLocation	( string fileName );
+		IAccessLocation			ToBuildMapLocation	( );
 		AssetData<TRuntimeData> Find				( string path );
         IDisposable             AddReference		( TRuntimeData data );
-		IAccessLocation			ToBundleLocation			( TRuntimeData data );
+		IAccessLocation			ToBundleLocation	( TRuntimeData data );
 	}
 
     public class LoadDatabase<TTable, TBundle, TAsset, TRuntimeData> 
@@ -36,6 +36,7 @@ namespace Chipstar.Downloads
 		//=========================================
 		//  変数
 		//=========================================
+		private string                                      m_dbFileName    = null;
 		private IEntryPoint                                 m_entryPoint    = null;
         private Dictionary<string, TRuntimeData>            m_bundleTable	= new Dictionary<string, TRuntimeData             >( StringComparer.OrdinalIgnoreCase ); // バンドル名   → バンドルデータテーブル
         private Dictionary<string, AssetData<TRuntimeData>> m_assetsTable	= new Dictionary<string, AssetData<TRuntimeData>  >( StringComparer.OrdinalIgnoreCase ); // アセットパス → アセットデータテーブル
@@ -53,9 +54,10 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// コンストラクタ
 		/// </summary>
-		public LoadDatabase( IEntryPoint entryPoint )
+		public LoadDatabase( IEntryPoint entryPoint, string dbFileName )
 		{
 			m_entryPoint = entryPoint;
+			m_dbFileName = dbFileName;
 		}
 
         /// <summary>
@@ -112,7 +114,6 @@ namespace Chipstar.Downloads
         protected virtual TTable ParseContentData( byte[] data )
         {
             var json = Encoding.UTF8.GetString( data );
-            Debug.Log( json );
             return JsonUtility.FromJson<TTable>( json );
         }
         /// <summary>
@@ -164,9 +165,9 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// コンテンツマニフェストの場所を取得
 		/// </summary>
-		public IAccessLocation ToBuildMapLocation( string fileName )
+		public IAccessLocation ToBuildMapLocation( )
 		{
-			return m_entryPoint.ToLocation( fileName );
+			return m_entryPoint.ToLocation( m_dbFileName );
 		}
 		/// <summary>
 		/// アセットバンドルの場所を取得
@@ -174,6 +175,21 @@ namespace Chipstar.Downloads
 		public IAccessLocation ToBundleLocation( TRuntimeData data )
 		{
 			return m_entryPoint.ToLocation( data.Name );
+		}
+
+		/// <summary>
+		/// ログ
+		/// </summary>
+		public override string ToString()
+		{
+			var builder = new StringBuilder();
+
+			foreach( var b in m_bundleTable.Values )
+			{
+				builder.AppendLine( b.ToString());
+			}
+
+			return builder.ToString();
 		}
 	}
 }
