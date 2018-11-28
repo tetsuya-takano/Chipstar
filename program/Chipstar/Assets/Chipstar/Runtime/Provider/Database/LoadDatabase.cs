@@ -13,7 +13,7 @@ namespace Chipstar.Downloads
         IEnumerable<TRuntimeData>            BundleList { get; }
         IEnumerable<AssetData<TRuntimeData>> AssetList  { get; }
 
-        void                    Initialize			( byte[] data );
+        IEnumerator             Initialize			( byte[] data );
 		IAccessLocation			ToBuildMapLocation	( );
 		AssetData<TRuntimeData> Find				( string path );
         IDisposable             AddReference		( TRuntimeData data );
@@ -76,7 +76,7 @@ namespace Chipstar.Downloads
         /// <summary>
         /// 
         /// </summary>
-        public void Initialize( byte[] datas )
+        public IEnumerator Initialize( byte[] datas )
         {
             var table = ParseContentData( datas );
             //  アセットの一覧
@@ -85,6 +85,7 @@ namespace Chipstar.Downloads
                 var d = new AssetData<TRuntimeData>(asset.Path, asset.Guid);
                 m_assetsTable.Add( asset.Path, d );
             }
+			yield return null;
 
             //  バンドルの一覧
             foreach (var bundle in table.BundleList)
@@ -95,9 +96,9 @@ namespace Chipstar.Downloads
 
                 m_bundleTable.Add(bundle.ABName, runtime);
             }
-
-            //  依存関係とアセットデータを接続
-            foreach (var bundle in table.BundleList)
+			yield return null;
+			//  依存関係とアセットデータを接続
+			foreach (var bundle in table.BundleList)
             {
                 var runtime      = m_bundleTable[bundle.ABName];
                 var dependencies = CreateDependencies( bundle );
@@ -109,7 +110,8 @@ namespace Chipstar.Downloads
                 runtime.Set( dependencies );
                 runtime.Set( assets );
             }
-        }
+			yield return null;
+		}
 
         protected virtual TTable ParseContentData( byte[] data )
         {

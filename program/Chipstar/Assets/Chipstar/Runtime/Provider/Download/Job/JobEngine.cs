@@ -60,7 +60,8 @@ namespace Chipstar.Downloads
             m_current.Done();
             m_current.Dispose();
             m_current = null;
-            return false;
+			//	ここまで止めて次のジョブは次のフレームに回す
+            return true;
         }
 
         protected virtual void MoveNext()

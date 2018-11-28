@@ -6,10 +6,7 @@ namespace Chipstar.Downloads
 {
     //==============================
     //  読み込み統括
-    //  リクエストを受け取って、タスクを返す
-    //  使用者が触るのはこれ
     //==============================
-
 
     public interface IAssetLoadProvider
     {
@@ -66,9 +63,8 @@ namespace Chipstar.Downloads
                 yield return null;
             }
 
-            LoadDatabase.Initialize( loadBuildMap.Content );
-
-			yield return CacheDatabase.Initialize( );
+            yield return LoadDatabase	.Initialize( loadBuildMap.Content );
+			yield return CacheDatabase	.Initialize( );
 
             yield break;
         }
@@ -164,8 +160,8 @@ namespace Chipstar.Downloads
                 job,
                 onCompleted: ( content ) =>
                 {
-					Debug.Log( location.AccessPath );
-					//	ファイルのDL → 書き込み → ロード
+					Debug.Log( "Downloaded : " + location.AccessPath );
+					//	ファイルのDL → 書き込み → ローカルロード
 					CacheDatabase.Write( data, content );
 					CacheDatabase.Apply();
 				},
@@ -181,7 +177,7 @@ namespace Chipstar.Downloads
 				job,
 				onCompleted: ( content ) =>
 				{
-					Debug.Log( location.AccessPath );
+					Debug.Log( "File Opened : " + location.AccessPath );
 					data.OnMemory( content );
 				},
 				dispose: LoadDatabase.AddReference( data )

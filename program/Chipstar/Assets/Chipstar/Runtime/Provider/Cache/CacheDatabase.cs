@@ -16,8 +16,8 @@ namespace Chipstar.Downloads
 		IAccessLocation ToLocation( string fileName );
 
 		bool HasCache	( ICachableBundle data );
-        void Write( ICachableBundle data, byte[] content );
-        void Apply( );
+        void Write		( ICachableBundle data, byte[] content );
+        void Apply		( );
 	}
     public class CacheDatabase : ICacheDatabase
     {
@@ -196,6 +196,7 @@ namespace Chipstar.Downloads
 			{
 				Directory.CreateDirectory( dirPath );
 			}
+			Debug.Log("Write File :" + location.AccessPath );
 			File.WriteAllBytes( location.AccessPath, content );
 		}
 

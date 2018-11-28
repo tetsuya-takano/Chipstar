@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace Chipstar.Downloads
 {
@@ -75,7 +76,8 @@ namespace Chipstar.Downloads
         /// </summary>
         public virtual void Run()
         {
-            DoRun( Location );
+			Debug.Log( "Job Run : "  + Location.AccessPath );
+			DoRun( Location );
         }
         protected abstract void DoRun( IAccessLocation location );
 
