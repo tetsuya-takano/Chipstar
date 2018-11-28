@@ -24,10 +24,10 @@ namespace Chipstar.Downloads
         //===============================
         //  プロパティ
         //===============================
-        private ICacheDatabase                  CacheDatabase   { get; set; } // ローカルストレージのキャッシュ情報
-        private ILoadDatabase<TRuntimeData>     LoadDatabase    { get; set; } // コンテンツテーブルから作成したDB
-        private IJobEngine                      JobEngine       { get; set; } // DLエンジン
-        private IJobCreator<TRuntimeData>       JobCreator      { get; set; } // ジョブの作成
+        private ICacheDatabase              CacheDatabase   { get; set; } // ローカルストレージのキャッシュ情報
+        private ILoadDatabase<TRuntimeData> LoadDatabase    { get; set; } // コンテンツテーブルから作成したDB
+        private IJobEngine                  JobEngine       { get; set; } // DLエンジン
+        private IJobCreator					JobCreator      { get; set; } // ジョブの作成
 
         //===============================
         //  関数
@@ -38,7 +38,7 @@ namespace Chipstar.Downloads
                 ILoadDatabase<TRuntimeData> loadDatabase,
 				ICacheDatabase				cacheDatabase,
                 IJobEngine                  dlEngine,
-                IJobCreator<TRuntimeData>   jobCreator
+                IJobCreator					jobCreator
             )
         {
             LoadDatabase    = loadDatabase;

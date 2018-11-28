@@ -5,15 +5,8 @@ using System;
 
 namespace Chipstar.Example
 {
-    public class SampleJobCreator<TRuntimeData>
-        : JobCreator<TRuntimeData>
-        where TRuntimeData : IRuntimeBundleData<TRuntimeData>
-    {
-        protected override ILoadJob<T> DoCreateAssetLoad<T>( AssetData<TRuntimeData> data )
-        {
-            return new AssetLoadJob<T, TRuntimeData>( data );
-        }
-
+	public class SampleJobCreator : JobCreator
+	{
 		protected override ILoadJob<AssetBundle> DoCreateDownload( IAccessLocation location )
 		{
             return WWWDL.GetAssetBundle( location );
