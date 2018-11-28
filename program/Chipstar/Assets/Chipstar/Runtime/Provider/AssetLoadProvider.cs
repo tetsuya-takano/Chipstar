@@ -104,19 +104,8 @@ namespace Chipstar.Downloads
 		protected virtual ILoadResult DoLoad( AssetData<TRuntimeData> data )
         {
             var bundleData = data.BundleData;
-            ILoadResult preloadJob = null;
-
-            //  ローカルにキャッシュがあったらそっちをロードする
-            if ( CacheDatabase.HasCache( bundleData ))
-            {
-                preloadJob = DoLoadCacheWithNeedAll( bundleData );
-            }
-            else
-            {
-				//  なかったらサーバからダウンロードして
-				//	ダウンロード済みファイルをローカルからロード
-				preloadJob = DoDownloadWithNeedAll( bundleData );
-            }
+			//	対象のロード
+			var	preloadJob = DoDownloadWithNeedAll( bundleData );
             //  ロード
             return preloadJob;
         }
@@ -129,7 +118,7 @@ namespace Chipstar.Downloads
             //  依存先がないなら自分だけ
             if (data.Dependencies.Length == 0)
             {
-                return DoDownload( data );
+                return DoLoadCore( data );
             }
             return DoDownloadDependencies( data );
         }
@@ -140,22 +129,35 @@ namespace Chipstar.Downloads
         {
             //  事前に必要な分を合成
             var dependencies= data.Dependencies;
-            var preloadJob  = new ILoadResult<byte[]>[ dependencies.Length ];
+            var preloadJob  = new ILoadResult<AssetBundle>[ dependencies.Length ];
             for( int i = 0; i < preloadJob.Length; i++ )
             {
-                preloadJob[i] = DoDownload( dependencies[i] );
+				var tmp = dependencies[i];
+				preloadJob[i] = DoLoadCore( tmp );
             }
             return preloadJob
                 .ToParallel()
-                .ToJoin( () => DoDownload( data ))
+                .ToJoin( () => DoLoadCore( data ))
                 .AsEmpty();
         }
 
 		/// <summary>
-		/// ダウンロード処理
+		/// ロード処理
 		/// </summary>
-		protected virtual ILoadResult<byte[]> DoDownload( TRuntimeData data )
-        {
+		protected virtual ILoadResult<AssetBundle> DoLoadCore( TRuntimeData data )
+		{
+			if( CacheDatabase.HasCache( data ) )
+			{
+				return DoLocalOpen( data );
+			}
+			return DoLoadNewFile( data );
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		protected virtual ILoadResult<AssetBundle> DoLoadNewFile( TRuntimeData data )
+		{
             var location    = LoadDatabase.ToBundleLocation( data );
             var job         = JobCreator.BytesLoad( JobEngine, location );
             return new LoadResult<byte[]>(
@@ -163,42 +165,13 @@ namespace Chipstar.Downloads
                 onCompleted: ( content ) =>
                 {
 					Debug.Log( location.AccessPath );
-					var ab = AssetBundle.LoadFromMemory( content );
-					data.OnMemory( ab );
-					CacheDatabase.SaveVersion( data, content );
+					//	ファイルのDL → 書き込み → ロード
+					CacheDatabase.Write( data, content );
 					CacheDatabase.Apply();
 				},
                 dispose : LoadDatabase.AddReference( data )
-            );
-        }
-
-		/// <summary>
-		/// ローカルからロード
-		/// </summary>
-		protected virtual ILoadResult DoLoadCacheWithNeedAll( TRuntimeData bundleData )
-		{
-			if( bundleData.Dependencies.Length == 0 )
-			{
-				return DoLocalOpen( bundleData );
-			}
-			return DoLocalOpenDependencies( bundleData );
-		}
-		/// <summary>
-		/// 事前ロードのみ
-		/// </summary>
-		protected virtual ILoadResult DoLocalOpenDependencies( TRuntimeData data )
-		{
-			//  事前に必要な分を合成
-			var dependencies= data.Dependencies;
-			var preloadJob  = new ILoadResult<AssetBundle>[ dependencies.Length ];
-			for( int i = 0; i < preloadJob.Length; i++ )
-			{
-				preloadJob[i] = DoLocalOpen( dependencies[i] );
-			}
-			return preloadJob
-				.ToParallel()
-				.ToJoin( () => DoLocalOpen( data ) )
-				.AsEmpty();
+            )
+			.ToJoin( () => DoLocalOpen( data ) );
 		}
 		protected virtual ILoadResult<AssetBundle> DoLocalOpen( TRuntimeData data )
 		{

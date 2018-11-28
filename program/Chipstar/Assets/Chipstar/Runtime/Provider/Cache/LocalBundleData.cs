@@ -60,9 +60,9 @@ namespace Chipstar.Downloads
         /// <summary>
         /// キャッシュ済みかどうか
         /// </summary>
-        public virtual bool IsMatchVersion( Hash128 version )
+        public virtual bool IsMatchVersion( Hash128 targetVersion )
         {
-            return EqualityComparer<Hash128>.Default.Equals( version, Version );
+			return targetVersion == Version;
         }
         /// <summary>
         /// ファイルが存在するかどうか

@@ -16,7 +16,7 @@ namespace Chipstar.Downloads
 		IAccessLocation ToLocation( string fileName );
 
 		bool HasCache	( ICachableBundle data );
-        void SaveVersion( ICachableBundle data, byte[] content );
+        void Write( ICachableBundle data, byte[] content );
         void Apply( );
 	}
     public class CacheDatabase : ICacheDatabase
@@ -145,7 +145,7 @@ namespace Chipstar.Downloads
         /// <summary>
         /// バージョンの保存
         /// </summary>
-        public virtual void SaveVersion( ICachableBundle data, byte[] content )
+        public virtual void Write( ICachableBundle data, byte[] content )
         {
 			//	ファイルの書き込み
 			WriteBundle( data, content );
