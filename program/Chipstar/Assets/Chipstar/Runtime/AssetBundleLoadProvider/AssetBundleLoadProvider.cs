@@ -71,6 +71,10 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public ILoadResult Load( string path )
 		{
+			if( !LoadDatabase.Contains( path ) )
+			{
+				return null;
+			}
 			var data = LoadDatabase.Find( path );
 			return DoLoad( data );
 		}

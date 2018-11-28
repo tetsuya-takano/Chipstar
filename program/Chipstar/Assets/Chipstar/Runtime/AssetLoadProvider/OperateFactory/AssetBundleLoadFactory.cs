@@ -35,7 +35,7 @@ namespace Chipstar.AssetLoad
 		/// </summary>
 		public bool CanLoad( string path )
 		{
-			return Database.Find( path ) != null;
+			return Database.Contains( path );
 		}
 
 		/// <summary>

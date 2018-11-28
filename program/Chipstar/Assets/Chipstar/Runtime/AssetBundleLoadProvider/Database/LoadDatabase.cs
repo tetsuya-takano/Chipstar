@@ -16,7 +16,8 @@ namespace Chipstar.Downloads
         IEnumerator             Initialize			( byte[] data );
 		IAccessLocation			ToBuildMapLocation	( );
 		AssetData<TRuntimeData> Find				( string path );
-        IDisposable             AddReference		( TRuntimeData data );
+		bool					Contains			( string path );
+		IDisposable             AddReference		( TRuntimeData data );
 		IAccessLocation			ToBundleLocation	( TRuntimeData data );
 	}
 
@@ -155,11 +156,18 @@ namespace Chipstar.Downloads
         {
             return m_assetsTable[ path ];
         }
+		/// <summary>
+		/// 所持判定
+		/// </summary>
+		public bool Contains( string path )
+		{
+			return m_assetsTable.ContainsKey( path );
+		}
 
-        /// <summary>
-        /// 参照カウンタの追加
-        /// </summary>
-        public IDisposable AddReference( TRuntimeData data )
+		/// <summary>
+		/// 参照カウンタの追加
+		/// </summary>
+		public IDisposable AddReference( TRuntimeData data )
         {
             return new RefCalclater( data );
         }

@@ -16,7 +16,7 @@ namespace Chipstar.AssetLoad
 		public bool CanLoad( string path )
 		{
 			//	拡張子指定ナシはたぶんResources
-			return !Path.HasExtension( path );
+			return !Path.HasExtension( path ) || path.Contains( "/Resources/" );
 		}
 
 		/// <summary>
@@ -24,7 +24,7 @@ namespace Chipstar.AssetLoad
 		/// </summary>
 		public ILoadOperation<T> Create<T>( string path ) where T : UnityEngine.Object
 		{
-			return new ResourcesLoadOperation<T>( Resources.LoadAsync<T>( path ) );
+			return new ResourcesLoadOperation<T>( Resources.LoadAsync<T>( Path.GetFileNameWithoutExtension( path ) ) );
 		}
 
 		/// <summary>
