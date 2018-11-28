@@ -5,9 +5,9 @@ using UnityEngine;
 
 namespace Chipstar.AssetLoad
 {
-	public interface IFactoryContainer
+	public interface IFactoryContainer : IDisposable
 	{
-		T		Get<T>( string path ) where T : ILoadOperateFactory;
+		T Get<T>( string path ) where T : ILoadOperateFactory;
 	}
 	/// <summary>
 	/// リクエスト作成クラスのコンテナ
@@ -17,11 +17,28 @@ namespace Chipstar.AssetLoad
 		//===============================
 		//	変数
 		//===============================
-		private List<ILoadOperateFactory> m_factories = new List<ILoadOperateFactory>();
+		private List<ILoadOperateFactory> m_factories = null;
 
 		//===============================
 		//	関数
 		//===============================
+
+		public FactoryContainer( params ILoadOperateFactory[] factories )
+		{
+			m_factories = new List<ILoadOperateFactory>( factories );
+		}
+
+		/// <summary>
+		/// 破棄処理
+		/// </summary>
+		public void Dispose()
+		{
+			foreach( var f in m_factories)
+			{
+				f.Dispose();
+			}
+			m_factories.Clear();
+		}
 
 		/// <summary>
 		/// 使用可能なものを取得

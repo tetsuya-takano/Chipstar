@@ -14,8 +14,8 @@ namespace Chipstar.Downloads
         T[]             Dependencies{ get; }
         bool            IsOnMemory  { get; }
 
-        AssetBundleRequest LoadAsync( string path );
-        void Unload();
+		AssetBundleRequest LoadAsync<TAssetType>( string path ) where TAssetType : UnityEngine.Object;
+		void Unload();
         void OnMemory( AssetBundle bundle );
 
         void Set( string abName, string hash );
@@ -42,7 +42,12 @@ namespace Chipstar.Downloads
         {
             BundleData = data;
         }
-    }
+
+		internal AssetBundleRequest LoadAsync<TAssetType>() where TAssetType : UnityEngine.Object
+		{
+			return BundleData.LoadAsync<TAssetType>( Path );
+		}
+	}
 
     public abstract class BundleData<T> 
         :   IRuntimeBundleData<T> 
@@ -98,9 +103,13 @@ namespace Chipstar.Downloads
         {
             Bundle = bundle;
         }
-        public AssetBundleRequest LoadAsync( string path )
-        {
-            return Bundle.LoadAssetAsync( path );
+
+		/// <summary>
+		/// 読み込み
+		/// </summary>
+		public AssetBundleRequest LoadAsync<TAssetType>( string path ) where TAssetType : UnityEngine.Object
+		{
+            return Bundle.LoadAssetAsync<TAssetType>( path );
         }
 
         public void Unload()

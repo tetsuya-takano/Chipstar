@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ namespace Chipstar.AssetLoad
 	/// 読み込みタスクを作成する
 	/// コレはただのマーカー
 	/// </summary>
-	public interface ILoadOperateFactory
+	public interface ILoadOperateFactory : IDisposable
 	{
 		bool CanLoad( string path );
 	}

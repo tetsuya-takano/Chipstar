@@ -30,7 +30,7 @@ namespace Chipstar.Downloads
 
         protected override void DoRun( IAccessLocation location )
         {
-            Source = m_bundle.LoadAsync( location.AccessPath );
+            Source = m_bundle.LoadAsync<T>( location.AccessPath );
         }
 
         protected override void DoUpdate( AssetBundleRequest source )
