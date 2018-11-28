@@ -1,3 +1,6 @@
+*,,0
 *.prefab,prefab,1
-*.png,sprite,2
+*.exr,,1
+*/materials,assets/bundletarget/*/materials/,2
+*.png,,2
 *.unity,,100

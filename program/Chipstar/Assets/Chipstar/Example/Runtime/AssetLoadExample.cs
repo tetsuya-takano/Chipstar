@@ -16,6 +16,7 @@ namespace Chipstar.Example
 		//	SerializeField
 		//========================================
 		[SerializeField] RawImage	m_image			= null;
+		[SerializeField] RawImage	m_loadedImage	= null;
 		[SerializeField] Text		m_dlListText	= null;
 		[SerializeField] Text		m_cacheListText	= null;
 
@@ -94,6 +95,8 @@ namespace Chipstar.Example
 				var img = Instantiate(m_image, parent);
 				img.texture = item as Texture;
 			}
+			var nextLoadOperate = m_assetLoadProvider.LoadAsset<Texture>( "Assets/Resources/Square 6.png" );
+			m_loadedImage.texture = nextLoadOperate.Content;
 
 			//	保存
 			cacheDatabase.Apply();
