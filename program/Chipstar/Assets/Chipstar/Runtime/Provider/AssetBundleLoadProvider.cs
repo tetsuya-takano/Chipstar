@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Chipstar.Downloads
 {
-    public interface IAssetLoadProvider
+    public interface IAssetBundleLoadProvider
     {
         IEnumerator				InitLoad    ( );
 		ILoadResult				Load		( string path );
@@ -16,8 +16,8 @@ namespace Chipstar.Downloads
 	/// 読み込みまわりの管理
 	/// ダウンロード / キャッシュロード付近
 	/// </summary>
-	public class AssetLoadProvider<TRuntimeData> 
-                                : IAssetLoadProvider
+	public class AssetBundleLoadProvider<TRuntimeData> 
+                                : IAssetBundleLoadProvider
             where TRuntimeData  : IRuntimeBundleData<TRuntimeData>
 
     {
@@ -33,7 +33,7 @@ namespace Chipstar.Downloads
         //  関数
         //===============================
 
-        public AssetLoadProvider
+        public AssetBundleLoadProvider
             ( 
                 ILoadDatabase<TRuntimeData> loadDatabase,
 				ICacheDatabase				cacheDatabase,
