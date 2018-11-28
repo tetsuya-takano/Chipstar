@@ -10,7 +10,7 @@ namespace Chipstar.AssetLoad
 	/// </summary>
 	public interface ILoadOperateFactory
 	{
-
+		bool CanLoad( string path );
 	}
 
 	/// <summary>

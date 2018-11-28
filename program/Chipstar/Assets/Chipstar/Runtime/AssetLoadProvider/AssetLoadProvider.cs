@@ -21,13 +21,33 @@ namespace Chipstar.AssetLoad
 	/// </summary>
 	public class AssetLoadProvider : IAssetLoadProvider
 	{
-		private ILoadOperateFactory m_factory = null;
+		//=======================
+		//	変数
+		//=======================
+		private IFactoryContainer Container { get; set; }
+
+		//=======================
+		//	関数
+		//=======================
+
+		/// <summary>
+		/// コンストラクタ
+		/// </summary>
+		public AssetLoadProvider( IFactoryContainer container )
+		{
+			Container = container;
+		}
 		/// <summary>
 		/// 
 		/// </summary>
 		public ILoadOperation<T> LoadAsset<T>( string path ) where T : UnityEngine.Object
 		{
-			return null;
+			var factory = Container.Get<IAssetLoadFactory>( path );
+			if( factory == null )
+			{
+				return null;
+			}
+			return factory.Create<T>( path );
 		}
 
 		public AsyncOperation LoadScene( string path )
