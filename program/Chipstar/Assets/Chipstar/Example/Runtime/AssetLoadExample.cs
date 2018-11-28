@@ -65,7 +65,10 @@ namespace Chipstar.Example
 				new ResourcesLoadFactory()
 			);
 			//	統合
-			m_assetLoadProvider = new AssetLoadProvider( factoryContainer );
+			m_assetLoadProvider = new AssetLoadProvider
+				( 
+					factoryContainer 
+				);
 
             yield return null;
 

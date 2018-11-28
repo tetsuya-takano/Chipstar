@@ -6,7 +6,7 @@ namespace Chipstar.Downloads
 {
     public static class SceneLoader
     {
-        private static IAssetLoadProvider LoadProvider { get; set; }
+        private static IAssetBundleLoadProvider LoadProvider { get; set; }
 
 
         public static IDisposable LoadLevel( string sceneName )

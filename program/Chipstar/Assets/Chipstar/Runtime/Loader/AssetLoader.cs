@@ -7,7 +7,7 @@ namespace Chipstar.Downloads
 {
     public static class AssetLoader
     {
-        private static IAssetLoadProvider LoadProvider { get; set; }
+        private static IAssetBundleLoadProvider LoadProvider { get; set; }
 
 
         /// <summary>
