@@ -14,7 +14,7 @@ namespace Chipstar.Example
             var builder = new AssetBundleBuilder<ABPackageMst,ABBuildData, ABBuildResult>();
             var config  = new ABBuildConfig(
                 outputPath : Path.Combine( Application.dataPath, "../../build/windows/" + prefix + "/"),
-                option     : BuildAssetBundleOptions.ForceRebuildAssetBundle | addOption,
+                option     : BuildAssetBundleOptions.ForceRebuildAssetBundle | BuildAssetBundleOptions.IgnoreTypeTreeChanges | addOption,
                 platform   : BuildTarget.StandaloneWindows64
             );
 
