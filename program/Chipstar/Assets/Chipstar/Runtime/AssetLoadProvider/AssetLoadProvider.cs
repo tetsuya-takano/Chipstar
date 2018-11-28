@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Chipstar.Downloads;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,6 +21,7 @@ namespace Chipstar.AssetLoad
 	/// </summary>
 	public class AssetLoadProvider : IAssetLoadProvider
 	{
+		private ILoadOperateFactory m_factory = null;
 		/// <summary>
 		/// 
 		/// </summary>
