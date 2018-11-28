@@ -40,9 +40,9 @@ namespace Chipstar.Downloads
         //=====================================
 
         public LoadResult(
-            ILoadJob<T>             job, 
-            Action<T>    onCompleted, 
-            IDisposable             dispose 
+            ILoadJob<T>		job, 
+            Action<T>		onCompleted, 
+            IDisposable     dispose 
         )
         {
             m_job           = job;
@@ -61,7 +61,10 @@ namespace Chipstar.Downloads
         public void Dispose()
         {
             m_job           = null;
-            m_dispose.Dispose();
+			if( m_dispose == null )
+			{
+				m_dispose.Dispose();
+			}
             m_dispose       = null;
             OnCompleted     = null;
         }

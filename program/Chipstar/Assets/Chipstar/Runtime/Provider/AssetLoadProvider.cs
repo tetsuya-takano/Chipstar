@@ -4,10 +4,6 @@ using UnityEngine;
 
 namespace Chipstar.Downloads
 {
-    //==============================
-    //  読み込み統括
-    //==============================
-
     public interface IAssetLoadProvider
     {
         IEnumerator				InitLoad    ( );
@@ -17,7 +13,8 @@ namespace Chipstar.Downloads
 	}
 
 	/// <summary>
-	/// 読み込みマネージャ
+	/// 読み込みまわりの管理
+	/// ダウンロード / キャッシュロード付近
 	/// </summary>
 	public class AssetLoadProvider<TRuntimeData> 
                                 : IAssetLoadProvider
@@ -165,7 +162,7 @@ namespace Chipstar.Downloads
 					CacheDatabase.Write( data, content );
 					CacheDatabase.Apply();
 				},
-                dispose : LoadDatabase.AddReference( data )
+                dispose : null
             )
 			.ToJoin( () => DoLocalOpen( data ) );
 		}

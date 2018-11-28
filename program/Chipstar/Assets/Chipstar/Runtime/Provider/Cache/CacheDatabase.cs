@@ -191,12 +191,18 @@ namespace Chipstar.Downloads
 		private void WriteBundle( ICachableBundle data, byte[] content )
 		{
 			var location = m_entryPoint.ToLocation( data.Name );
-			var dirPath  = Path.GetDirectoryName( location.AccessPath );
+			var filePath = location.AccessPath;
+			var dirPath  = Path.GetDirectoryName( filePath );
 			if( !Directory.Exists( dirPath ) )
 			{
 				Directory.CreateDirectory( dirPath );
 			}
-			Debug.Log("Write File :" + location.AccessPath );
+			if( File.Exists( filePath ) )
+			{
+				File.Delete( filePath );
+			}
+
+			Debug.Log( "Write File :" + location.AccessPath );
 			File.WriteAllBytes( location.AccessPath, content );
 		}
 
