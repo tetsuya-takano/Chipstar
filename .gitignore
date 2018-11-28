@@ -4,3 +4,6 @@ program/Chipstar/.vs/
 *.sln
 *.csproj*
 program/build/
+program/Chipstar/Assets/BundleTarget/
+*.ab
+program/cacheStorage/
