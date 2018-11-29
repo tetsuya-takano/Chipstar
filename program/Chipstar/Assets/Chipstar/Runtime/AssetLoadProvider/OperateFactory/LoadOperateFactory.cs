@@ -27,6 +27,7 @@ namespace Chipstar.AssetLoad
 	/// </summary>
 	public interface ISceneLoadFactory : ILoadOperateFactory
 	{
-		AsyncOperation LoadLevel( string sceneName );
+		AsyncOperation LoadLevel		( string path );
+		AsyncOperation LoadLevelAdditive( string path );
 	}
 }

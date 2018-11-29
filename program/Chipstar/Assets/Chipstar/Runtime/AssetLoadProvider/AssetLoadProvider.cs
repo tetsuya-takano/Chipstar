@@ -13,7 +13,7 @@ namespace Chipstar.AssetLoad
 	public interface IAssetLoadProvider
 	{
 		ILoadOperation<T>	LoadAsset<T>	( string path ) where T : UnityEngine.Object;
-		AsyncOperation		LoadScene		( string path );
+		AsyncOperation		LoadLevel		( string path );
 	}
 
 	/// <summary>
@@ -50,9 +50,29 @@ namespace Chipstar.AssetLoad
 			return factory.Create<T>( path );
 		}
 
-		public AsyncOperation LoadScene( string path )
+		/// <summary>
+		/// シーン遷移
+		/// </summary>
+		public AsyncOperation LoadLevel( string path )
 		{
-			return SceneManager.LoadSceneAsync( path );
+			var factory = Container.Get<ISceneLoadFactory>( path );
+			if( factory == null )
+			{
+				return null;
+			}
+			return factory.LoadLevel( path );
+		}
+		/// <summary>
+		/// シーン加算
+		/// </summary>
+		public AsyncOperation LoadLevelAdditive( string path )
+		{
+			var factory = Container.Get<ISceneLoadFactory>( path );
+			if( factory == null )
+			{
+				return null;
+			}
+			return factory.LoadLevelAdditive( path );
 		}
 	}
 }
