@@ -10,10 +10,10 @@ namespace Chipstar.Downloads
 	/// <summary>
 	/// アセット読み込みまわりの管理
 	/// </summary>
-	public interface IAssetLoadProvider
+	public interface IAssetLoadProvider : IDisposable
 	{
-		ILoadOperation<T>	LoadAsset<T>	( string path ) where T : UnityEngine.Object;
-		AsyncOperation		LoadLevel		( string path );
+		IAssetLoadOperation<T>	LoadAsset<T>	( string path ) where T : UnityEngine.Object;
+		ISceneLoadOperation		LoadLevel		( string path );
 	}
 
 	/// <summary>
@@ -37,10 +37,20 @@ namespace Chipstar.Downloads
 		{
 			Container = container;
 		}
+
 		/// <summary>
-		/// 
+		/// 破棄処理
 		/// </summary>
-		public ILoadOperation<T> LoadAsset<T>( string path ) where T : UnityEngine.Object
+		public void Dispose()
+		{
+			Container.Dispose();
+			Container = null;
+		}
+
+		/// <summary>
+		/// アセットの取得
+		/// </summary>
+		public IAssetLoadOperation<T> LoadAsset<T>( string path ) where T : UnityEngine.Object
 		{
 			var factory = Container.Get<IAssetLoadFactory>( path );
 			if( factory == null )
@@ -55,7 +65,7 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// シーン遷移
 		/// </summary>
-		public AsyncOperation LoadLevel( string path )
+		public ISceneLoadOperation LoadLevel( string path )
 		{
 			var factory = Container.Get<ISceneLoadFactory>( path );
 			if( factory == null )
@@ -68,7 +78,7 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// シーン加算
 		/// </summary>
-		public AsyncOperation LoadLevelAdditive( string path )
+		public ISceneLoadOperation LoadLevelAdditive( string path )
 		{
 			var factory = Container.Get<ISceneLoadFactory>( path );
 			if( factory == null )

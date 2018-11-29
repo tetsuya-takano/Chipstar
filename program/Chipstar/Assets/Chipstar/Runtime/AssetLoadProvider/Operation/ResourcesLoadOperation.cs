@@ -9,7 +9,7 @@ namespace Chipstar.Downloads
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	public sealed class ResourcesLoadOperation<T> 
-		: LoadOperation<T> 
+		: AssetLoadOperation<T> 
 		where T : UnityEngine.Object
 	{
 		//===============================
@@ -32,6 +32,14 @@ namespace Chipstar.Downloads
 		public ResourcesLoadOperation( ResourceRequest request )
 		{
 			m_request = request;
+		}
+
+		/// <summary>
+		/// 破棄
+		/// </summary>
+		protected override void DoDispose()
+		{
+			m_request = null;
 		}
 	}
 }

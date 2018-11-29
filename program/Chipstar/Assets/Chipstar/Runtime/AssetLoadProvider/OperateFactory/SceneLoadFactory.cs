@@ -56,16 +56,16 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// シーンロード
 		/// </summary>
-		public AsyncOperation LoadLevel( string path )
+		public ISceneLoadOperation LoadLevel( string path )
 		{
-			return SceneManager.LoadSceneAsync( path );
+			return new SceneLoadOperation( SceneManager.LoadSceneAsync( path ) );
 		}
 		/// <summary>
 		/// 加算ロード
 		/// </summary>
-		public AsyncOperation LoadLevelAdditive( string path )
+		public ISceneLoadOperation LoadLevelAdditive( string path )
 		{
-			return SceneManager.LoadSceneAsync( path, LoadSceneMode.Additive );
+			return new SceneLoadOperation( SceneManager.LoadSceneAsync( path, LoadSceneMode.Additive ) );
 		}
 	}
 }

@@ -68,7 +68,7 @@ namespace Chipstar.Downloads
         public      bool            IsFree      { get { return RefCount <= 0; } }
 
         protected   AssetBundle     Bundle      { get; set; }
-        private     int             RefCount    { get; set; }
+        public		int             RefCount    { get; private set; }
 
         //========================================
         //  関数
@@ -129,6 +129,10 @@ namespace Chipstar.Downloads
         public void AddRef()
         {
             RefCount++;
+			for( int i = 0; i < Dependencies.Length; i++ )
+			{
+				Dependencies[ i ].AddRef();
+			}
         }
 
         /// <summary>
@@ -137,12 +141,16 @@ namespace Chipstar.Downloads
         public void ReleaseRef()
         {
             RefCount = Mathf.Max( 0, RefCount - 1 );
-        }
+			for( int i = 0; i < Dependencies.Length; i++ )
+			{
+				Dependencies[i].ReleaseRef();
+			}
+		}
 
-        /// <summary>
-        /// 参照カウンタ破棄
-        /// </summary>
-        public void ClearRef()
+		/// <summary>
+		/// 参照カウンタ破棄
+		/// </summary>
+		public void ClearRef()
         {
             RefCount = 0;
         }

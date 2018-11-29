@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Chipstar.Downloads
 {
-    public interface IAssetBundleLoadProvider
+    public interface IAssetBundleLoadProvider : IDisposable
     {
         IEnumerator	InitLoad    ( );
 		ILoadResult	Load		( string path );
@@ -47,10 +47,21 @@ namespace Chipstar.Downloads
             JobCreator      = jobCreator;
         }
 
+		public void Dispose()
+		{
+			JobCreator	.Dispose();
+			JobEngine	.Dispose();
+
+			CacheDatabase	= null;
+			LoadDatabase	= null;
+			JobCreator      = null;
+			JobEngine       = null;
+		}
+
 		/// <summary>
 		/// 初期化処理
 		/// </summary>
-        public IEnumerator InitLoad( )
+		public IEnumerator InitLoad( )
         {
 			//	コンテンツデータの取得
 			var location     = LoadDatabase.ToBuildMapLocation( );
@@ -144,6 +155,7 @@ namespace Chipstar.Downloads
 		{
 			if( data.IsOnMemory )
 			{
+				//	ロードしてあるならしない
 				return LoadSkip.Default;
 			}
 			if( CacheDatabase.HasCache( data ) )
@@ -192,5 +204,6 @@ namespace Chipstar.Downloads
 				}
 			);
 		}
+
 	}
 }

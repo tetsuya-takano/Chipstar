@@ -19,7 +19,7 @@ namespace Chipstar.Downloads
 	/// </summary>
 	public interface IAssetLoadFactory : ILoadOperateFactory
 	{
-		ILoadOperation<T> Create<T>( string path ) where T : UnityEngine.Object;
+		IAssetLoadOperation<T> Create<T>( string path ) where T : UnityEngine.Object;
 	}
 
 	/// <summary>
@@ -27,7 +27,7 @@ namespace Chipstar.Downloads
 	/// </summary>
 	public interface ISceneLoadFactory : ILoadOperateFactory
 	{
-		AsyncOperation LoadLevel		( string path );
-		AsyncOperation LoadLevelAdditive( string path );
+		ISceneLoadOperation LoadLevel		 ( string path );
+		ISceneLoadOperation LoadLevelAdditive( string path );
 	}
 }

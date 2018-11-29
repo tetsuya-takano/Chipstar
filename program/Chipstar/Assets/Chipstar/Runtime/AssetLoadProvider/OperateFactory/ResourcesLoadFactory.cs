@@ -37,7 +37,7 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// リクエスト作成
 		/// </summary>
-		public ILoadOperation<T> Create<T>( string path ) where T : UnityEngine.Object
+		public IAssetLoadOperation<T> Create<T>( string path ) where T : UnityEngine.Object
 		{
 			var match = m_regex.Match( path );
 			if( !match.Success )

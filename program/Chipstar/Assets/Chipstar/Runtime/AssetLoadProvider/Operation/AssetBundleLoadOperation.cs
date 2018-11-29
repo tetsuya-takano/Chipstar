@@ -8,7 +8,7 @@ namespace Chipstar.Downloads
 	/// アセットバンドルを撮ってくる機能
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public sealed class AssetBundleLoadOperation<T> : LoadOperation<T>
+	public sealed class AssetBundleLoadOperation<T> : AssetLoadOperation<T>
 		where T : UnityEngine.Object
 	{
 		//====================================
