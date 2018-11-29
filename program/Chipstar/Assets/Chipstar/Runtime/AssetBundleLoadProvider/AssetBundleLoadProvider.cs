@@ -142,6 +142,10 @@ namespace Chipstar.Downloads
 		/// </summary>
 		protected virtual ILoadResult DoLoadCore( TRuntimeData data )
 		{
+			if( data.IsOnMemory )
+			{
+				return LoadSkip.Default;
+			}
 			if( CacheDatabase.HasCache( data ) )
 			{
 				//	更新がないならそのままローカルのファイルを開く
@@ -171,8 +175,9 @@ namespace Chipstar.Downloads
 				}
 			);
 		}
+
 		/// <summary>
-		/// 
+		/// ローカルファイルを開く
 		/// </summary>
 		protected virtual ILoadResult DoLocalOpen( TRuntimeData data )
 		{

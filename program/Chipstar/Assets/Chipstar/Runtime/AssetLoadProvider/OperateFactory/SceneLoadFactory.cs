@@ -36,6 +36,7 @@ namespace Chipstar.AssetLoad
 		/// </summary>
 		public void Dispose()
 		{
+			Database = null;
 		}
 
 		/// <summary>

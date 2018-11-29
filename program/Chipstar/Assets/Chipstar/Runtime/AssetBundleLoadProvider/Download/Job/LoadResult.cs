@@ -13,9 +13,11 @@ namespace Chipstar.Downloads
     public interface ILoadResult : IDisposable
     {
         bool    IsCompleted { get; }
-        Action  OnCompleted { set; }
     }
 
+	/// <summary>
+	/// 結果を取るロード処理
+	/// </summary>
 	public sealed class LoadResult<T> : ILoadResult
 	{
         //=====================================
@@ -26,7 +28,6 @@ namespace Chipstar.Downloads
         //=====================================
         //  プロパティ
         //=====================================
-        public			Action  OnCompleted { private get; set; }
         public			T       Content     { get; private set; }
         public			bool    IsCompleted { get; private set; }
 
@@ -45,10 +46,6 @@ namespace Chipstar.Downloads
                 IsCompleted = true;
                 Content     = m_job.Content;
                 onCompleted( Content );
-				if( OnCompleted != null )
-				{
-					OnCompleted();
-				}
             };
         }
         /// <summary>
@@ -57,14 +54,22 @@ namespace Chipstar.Downloads
         public void Dispose()
         {
             m_job           = null;
-            OnCompleted     = null;
         }
     }
 
-    /// <summary>
-    /// ロード結果処理を直列にする
-    /// </summary>
-    public sealed class JoinLoadResult : ILoadResult
+	/// <summary>
+	/// ロードをしないけど積む
+	/// </summary>
+	public sealed class LoadSkip : ILoadResult
+	{
+		public static readonly LoadSkip Default = new LoadSkip();
+		public bool IsCompleted { get { return true; } }
+		public void Dispose()	{ }
+	}
+	/// <summary>
+	/// ロード結果処理を直列にする
+	/// </summary>
+	public sealed class JoinLoadResult : ILoadResult
     {
         //================================
         //  変数
@@ -75,8 +80,21 @@ namespace Chipstar.Downloads
         //================================
         //  プロパティ
         //================================
-        public bool     IsCompleted { get; private set; }
-        public Action   OnCompleted { set; private get; }
+        public bool     IsCompleted
+		{
+			get
+			{
+				if( !m_prev.IsCompleted )
+				{
+					return false;
+				}
+				if( !m_next.IsCompleted )
+				{
+					return false;
+				}
+				return true;
+			}
+		}
 
         //================================
         //  関数
@@ -85,18 +103,7 @@ namespace Chipstar.Downloads
         public JoinLoadResult( ILoadResult prev, Func<ILoadResult> onNext )
         {
             m_prev = prev;
-            m_prev.OnCompleted = () =>
-            {
-                m_next = onNext();
-                m_next.OnCompleted = () =>
-                {
-                    IsCompleted = true;
-                    if (OnCompleted != null)
-                    {
-                        OnCompleted();
-                    }
-                };
-            };
+            m_next = onNext();
         }
 
         /// <summary>
@@ -105,11 +112,7 @@ namespace Chipstar.Downloads
         public void Dispose()
         {
             m_prev.Dispose();
-            if( m_next != null )
-            {
-                m_next.Dispose();
-            }
-            OnCompleted = null;
+            m_next.Dispose();
         }
     }
 	/// <summary>
@@ -120,13 +123,24 @@ namespace Chipstar.Downloads
      //================================
         //  変数
         //================================
-        private ILoadResult[	] m_list  = null;
-        private int              m_compCount   = 0;
+        private ILoadResult[]	m_list  = null;
         //================================
         //  プロパティ
         //================================
-        public bool     IsCompleted { private set; get; }
-        public Action   OnCompleted { set; private get; }
+        public bool     IsCompleted
+		{
+			get
+			{
+				for( var i = 0; i < m_list.Length; i++ )
+				{
+					if( !m_list[i].IsCompleted )
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+		}
 
         //================================
         //  関数
@@ -135,23 +149,6 @@ namespace Chipstar.Downloads
         public ParallelLoadResult( ILoadResult[] args )
         {
             m_list      = args;
-            m_compCount = 0;
-            Action<ParallelLoadResult> onDoneCallback = (self) =>
-            {
-                var i = self.m_compCount;
-                self.m_compCount++;
-                if( self.m_compCount < self.m_list.Length )
-                {
-                    return;
-                }
-                IsCompleted = true;
-                self.OnCompleted();
-            };
-
-            foreach( var ret in m_list )
-            {
-                ret.OnCompleted = () => onDoneCallback( this );
-            }
         }
 
         /// <summary>
@@ -164,7 +161,6 @@ namespace Chipstar.Downloads
                 r.Dispose();
             }
             m_list      = null;
-            OnCompleted = null;
         }
     }
 
@@ -194,6 +190,7 @@ namespace Chipstar.Downloads
 			m_self = result;
 		}
 	}
+
 	/// <summary>
 	/// 合成関連の拡張
 	/// </summary>

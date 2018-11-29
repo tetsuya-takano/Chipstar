@@ -35,19 +35,19 @@ namespace Chipstar.Example
 		// Use this for initialization
 		IEnumerator Start()
         {
-            yield return null;
+			Debug.Log( "	初期化開始" );
 
-			//	初期化開始
-            yield return AssetLoaderSingleton.Setup( );
+			yield return AssetLoaderSingleton.Setup( );
 
-			//	アセットバンドルDL
+			Debug.Log( "アセットバンドルDL" );
 			var path = "Assets/BundleTarget/Container 1.prefab";
             yield return AssetLoaderSingleton.Preload( path );
 			yield return null;
-			//	リソースロード
+			Debug.Log( "リソースロード" );
 			var operation = AssetLoaderSingleton.LoadAsset<GameObject>( path );
 			yield return operation;
 
+			Debug.Log( "UI構築" );
 			var prefab		= operation.Content;
 			var container	= prefab.GetComponent<Container>();
 			var parent		= m_image.transform.parent;
@@ -59,10 +59,6 @@ namespace Chipstar.Example
 			var nextLoadOperate = AssetLoaderSingleton.LoadAsset<Texture>( "Assets/Resources/Square 6.png" );
 			m_loadedImage.texture = nextLoadOperate.Content;
 			m_loadLevelButton.onClick.AddListener( () => StartCoroutine( LoadLevel() ));
-
-
-			operation.Dispose();
-			nextLoadOperate.Dispose();
 		}
 
 		private IEnumerator LoadLevel()
