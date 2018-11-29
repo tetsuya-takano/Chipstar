@@ -4,7 +4,10 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace Chipstar.AssetLoad
 {
-	public interface ILoadOperation<T> where T : UnityEngine.Object
+	public interface ILoadOperation<T> 
+		:	IDisposable
+			where T : UnityEngine.Object
+
 	{
 		T Content { get; }
 	}
@@ -17,5 +20,8 @@ namespace Chipstar.AssetLoad
 		ILoadOperation<T> where T : UnityEngine.Object
 	{
 		public abstract T Content { get; }
+
+		public void Dispose() { DoDispose(); }
+		protected virtual void DoDispose() { }
 	}
 }

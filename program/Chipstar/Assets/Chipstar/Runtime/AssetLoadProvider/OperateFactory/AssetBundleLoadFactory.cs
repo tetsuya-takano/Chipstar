@@ -44,7 +44,10 @@ namespace Chipstar.AssetLoad
 		public ILoadOperation<T> Create<T>( string path ) where T : UnityEngine.Object
 		{
 			var data = Database.Find( path );
-			return new AssetBundleLoadOperation<T>( data.LoadAsync<T>( ) );
+			return new AssetBundleLoadOperation<T>( 
+							data.LoadAsync<T>( ), 
+							Database.AddReference( data.BundleData ) 
+						);
 		}
 
 		/// <summary>
