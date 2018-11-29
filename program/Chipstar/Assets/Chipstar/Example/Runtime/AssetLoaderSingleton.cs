@@ -5,9 +5,13 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using System;
+using System.Text;
 
 namespace Chipstar.Example
 {
+	/// <summary>
+	/// とりあえず使い勝手を試すシングルトン
+	/// </summary>
 	public sealed class AssetLoaderSingleton : MonoBehaviour
 	{
 		//==================================
@@ -18,10 +22,11 @@ namespace Chipstar.Example
 		//==================================
 		//	変数
 		//==================================
-		private bool                        m_isInit = false;
-		private IAssetLoadProvider			m_assetLoadProvider;
-		private IAssetBundleLoadProvider	m_downloadProvider;
-
+		private bool								m_isInit			= false;
+		private ILoadDatabase<RuntimeBundlleData>   m_database			= null;
+		private IAssetLoadProvider					m_assetLoadProvider = null;
+		private IAssetBundleLoadProvider			m_downloadProvider  = null;
+		private StringBuilder                       m_builder			= new StringBuilder();
 		//==================================
 		//	関数
 		//==================================
@@ -55,13 +60,13 @@ namespace Chipstar.Example
 			yield return operation;
 		}
 
-		public static ILoadOperation<T> LoadAsset<T>( string path ) where T : UnityEngine.Object
+		public static IAssetLoadOperation<T> LoadAsset<T>( string path ) where T : UnityEngine.Object
 		{
 			var operation = I.m_assetLoadProvider.LoadAsset<T>( path );
 			return operation;
 		}
 
-		public static AsyncOperation LoadLevel( string scenePath )
+		public static ISceneLoadOperation LoadLevel( string scenePath )
 		{
 			return I.m_assetLoadProvider.LoadLevel( scenePath );
 		}
@@ -83,6 +88,10 @@ namespace Chipstar.Example
 				return;
 			}
 			I = null;
+
+			m_database.Dispose();
+			m_downloadProvider	.Dispose();
+			m_assetLoadProvider	.Dispose();
 		}
 
 		/// <summary>
@@ -125,11 +134,30 @@ namespace Chipstar.Example
 				(
 					factoryContainer
 				);
+
+			m_database = loadDatabase;
 		}
 
 		private void Update()
 		{
 			m_downloadProvider.DoUpdate();
+		}
+
+
+		private void OnGUI()
+		{
+			if( !m_isInit ) { return; }
+			m_builder.Length = 0;
+			var defaultColor = GUI.contentColor;
+			GUI.contentColor = Color.red;
+			foreach( var bundle in m_database.BundleList )
+			{
+				m_builder
+					.AppendFormat( "{0} : {1}", bundle.Name, bundle.RefCount )
+					.AppendLine();
+			}
+			GUI.contentColor = defaultColor;
+			GUILayout.Label( m_builder.ToString(),GUI.skin.button );
 		}
 	}
 }

@@ -28,6 +28,8 @@ namespace Chipstar.Example
 		//	変数
 		//========================================
 
+		private List<IDisposable> m_disposes = new List<IDisposable>();
+
 		//========================================
 		//	関数
 		//========================================
@@ -59,6 +61,10 @@ namespace Chipstar.Example
 			var nextLoadOperate = AssetLoaderSingleton.LoadAsset<Texture>( "Assets/Resources/Square 6.png" );
 			m_loadedImage.texture = nextLoadOperate.Content;
 			m_loadLevelButton.onClick.AddListener( () => StartCoroutine( LoadLevel() ));
+
+
+			m_disposes.Add( operation );
+			m_disposes.Add( nextLoadOperate );
 		}
 
 		private IEnumerator LoadLevel()
@@ -67,10 +73,15 @@ namespace Chipstar.Example
 
 			var operation = AssetLoaderSingleton.LoadLevel( m_scenePath );
 			yield return operation;
+			m_disposes.Add( operation );
 		}
 
 		private void OnDestroy()
         {
+			foreach( var d in m_disposes)
+			{
+				d.Dispose();
+			}
         }
     }
 }
