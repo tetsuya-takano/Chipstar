@@ -45,7 +45,10 @@ namespace Chipstar.Downloads
                 IsCompleted = true;
                 Content     = m_job.Content;
                 onCompleted( Content );
-                OnCompleted( );
+				if( OnCompleted != null )
+				{
+					OnCompleted();
+				}
             };
         }
         /// <summary>

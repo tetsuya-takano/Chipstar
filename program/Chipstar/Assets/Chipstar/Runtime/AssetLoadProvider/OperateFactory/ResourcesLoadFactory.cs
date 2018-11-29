@@ -31,7 +31,7 @@ namespace Chipstar.AssetLoad
 		public bool CanLoad( string path )
 		{
 			//	拡張子指定ナシはたぶんResources
-			return !Path.HasExtension( path ) || m_regex.IsMatch( path );
+			return m_regex.IsMatch( path );
 		}
 
 		/// <summary>

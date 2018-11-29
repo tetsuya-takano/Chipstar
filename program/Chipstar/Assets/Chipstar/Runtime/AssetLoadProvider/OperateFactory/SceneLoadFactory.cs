@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Chipstar.Downloads;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,8 +10,27 @@ namespace Chipstar.AssetLoad
 	/// <summary>
 	/// シーン読み込み機能を生成
 	/// </summary>
-	public sealed class SceneLoadFactory : ISceneLoadFactory
+	public sealed class SceneLoadFactory<TRuntimeBundleData>
+		: ISceneLoadFactory
+		where TRuntimeBundleData : IRuntimeBundleData<TRuntimeBundleData>
 	{
+		//================================
+		//	プロパティ
+		//================================
+		private ILoadDatabase<TRuntimeBundleData> Database;
+
+		//================================
+		//	関数
+		//================================
+		
+		/// <summary>
+		/// コンストラクタ
+		/// </summary>
+		public SceneLoadFactory( ILoadDatabase<TRuntimeBundleData> database )
+		{
+			Database = database;
+		}
+
 		/// <summary>
 		/// 破棄処理
 		/// </summary>
@@ -23,12 +43,13 @@ namespace Chipstar.AssetLoad
 		/// </summary>
 		public bool CanLoad( string path )
 		{
-			var scene = SceneManager.GetSceneByPath( path );
-			if( !scene.IsValid() )
+			if( !Database.Contains( path ) )
 			{
 				return false;
 			}
-			return true;
+			var data = Database.Find( path );
+
+			return data.BundleData.IsScene;
 		}
 
 		/// <summary>
@@ -36,24 +57,14 @@ namespace Chipstar.AssetLoad
 		/// </summary>
 		public AsyncOperation LoadLevel( string path )
 		{
-			var scene = SceneManager.GetSceneByPath( path );
-			if( !scene.IsValid() )
-			{
-				return null;
-			}
-			return SceneManager.LoadSceneAsync( scene.name );
+			return SceneManager.LoadSceneAsync( path );
 		}
 		/// <summary>
 		/// 加算ロード
 		/// </summary>
 		public AsyncOperation LoadLevelAdditive( string path )
 		{
-			var scene = SceneManager.GetSceneByPath( path );
-			if( !scene.IsValid() )
-			{
-				return null;
-			}
-			return SceneManager.LoadSceneAsync( scene.name, LoadSceneMode.Additive );
+			return SceneManager.LoadSceneAsync( path, LoadSceneMode.Additive );
 		}
 	}
 }

@@ -47,6 +47,8 @@ namespace Chipstar.AssetLoad
 			{
 				return null;
 			}
+
+			Debug.LogFormat( "Load Asset ::: {0}", path );
 			return factory.Create<T>( path );
 		}
 
@@ -60,6 +62,7 @@ namespace Chipstar.AssetLoad
 			{
 				return null;
 			}
+			Debug.LogFormat( "Load Level ::: {0}", path );
 			return factory.LoadLevel( path );
 		}
 		/// <summary>
@@ -72,6 +75,7 @@ namespace Chipstar.AssetLoad
 			{
 				return null;
 			}
+			Debug.LogFormat( "Load Level Additive ::: {0}", path );
 			return factory.LoadLevelAdditive( path );
 		}
 	}

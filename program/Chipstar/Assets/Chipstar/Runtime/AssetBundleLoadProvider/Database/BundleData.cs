@@ -13,6 +13,7 @@ namespace Chipstar.Downloads
         AssetData<T>[]  Assets      { get; }
         T[]             Dependencies{ get; }
         bool            IsOnMemory  { get; }
+		bool            IsScene		{ get; }
 
 		AssetBundleRequest LoadAsync<TAssetType>( string path ) where TAssetType : UnityEngine.Object;
 		void Unload();
@@ -62,6 +63,7 @@ namespace Chipstar.Downloads
         public      Hash128         Hash        { get; private set; }
         public      T[]             Dependencies{ get; private set; }
         public      bool            IsOnMemory  { get { return Bundle != null; } }
+		public      bool            IsScene		{ get { return Bundle.isStreamedSceneAssetBundle; } }
 
         public      bool            IsFree      { get { return RefCount <= 0; } }
 

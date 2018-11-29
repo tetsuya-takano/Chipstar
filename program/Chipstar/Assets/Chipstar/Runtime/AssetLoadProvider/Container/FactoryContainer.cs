@@ -59,6 +59,7 @@ namespace Chipstar.AssetLoad
 					return (T)factory;
 				}
 			}
+			throw new UnassignedReferenceException( path + "\nをロード出来る機能がありません" );
 			return default(T);
 		}
 	}

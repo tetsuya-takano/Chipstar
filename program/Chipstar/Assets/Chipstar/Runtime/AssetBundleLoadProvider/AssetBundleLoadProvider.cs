@@ -6,8 +6,8 @@ namespace Chipstar.Downloads
 {
     public interface IAssetBundleLoadProvider
     {
-        IEnumerator				InitLoad    ( );
-		ILoadResult				Load		( string path );
+        IEnumerator	InitLoad    ( );
+		ILoadResult	Load		( string path );
 
 		void DoUpdate();
 	}
@@ -165,6 +165,7 @@ namespace Chipstar.Downloads
 				{
 					Debug.Log( "Downloaded : " + location.AccessPath );
 					//	ファイルのDL → 書き込み → ローカルロード
+					//	剥がしたい
 					CacheDatabase.Write( data, content );
 					CacheDatabase.Apply();
 				}
