@@ -6,43 +6,37 @@ using UnityEngine;
 
 namespace Chipstar.Downloads
 {
-    public sealed class Empty
-    {
-        public static readonly Empty Default = new Empty();
-    }
+	public sealed class Empty
+	{
+		public static readonly Empty Default = new Empty();
+	}
     public interface ILoadResult : IDisposable
     {
         bool    IsCompleted { get; }
         Action  OnCompleted { set; }
     }
-    public interface ILoadResult<T> : ILoadResult
-    {
-        T Content { get; }
-    }
 
-    public sealed class LoadResult<T> : ILoadResult, ILoadResult<T>
-    {
+	public sealed class LoadResult<T> : ILoadResult
+	{
         //=====================================
         //  変数
         //=====================================
-        private IDisposable         m_dispose       = null;
         private ILoadJob<T>         m_job           = null;
 
         //=====================================
         //  プロパティ
         //=====================================
-        public Action   OnCompleted { private get; set; }
-        public T        Content     { get; private set; }
-        public bool     IsCompleted { get; private set; }
+        public			Action  OnCompleted { private get; set; }
+        public			T       Content     { get; private set; }
+        public			bool    IsCompleted { get; private set; }
 
-        //=====================================
-        //  関数
-        //=====================================
+		//=====================================
+		//  関数
+		//=====================================
 
-        public LoadResult(
+		public LoadResult(
             ILoadJob<T>		job, 
-            Action<T>		onCompleted, 
-            IDisposable     dispose 
+            Action<T>		onCompleted
         )
         {
             m_job           = job;
@@ -53,7 +47,6 @@ namespace Chipstar.Downloads
                 onCompleted( Content );
                 OnCompleted( );
             };
-            m_dispose       = dispose;
         }
         /// <summary>
         /// 
@@ -61,11 +54,6 @@ namespace Chipstar.Downloads
         public void Dispose()
         {
             m_job           = null;
-			if( m_dispose == null )
-			{
-				m_dispose.Dispose();
-			}
-            m_dispose       = null;
             OnCompleted     = null;
         }
     }
@@ -73,26 +61,25 @@ namespace Chipstar.Downloads
     /// <summary>
     /// ロード結果処理を直列にする
     /// </summary>
-    public class JoinLoadResult<T> : ILoadResult<T>
+    public sealed class JoinLoadResult : ILoadResult
     {
         //================================
         //  変数
         //================================
-        private ILoadResult     m_prev = null;
-        private ILoadResult<T>  m_next = null;
+        private ILoadResult	m_prev = null;
+        private ILoadResult m_next = null;
 
         //================================
         //  プロパティ
         //================================
         public bool     IsCompleted { get; private set; }
         public Action   OnCompleted { set; private get; }
-        public T        Content     { get; private set; }
 
         //================================
         //  関数
         //================================
 
-        public JoinLoadResult( ILoadResult prev, Func<ILoadResult<T>> onNext )
+        public JoinLoadResult( ILoadResult prev, Func<ILoadResult> onNext )
         {
             m_prev = prev;
             m_prev.OnCompleted = () =>
@@ -101,7 +88,6 @@ namespace Chipstar.Downloads
                 m_next.OnCompleted = () =>
                 {
                     IsCompleted = true;
-                    Content     = m_next.Content;
                     if (OnCompleted != null)
                     {
                         OnCompleted();
@@ -119,51 +105,49 @@ namespace Chipstar.Downloads
             if( m_next != null )
             {
                 m_next.Dispose();
-                Content = default(T);
             }
             OnCompleted = null;
         }
     }
-    public sealed class ParallelLoadResult<T> : ILoadResult<IList<T>>
+	/// <summary>
+	/// 並列で待つ
+	/// </summary>
+    public sealed class ParallelLoadResult : ILoadResult
     {
      //================================
         //  変数
         //================================
-        private ILoadResult<T>[] m_list  = null;
-        private T[]              m_datas = null;
+        private ILoadResult[	] m_list  = null;
         private int              m_compCount   = 0;
         //================================
         //  プロパティ
         //================================
         public bool     IsCompleted { private set; get; }
         public Action   OnCompleted { set; private get; }
-        public IList<T> Content     { get { return m_datas; } }
 
         //================================
         //  関数
         //================================
 
-        public ParallelLoadResult( ILoadResult<T>[] args )
+        public ParallelLoadResult( ILoadResult[] args )
         {
             m_list      = args;
-            m_datas     = new T[ m_list.Length ];
             m_compCount = 0;
-            Action<T, ParallelLoadResult<T>> onDoneCallback = (c, result) =>
+            Action<ParallelLoadResult> onDoneCallback = (self) =>
             {
-                var i = result.m_compCount;
-                result.m_datas[ i ] = c;
-                result.m_compCount++;
-                if( result.m_compCount < result.m_list.Length )
+                var i = self.m_compCount;
+                self.m_compCount++;
+                if( self.m_compCount < self.m_list.Length )
                 {
                     return;
                 }
                 IsCompleted = true;
-                result.OnCompleted();
+                self.OnCompleted();
             };
 
             foreach( var ret in m_list )
             {
-                ret.OnCompleted = () => onDoneCallback(ret.Content, this);
+                ret.OnCompleted = () => onDoneCallback( this );
             }
         }
 
@@ -177,35 +161,62 @@ namespace Chipstar.Downloads
                 r.Dispose();
             }
             m_list      = null;
-            m_datas     = null;
             OnCompleted = null;
         }
     }
 
+	/// <summary>
+	/// コルーチン化する
+	/// </summary>
+	public sealed class LoadResultYieldInstruction : CustomYieldInstruction
+	{
+		//========================================
+		//	変数
+		//========================================
+		private ILoadResult m_self = null;
+
+		//========================================
+		//	プロパティ
+		//========================================
+		public override bool keepWaiting { get { return m_self != null && !m_self.IsCompleted; } }
+
+		//========================================
+		//	関数
+		//========================================
+		/// <summary>
+		/// コンストラクタ
+		/// </summary>
+		public LoadResultYieldInstruction( ILoadResult result )
+		{
+			m_self = result;
+		}
+	}
+	/// <summary>
+	/// 合成関連の拡張
+	/// </summary>
     public static class ILoadResultExtensions
     {
-        public static ILoadResult<IList<T>> ToParallel<T>(this ILoadResult<T>[] self)
+		/// <summary>
+		/// 並列
+		/// </summary>
+        public static ILoadResult ToParallel(this ILoadResult[] self)
         {
-            return new ParallelLoadResult<T>( self );
+            return new ParallelLoadResult( self );
         }
         
-        public static ILoadResult<TNext> ToJoin<TNext>( this ILoadResult self, Func<ILoadResult<TNext>> onNext )
+		/// <summary>
+		/// 直列
+		/// </summary>
+        public static ILoadResult ToJoin( this ILoadResult self, Func<ILoadResult> onNext )
         {
-            return new JoinLoadResult<TNext>( self, onNext );
+            return new JoinLoadResult( self, onNext );
         }
-        public static ILoadResult AsEmpty<T>( this ILoadResult<T> self )
-        {
-            return self;
-        }
-        public static IDisposable OnComplete( this ILoadResult self, Action onCompleted )
-        {
-            self.OnCompleted = onCompleted;
-            return self;
-        }
-        public static IDisposable OnComplete<T>(this ILoadResult<T> self, Action<T> onCompleted )
-        {
-            self.OnCompleted = () => onCompleted( self.Content );
-            return self;
-        }
-    }
+		/// <summary>
+		/// 
+		/// </summary>
+		public static LoadResultYieldInstruction ToYieldInstruction( this ILoadResult self )
+		{
+			return new LoadResultYieldInstruction( self );
+		}
+	}
 }

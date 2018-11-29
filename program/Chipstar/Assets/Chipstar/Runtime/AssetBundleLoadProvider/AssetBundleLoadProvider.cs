@@ -126,51 +126,54 @@ namespace Chipstar.Downloads
         {
             //  事前に必要な分を合成
             var dependencies= data.Dependencies;
-            var preloadJob  = new ILoadResult<AssetBundle>[ dependencies.Length ];
+            var preloadJob  = new ILoadResult[ dependencies.Length ];
             for( int i = 0; i < preloadJob.Length; i++ )
             {
 				var tmp = dependencies[i];
 				preloadJob[i] = DoLoadCore( tmp );
             }
-            return preloadJob
-                .ToParallel()
-                .ToJoin( () => DoLoadCore( data ))
-                .AsEmpty();
+			return preloadJob
+				.ToParallel()
+				.ToJoin( () => DoLoadCore( data ) );
         }
 
 		/// <summary>
 		/// ロード処理
 		/// </summary>
-		protected virtual ILoadResult<AssetBundle> DoLoadCore( TRuntimeData data )
+		protected virtual ILoadResult DoLoadCore( TRuntimeData data )
 		{
 			if( CacheDatabase.HasCache( data ) )
 			{
+				//	更新がないならそのままローカルのファイルを開く
 				return DoLocalOpen( data );
 			}
-			return DoLoadNewFile( data );
+			///	DLしてから開く
+			return DoLoadNewFile( data )
+					.ToJoin( () => DoLocalOpen( data ));
 		}
 
 		/// <summary>
-		/// 
+		/// ダウンロード
 		/// </summary>
-		protected virtual ILoadResult<AssetBundle> DoLoadNewFile( TRuntimeData data )
+		protected virtual ILoadResult DoLoadNewFile( TRuntimeData data )
 		{
             var location    = LoadDatabase.ToBundleLocation( data );
             var job         = JobCreator.BytesLoad( JobEngine, location );
-            return new LoadResult<byte[]>(
-                job,
-                onCompleted: ( content ) =>
-                {
+			return new LoadResult<byte[]>(
+				job,
+				onCompleted: ( content ) =>
+				{
 					Debug.Log( "Downloaded : " + location.AccessPath );
 					//	ファイルのDL → 書き込み → ローカルロード
 					CacheDatabase.Write( data, content );
 					CacheDatabase.Apply();
-				},
-                dispose : null
-            )
-			.ToJoin( () => DoLocalOpen( data ) );
+				}
+			);
 		}
-		protected virtual ILoadResult<AssetBundle> DoLocalOpen( TRuntimeData data )
+		/// <summary>
+		/// 
+		/// </summary>
+		protected virtual ILoadResult DoLocalOpen( TRuntimeData data )
 		{
 			var location	= CacheDatabase.ToLocation( data.Name );
 			var job			= JobCreator.OpenLocalBundle( JobEngine, location );
@@ -180,8 +183,7 @@ namespace Chipstar.Downloads
 				{
 					Debug.Log( "File Opened : " + location.AccessPath );
 					data.OnMemory( content );
-				},
-				dispose: LoadDatabase.AddReference( data )
+				}
 			);
 		}
 	}

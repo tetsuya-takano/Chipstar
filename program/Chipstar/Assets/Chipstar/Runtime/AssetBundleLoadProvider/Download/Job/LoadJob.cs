@@ -20,26 +20,28 @@ namespace Chipstar.Downloads
     /// <summary>
     /// DLジョブ
     /// </summary>
-    public abstract class LoadJob<THandler, TSource, TData> : ILoadJob<TData>
-        where THandler  : ILoadJobHandler<TSource, TData>
-    {
+    public abstract class LoadJob<THandler, TSource, TData> 
+			:	CustomYieldInstruction,
+				ILoadJob<TData> where THandler : ILoadJobHandler<TSource, TData>
+	{
         //===============================
         //  プロパティ
         //===============================
-        public      IAccessLocation Location       { get; protected set; }
-        public      float           Progress       { get; protected set; }
-        public      bool            IsCompleted    { get; protected set; }
-        public      TData           Content        { get; protected set; }
-        public      Action          OnLoaded       { protected get; set; }
+        public      IAccessLocation Location	{ get; protected set; }
+        public      float           Progress	{ get; protected set; }
+        public      bool            IsCompleted	{ get; protected set; }
+        public      TData           Content		{ get; protected set; }
+        public      Action          OnLoaded	{ protected get; set; }
 
-        protected   TSource  Source         { get; set; }
-        protected   THandler DLHandler      { get; set; }
+        protected   TSource  Source				{ get; set; }
+        protected   THandler DLHandler			{ get; set; }
 
-        //===============================
-        //  変数
-        //===============================
+		public override bool keepWaiting		{ get { return !IsCompleted; } }
+		//===============================
+		//  変数
+		//===============================
 
-        private bool        m_isDisposed = false;
+		private bool        m_isDisposed = false;
 
         //===============================
         //  関数
