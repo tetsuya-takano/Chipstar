@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEngine;
 namespace Chipstar.Builder
 {
@@ -11,19 +12,32 @@ namespace Chipstar.Builder
         string[] Refine( string[] allAssetPaths );
     }
 
-
+	/// <summary>
+	/// 対象ファイルフィルタ
+	/// </summary>
     public class ABBuildFileFilter : IABBuildFileFilter
     {
-        public static readonly ABBuildFileFilter Empty = new ABBuildFileFilter( null );
+		//====================================
+		//	変数
+		//====================================
+		private Regex[] m_regexes = null;
+		//====================================
+		//	変数
+		//====================================
 
-        protected string[] Extensions { get; private set; }
-
-
-        public ABBuildFileFilter( 
-            string[] ignoreExtensions
+		public ABBuildFileFilter( 
+            string[] ignorePattern
         )
         {
-            Extensions = ignoreExtensions;
+            if( ignorePattern == null )
+			{
+				return;
+			}
+			m_regexes = new Regex[ ignorePattern.Length ];
+			for( int i = 0; i < ignorePattern.Length; i++ )
+			{
+				m_regexes[i] = new Regex( ignorePattern[ i ] );
+			}
         }
 
         /// <summary>
@@ -34,7 +48,7 @@ namespace Chipstar.Builder
             return allAssetPaths
                     .Where( p => IsInProject( p ))
                     .Where( p => !IsFolder  ( p ) )
-                    .Where( p => !IsMatchExtensions( p ) )
+                    .Where( p => !IsMatchIgnore( p ) )
                     .ToArray();
         }
 
@@ -50,26 +64,22 @@ namespace Chipstar.Builder
         }
 
         /// <summary>
-        /// 拡張子チェック
+        /// 無視パターン判定
         /// </summary>
-        protected bool IsMatchExtensions( string path )
+        protected bool IsMatchIgnore( string path )
         {
-            if( !Path.HasExtension( path ) )
-            {
-                return false;
-            }
-            if( Extensions == null || Extensions.Length == 0)
-            {
-                return false;
-            }
-            var extension = Path.GetExtension( path );
-            foreach( var ignore in Extensions)
-            {
-                if( ignore == extension )
-                {
-                    return true;
-                }
-            }
+			if( m_regexes == null || m_regexes.Length == 0 )
+			{
+				return false;
+			}
+
+			foreach( var regex in m_regexes )
+			{
+				if( regex.IsMatch( path ) )
+				{
+					return true;
+				}
+			}
             return false;
         }
     }

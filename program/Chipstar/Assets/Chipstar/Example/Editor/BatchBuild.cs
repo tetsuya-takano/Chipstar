@@ -19,7 +19,7 @@ namespace Chipstar.Example
             );
 
             var fileFilter      = new ABBuildFileFilter( 
-                ignoreExtensions: new string[] 
+                ignorePattern: new string[] 
                 {
                     ".cs", ".meta", ".asmdef"
                 } 
