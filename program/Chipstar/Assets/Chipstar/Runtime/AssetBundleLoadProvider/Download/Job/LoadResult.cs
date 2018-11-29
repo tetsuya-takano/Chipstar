@@ -100,10 +100,10 @@ namespace Chipstar.Downloads
         //  関数
         //================================
 
-        public JoinLoadResult( ILoadResult prev, Func<ILoadResult> onNext )
+        public JoinLoadResult( ILoadResult prev, ILoadResult onNext )
         {
             m_prev = prev;
-            m_next = onNext();
+            m_next = onNext;
         }
 
         /// <summary>
@@ -207,7 +207,7 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// 直列
 		/// </summary>
-        public static ILoadResult ToJoin( this ILoadResult self, Func<ILoadResult> onNext )
+        public static ILoadResult ToJoin( this ILoadResult self, ILoadResult onNext )
         {
             return new JoinLoadResult( self, onNext );
         }

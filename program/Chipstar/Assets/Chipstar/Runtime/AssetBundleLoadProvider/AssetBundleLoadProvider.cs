@@ -134,7 +134,7 @@ namespace Chipstar.Downloads
             }
 			return preloadJob
 				.ToParallel()
-				.ToJoin( () => DoLoadCore( data ) );
+				.ToJoin( DoLoadCore( data ) );
         }
 
 		/// <summary>
@@ -153,7 +153,7 @@ namespace Chipstar.Downloads
 			}
 			///	DLしてから開く
 			return DoLoadNewFile( data )
-					.ToJoin( () => DoLocalOpen( data ));
+					.ToJoin( DoLocalOpen( data ) );
 		}
 
 		/// <summary>
