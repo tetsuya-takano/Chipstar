@@ -20,12 +20,13 @@ namespace Chipstar.Example
 		[SerializeField] Text		m_dlListText	= null;
 		[SerializeField] Text		m_cacheListText	= null;
 
+
+		[SerializeField] private Button m_loadLevelButton	= null;
+		[SerializeField] private string m_scenePath			= null;
+
 		//========================================
 		//	変数
 		//========================================
-		private IDisposable					m_disposable = null;
-		private IAssetBundleLoadProvider	m_downloadProvider	 = null;
-		private IAssetLoadProvider          m_assetLoadProvider  = null;
 
 		//========================================
 		//	関数
@@ -34,59 +35,19 @@ namespace Chipstar.Example
 		// Use this for initialization
 		IEnumerator Start()
         {
-			//	接続先
-			var acccesPoint   = new EntryPoint( Path.Combine( Application.dataPath, "../../build/windows/lzma/" ) );
-			//	保存先
-			var cacheStorage  = new EntryPoint( Path.Combine( Application.dataPath, "../../cacheStorage/" ) );
-			
-			//	コンテンツカタログ
-			var loadDatabase = new LoadDatabase<BuildMapDataTable, BundleBuildData, AssetBuildData, RuntimeBundlleData>( acccesPoint,"buildMap.json" );
-			//	ローカル保存データベース
-			var cacheDatabase= new CacheDatabase( cacheStorage, "localVersion.json"  );
-
-			m_disposable = loadDatabase;
-
-			//	リクエスト作成
-			var creator      = new SampleJobCreator();
-            var jobEngine    = new JobEngine();
-
-			//	DL機能を統合
-            m_downloadProvider = new AssetBundleLoadProvider<RuntimeBundlleData>
-                (
-                    loadDatabase	: loadDatabase,
-					cacheDatabase	: cacheDatabase,
-                    jobCreator		: creator,
-                    dlEngine		: jobEngine
-                );
-
-			//	読み込みリクエスト側機能
-			var factoryContainer = new FactoryContainer
-			(
-				new AssetBundleLoadFactory<RuntimeBundlleData>( loadDatabase ),
-				new ResourcesLoadFactory()
-			);
-			//	統合
-			m_assetLoadProvider = new AssetLoadProvider
-				( 
-					factoryContainer 
-				);
-
             yield return null;
 
 			//	初期化開始
-            yield return m_downloadProvider.InitLoad( );
-
-			m_cacheListText	.text = cacheDatabase.ToString();
-			m_dlListText	.text = loadDatabase .ToString();
+            yield return AssetLoaderSingleton.Setup( );
 
 			//	アセットバンドルDL
 			var path = "Assets/BundleTarget/Container 1.prefab";
-			var downloadTask = m_downloadProvider.Load( path );
-            yield return new WaitWhile(() => !downloadTask.IsCompleted );
+            yield return AssetLoaderSingleton.Preload( path );
 			yield return null;
 			//	リソースロード
-			var operation = m_assetLoadProvider.LoadAsset<GameObject>( path );
+			var operation = AssetLoaderSingleton.LoadAsset<GameObject>( path );
 			yield return operation;
+
 			var prefab		= operation.Content;
 			var container	= prefab.GetComponent<Container>();
 			var parent		= m_image.transform.parent;
@@ -95,21 +56,25 @@ namespace Chipstar.Example
 				var img = Instantiate(m_image, parent);
 				img.texture = item as Texture;
 			}
-			var nextLoadOperate = m_assetLoadProvider.LoadAsset<Texture>( "Assets/Resources/Square 6.png" );
+			var nextLoadOperate = AssetLoaderSingleton.LoadAsset<Texture>( "Assets/Resources/Square 6.png" );
 			m_loadedImage.texture = nextLoadOperate.Content;
+			m_loadLevelButton.onClick.AddListener( () => StartCoroutine( LoadLevel() ));
 
-			//	保存
-			cacheDatabase.Apply();
+
+			operation.Dispose();
+			nextLoadOperate.Dispose();
 		}
-        private void OnDestroy()
-        {
-			m_disposable.Dispose();
-        }
 
-        private void Update()
+		private IEnumerator LoadLevel()
+		{
+			yield return AssetLoaderSingleton.Preload( m_scenePath );
+
+			var operation = AssetLoaderSingleton.LoadLevel( m_scenePath );
+			yield return operation;
+		}
+
+		private void OnDestroy()
         {
-            if( m_downloadProvider == null ) { return; }
-            m_downloadProvider.DoUpdate();
         }
     }
 }
