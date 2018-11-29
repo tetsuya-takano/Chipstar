@@ -129,6 +129,7 @@ namespace Chipstar.Downloads
         public void AddRef()
         {
             RefCount++;
+			if( Dependencies == null ) { return; }
 			for( int i = 0; i < Dependencies.Length; i++ )
 			{
 				Dependencies[ i ].AddRef();
@@ -141,6 +142,7 @@ namespace Chipstar.Downloads
         public void ReleaseRef()
         {
             RefCount = Mathf.Max( 0, RefCount - 1 );
+			if( Dependencies == null ) { return; }
 			for( int i = 0; i < Dependencies.Length; i++ )
 			{
 				Dependencies[i].ReleaseRef();

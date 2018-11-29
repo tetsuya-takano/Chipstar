@@ -14,8 +14,8 @@ namespace Chipstar.Downloads
 		//==============================
 		//	変数
 		//==============================
-		private AsyncOperation m_sceneOperation = null;
-
+		private AsyncOperation	m_sceneOperation = null;
+		private IDisposable     m_unloader  = null;
 		//==============================
 		//	プロパティ
 		//==============================
@@ -24,18 +24,27 @@ namespace Chipstar.Downloads
 		//==============================
 		//	関数
 		//==============================
-	
+
 		/// <summary>
 		/// コンストラクタ
 		/// </summary>
-		public SceneLoadOperation( AsyncOperation operation )
+		public SceneLoadOperation( AsyncOperation operation ) : this( operation, null )
+		{
+			
+		}
+		public SceneLoadOperation( AsyncOperation operation, IDisposable unloadDispose )
 		{
 			m_sceneOperation = operation;
+			m_unloader  = unloadDispose;
 		}
-
 		protected override void DoDispose()
 		{
 			m_sceneOperation = null;
+			if( m_unloader != null )
+			{
+				m_unloader.Dispose();
+			}
+			m_unloader = null;
 		}
 	}
 }
