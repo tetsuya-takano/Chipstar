@@ -21,8 +21,9 @@ namespace Chipstar.Example
             var fileFilter      = new ABBuildFileFilter( 
                 ignorePattern: new string[] 
                 {
-                    ".cs", ".meta", ".asmdef"
-                } 
+                    "(.*).cs", "(.*).meta", "(.*).asmdef",	//	無視ファイル
+					"(.*)Resources/"						//	無視フォルダ
+				} 
             );
             //var buildProcess  = new DisableBuildProcess<ABBuildData>();
             var buildProcess    = SimpleABBuildProcess<ABBuildData>.Empty;
