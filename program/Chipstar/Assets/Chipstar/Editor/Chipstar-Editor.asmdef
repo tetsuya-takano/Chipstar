@@ -1,6 +1,8 @@
 {
     "name": "Chipstar-Editor",
-    "references": [],
+    "references": [
+        "Chipstar-Runtime"
+    ],
     "includePlatforms": [
         "Editor"
     ],
