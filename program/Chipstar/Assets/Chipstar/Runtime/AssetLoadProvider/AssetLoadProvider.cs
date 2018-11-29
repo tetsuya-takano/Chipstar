@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Chipstar.AssetLoad
+namespace Chipstar.Downloads
 {
 	/// <summary>
 	/// アセット読み込みまわりの管理

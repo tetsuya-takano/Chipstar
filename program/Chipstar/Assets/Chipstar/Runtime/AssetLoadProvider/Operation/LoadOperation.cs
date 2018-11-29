@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-namespace Chipstar.AssetLoad
+namespace Chipstar.Downloads
 {
 	public interface ILoadOperation<T> 
 		:	IDisposable

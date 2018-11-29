@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using UnityEngine;
-namespace Chipstar.AssetLoad
+namespace Chipstar.Downloads
 {
 	/// <summary>
 	/// Resourcesロードをするヤツ

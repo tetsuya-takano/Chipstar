@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System;
 using System.IO;
-using Chipstar.AssetLoad;
+using Chipstar.Downloads;
 
 namespace Chipstar.Example
 {

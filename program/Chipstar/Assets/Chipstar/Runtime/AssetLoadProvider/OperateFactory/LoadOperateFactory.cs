@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Chipstar.AssetLoad
+namespace Chipstar.Downloads
 {
 	/// <summary>
 	/// 読み込みタスクを作成する
