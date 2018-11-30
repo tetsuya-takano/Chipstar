@@ -7,3 +7,4 @@ program/build/
 program/Chipstar/Assets/BundleTarget/
 *.ab
 program/cacheStorage/
+program/app/
