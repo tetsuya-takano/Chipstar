@@ -35,6 +35,11 @@ namespace Chipstar
 		/// シーン加算
 		/// </summary>
 		ISceneLoadOperation LoadLevelAdditive( string scenePath );
+
+		/// <summary>
+		/// 更新処理
+		/// </summary>
+		void DoUpdate();
 	}
 
 	/// <summary>
