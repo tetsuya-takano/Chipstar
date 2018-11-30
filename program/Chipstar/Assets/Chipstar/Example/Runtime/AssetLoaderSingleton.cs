@@ -1,11 +1,7 @@
 ﻿using Chipstar.Downloads;
-using Chipstar.Downloads;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using System;
-using System.Text;
 
 namespace Chipstar.Example
 {
@@ -22,11 +18,8 @@ namespace Chipstar.Example
 		//==================================
 		//	変数
 		//==================================
-		private bool								m_isInit			= false;
-		private ILoadDatabase<RuntimeBundlleData>   m_database			= null;
-		private IAssetLoadProvider					m_assetLoadProvider = null;
-		private IAssetBundleLoadProvider			m_downloadProvider  = null;
-		private StringBuilder                       m_builder			= new StringBuilder();
+		private bool						m_isInit			= false;
+		private IAssetManager               m_manager           = null;
 		//==================================
 		//	関数
 		//==================================
@@ -50,25 +43,25 @@ namespace Chipstar.Example
 			{
 				yield break;
 			}
-			yield return I.m_downloadProvider.InitLoad();
+			yield return I.m_manager.Setup();
 			I.m_isInit = true;
 		}
 
 		public static IEnumerator Preload( string path )
 		{
-			var operation = I.m_downloadProvider.Load( path ).ToYieldInstruction();
+			var operation = I.m_manager.Preload( path );
 			yield return operation;
 		}
 
 		public static IAssetLoadOperation<T> LoadAsset<T>( string path ) where T : UnityEngine.Object
 		{
-			var operation = I.m_assetLoadProvider.LoadAsset<T>( path );
+			var operation = I.m_manager.LoadAsset<T>( path );
 			return operation;
 		}
 
 		public static ISceneLoadOperation LoadLevel( string scenePath )
 		{
-			return I.m_assetLoadProvider.LoadLevel( scenePath );
+			return I.m_manager.LoadLevel( scenePath );
 		}
 
 		private void Awake()
@@ -89,9 +82,7 @@ namespace Chipstar.Example
 			}
 			I = null;
 
-			m_database.Dispose();
-			m_downloadProvider	.Dispose();
-			m_assetLoadProvider	.Dispose();
+			m_manager.Dispose();
 		}
 
 		/// <summary>
@@ -99,65 +90,23 @@ namespace Chipstar.Example
 		/// </summary>
 		private void Start()
 		{
-			//	接続先
-			var acccesPoint   = new EntryPoint( Path.Combine( Application.dataPath, "../../build/windows/lz4/" ) );
-			//	保存先
-			var cacheStorage  = new EntryPoint( Path.Combine( Application.dataPath, "../../cacheStorage/" ) );
-
-			//	コンテンツカタログ
-			var loadDatabase = new LoadDatabase<BuildMapDataTable, BundleBuildData, AssetBuildData, RuntimeBundlleData>( acccesPoint,"buildMap.json" );
-			//	ローカル保存データベース
-			var cacheDatabase= new CacheDatabase( cacheStorage, "localVersion.json"  );
-
-			//	リクエスト作成
-			var creator      = new SampleJobCreator();
-			var jobEngine    = new JobEngine();
-
-			//	DL機能を統合
-			m_downloadProvider = new AssetBundleLoadProvider<RuntimeBundlleData>
-				(
-					loadDatabase: loadDatabase,
-					cacheDatabase: cacheDatabase,
-					jobCreator: creator,
-					dlEngine: jobEngine
-				);
-
-			//	読み込みリクエスト側機能
-			var factoryContainer = new FactoryContainer
-			(
-				new AssetBundleLoadFactory<RuntimeBundlleData>( loadDatabase ),
-				new ResourcesLoadFactory(),
-				new SceneLoadFactory<RuntimeBundlleData>( loadDatabase )
-			);
-			//	統合
-			m_assetLoadProvider = new AssetLoadProvider
-				(
-					factoryContainer
-				);
-
-			m_database = loadDatabase;
+			var config = new
+			{
+				ServerUrl    = Path.Combine( Application.dataPath, "../../build/windows/lz4/" ),
+				BuildInfoFile= "buildMap.json",
+				CacheStorage = Path.Combine( Application.dataPath, "../../cacheStorage/" ),
+				LocalSaveFile= "localVersion.json"
+			};
+#if UNITY_EDITOR
+			m_manager = AssetManager.Simulator();
+#else
+			m_manager = AssetManager.Default<RuntimeBundlleData>( config.ServerUrl, config.BuildInfoFile, config.CacheStorage, config.LocalSaveFile );
+#endif
 		}
 
 		private void Update()
 		{
-			m_downloadProvider.DoUpdate();
-		}
-
-
-		private void OnGUI()
-		{
-			if( !m_isInit ) { return; }
-			m_builder.Length = 0;
-			var defaultColor = GUI.contentColor;
-			GUI.contentColor = Color.red;
-			foreach( var bundle in m_database.BundleList )
-			{
-				m_builder
-					.AppendFormat( "{0} : {1}", bundle.Name, bundle.RefCount )
-					.AppendLine();
-			}
-			GUI.contentColor = defaultColor;
-			GUILayout.Label( m_builder.ToString(),GUI.skin.button );
+			m_manager.DoUpdate();
 		}
 	}
 }

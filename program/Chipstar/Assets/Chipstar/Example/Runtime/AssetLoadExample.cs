@@ -1,25 +1,18 @@
 ﻿using UnityEngine;
 using System.Collections;
-using Chipstar.Downloads;
-using UnityEngine.Networking;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System;
-using System.IO;
-using Chipstar.Downloads;
 
 namespace Chipstar.Example
 {
-    public class AssetLoadExample : MonoBehaviour
+	public class AssetLoadExample : MonoBehaviour
     {
 		//========================================
 		//	SerializeField
 		//========================================
 		[SerializeField] RawImage	m_image			= null;
 		[SerializeField] RawImage	m_loadedImage	= null;
-		[SerializeField] Text		m_dlListText	= null;
-		[SerializeField] Text		m_cacheListText	= null;
-
 
 		[SerializeField] private Button m_loadLevelButton	= null;
 		[SerializeField] private string m_scenePath			= null;
