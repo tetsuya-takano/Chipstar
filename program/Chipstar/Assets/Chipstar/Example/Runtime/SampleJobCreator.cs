@@ -19,12 +19,12 @@ namespace Chipstar.Example
 
 		protected override ILoadJob<byte[]> DoCreateBytesLoad( IAccessLocation location )
         {
-            return WWWDL.GetBytes( location );
+            return WWWDL.GetBinaryFile( location );
         }
 
         protected override ILoadJob<string> DoCreateTextLoad( IAccessLocation location )
         {
-            return WWWDL.GetString( location );
+            return WWWDL.GetTextFile( location );
         }
     }
 }

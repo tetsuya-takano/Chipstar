@@ -12,11 +12,11 @@ namespace Chipstar.Downloads
         //==================================
         //  各通信用ジョブの作成
         //==================================
-        public static ILoadJob<string> GetString( IAccessLocation location )
+        public static ILoadJob<string> GetTextFile( IAccessLocation location )
         {
             return new WRDLJob<string>( location, new WRDL.TextDL() );
         }
-        public static ILoadJob<byte[]> GetBytes( IAccessLocation location )
+        public static ILoadJob<byte[]> GetBinaryFile( IAccessLocation location )
         {
             return new WRDLJob<byte[]>( location, new WRDL.BytesDL() );
         }
