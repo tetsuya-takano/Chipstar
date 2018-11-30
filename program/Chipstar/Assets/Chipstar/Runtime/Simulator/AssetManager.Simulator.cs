@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Chipstar.Downloads;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 
-namespace Chipstar.Downloads
+namespace Chipstar
 {
 	/// <summary>
 	/// シミュレートモード用

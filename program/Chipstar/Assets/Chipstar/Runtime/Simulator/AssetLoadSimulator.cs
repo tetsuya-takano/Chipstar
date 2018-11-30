@@ -28,7 +28,8 @@ namespace Chipstar.Downloads
 			Container = new FactoryContainer
 				(
 					new ResourcesLoadFactory(),
-					new EditorLoadAssetFactory()
+					new EditorLoadAssetFactory(),
+					new EditorSceneLoadFactory()
 				);
 		}
 
