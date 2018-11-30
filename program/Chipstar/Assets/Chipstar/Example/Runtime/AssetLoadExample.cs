@@ -32,14 +32,14 @@ namespace Chipstar.Example
         {
 			Debug.Log( "	初期化開始" );
 
-			yield return AssetLoaderSingleton.Setup( );
+			yield return AssetLoaderSingleton.SetupOnlySingle( );
 
 			Debug.Log( "アセットバンドルDL" );
 			var path = "Assets/BundleTarget/Container 1.prefab";
-            yield return AssetLoaderSingleton.Preload( path );
+            yield return AssetLoaderSingleton.PreloadOnly( path );
 			yield return null;
 			Debug.Log( "リソースロード" );
-			var operation = AssetLoaderSingleton.LoadAsset<GameObject>( path );
+			var operation = AssetLoaderSingleton.LoadAssetWithoutDownload<GameObject>( path );
 			yield return operation;
 
 			Debug.Log( "UI構築" );
@@ -51,7 +51,7 @@ namespace Chipstar.Example
 				var img = Instantiate(m_image, parent);
 				img.texture = item as Texture;
 			}
-			var nextLoadOperate = AssetLoaderSingleton.LoadAsset<Texture>( "Assets/Resources/Square 6.png" );
+			var nextLoadOperate = AssetLoaderSingleton.LoadAssetWithoutDownload<Texture>( "Assets/Resources/Square 6.png" );
 			m_loadedImage.texture = nextLoadOperate.Content;
 			m_loadLevelButton.onClick.AddListener( () => StartCoroutine( LoadLevel() ));
 
@@ -62,9 +62,9 @@ namespace Chipstar.Example
 
 		private IEnumerator LoadLevel()
 		{
-			yield return AssetLoaderSingleton.Preload( m_scenePath );
+			yield return AssetLoaderSingleton.PreloadOnly( m_scenePath );
 
-			var operation = AssetLoaderSingleton.LoadLevel( m_scenePath );
+			var operation = AssetLoaderSingleton.LoadLevelWithoutDownload( m_scenePath );
 			yield return operation;
 			m_disposes.Add( operation );
 		}

@@ -1,4 +1,5 @@
 ﻿using Chipstar.Downloads;
+using System;
 using System.Collections;
 using System.IO;
 using UnityEngine;
@@ -20,8 +21,9 @@ namespace Chipstar.Example
 		//==================================
 		private bool						m_isInit			= false;
 		private IAssetManager               m_manager           = null;
+		
 		//==================================
-		//	関数
+		//	関数 static
 		//==================================
 
 		public static IEnumerator Wakeup()
@@ -35,8 +37,11 @@ namespace Chipstar.Example
 			yield return null;
 		}
 
-
-		public static IEnumerator Setup()
+		/// <summary>
+		/// 初期化関数
+		/// １度しか行わない
+		/// </summary>
+		public static IEnumerator SetupOnlySingle()
 		{
 			yield return Wakeup();
 			if( I.m_isInit )
@@ -47,22 +52,43 @@ namespace Chipstar.Example
 			I.m_isInit = true;
 		}
 
-		public static IEnumerator Preload( string path )
+		/// <summary>
+		/// 事前ロードのみ処理
+		/// </summary>
+		public static IEnumerator PreloadOnly( string path )
 		{
 			var operation = I.m_manager.Preload( path );
 			yield return operation;
 		}
-
-		public static IAssetLoadOperation<T> LoadAsset<T>( string path ) where T : UnityEngine.Object
+		/// <summary>
+		/// アセットの読み込みのみ処理
+		/// </summary>
+		public static IAssetLoadOperation<T> LoadAssetWithoutDownload<T>( string path ) where T : UnityEngine.Object
 		{
 			var operation = I.m_manager.LoadAsset<T>( path );
 			return operation;
 		}
 
-		public static ISceneLoadOperation LoadLevel( string scenePath )
+		/// <summary>
+		/// シーン遷移のみ処理
+		/// </summary>
+		public static ISceneLoadOperation LoadLevelWithoutDownload( string scenePath )
 		{
 			return I.m_manager.LoadLevel( scenePath );
 		}
+
+		//==================================
+		//	関数 
+		//==================================
+		private IEnumerator DoDownload( string path, Action onDone )
+		{
+			var preload = m_manager.Preload( path );
+			yield return preload;
+		}
+
+		//==================================
+		//	関数 unity
+		//==================================
 
 		private void Awake()
 		{
@@ -74,6 +100,9 @@ namespace Chipstar.Example
 			I = this;
 		}
 
+		/// <summary>
+		/// 破棄
+		/// </summary>
 		private void OnDestroy()
 		{
 			if( I != this)
@@ -104,9 +133,13 @@ namespace Chipstar.Example
 #endif
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		private void Update()
 		{
 			m_manager.DoUpdate();
 		}
+
 	}
 }
