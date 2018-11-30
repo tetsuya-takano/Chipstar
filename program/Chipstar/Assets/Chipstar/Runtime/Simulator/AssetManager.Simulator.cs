@@ -1,4 +1,5 @@
-﻿using Chipstar.Downloads;
+﻿#if UNITY_EDITOR
+using Chipstar.Downloads;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -97,3 +98,4 @@ namespace Chipstar
 		}
 	}
 }
+#endif

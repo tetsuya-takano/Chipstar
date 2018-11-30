@@ -1,8 +1,8 @@
-﻿using System;
+﻿#if UNITY_EDITOR
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 namespace Chipstar.Downloads
 {
@@ -51,3 +51,4 @@ namespace Chipstar.Downloads
 		}
 	}
 }
+#endif
