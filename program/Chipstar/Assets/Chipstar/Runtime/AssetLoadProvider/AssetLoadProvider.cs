@@ -12,8 +12,9 @@ namespace Chipstar.Downloads
 	/// </summary>
 	public interface IAssetLoadProvider : IDisposable
 	{
-		IAssetLoadOperation<T>	LoadAsset<T>	( string path ) where T : UnityEngine.Object;
-		ISceneLoadOperation		LoadLevel		( string path );
+		IAssetLoadOperation<T>	LoadAsset<T>	 ( string path ) where T : UnityEngine.Object;
+		ISceneLoadOperation		LoadLevel		 ( string path );
+		ISceneLoadOperation		LoadLevelAdditive( string path );
 	}
 
 	/// <summary>

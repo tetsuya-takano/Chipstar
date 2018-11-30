@@ -20,11 +20,15 @@ namespace Chipstar.Downloads
 		//	関数
 		//=================================
 
+		/// <summary>
+		/// コンストラクタ
+		/// </summary>
 		public AssetLoadSimulator()
 		{
 			Container = new FactoryContainer
 				(
-					new ResourcesLoadFactory()
+					new ResourcesLoadFactory(),
+					new EditorLoadAssetFactory()
 				);
 		}
 
@@ -33,14 +37,15 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public void Dispose()
 		{
-
+			Container.Dispose();
+			Container = null;
 		}
 		/// <summary>
 		/// アセット
 		/// </summary>
 		public IAssetLoadOperation<T> LoadAsset<T>( string path ) where T : UnityEngine.Object
 		{
-			return null;
+			return Container.Get<IAssetLoadFactory>( path ).Create<T>( path );
 		}
 
 		/// <summary>
@@ -48,7 +53,18 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public ISceneLoadOperation LoadLevel( string path )
 		{
-			return null;
+			return Container
+					.Get<ISceneLoadFactory>( path )
+					.LoadLevel( path );
+		}
+		/// <summary>
+		/// シーン加算
+		/// </summary>
+		public ISceneLoadOperation LoadLevelAdditive( string path )
+		{
+			return Container
+					.Get<ISceneLoadFactory>( path )
+					.LoadLevelAdditive( path );
 		}
 	}
 }
