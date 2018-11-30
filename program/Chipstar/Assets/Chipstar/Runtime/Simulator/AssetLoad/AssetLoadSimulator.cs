@@ -7,6 +7,7 @@ namespace Chipstar.Downloads
 {
 	/// <summary>
 	/// エディタ用のアセットロード機能
+	/// ResourcesとAssetDatabase
 	/// </summary>
 	public sealed class AssetLoadSimulator : IAssetLoadProvider
 	{
