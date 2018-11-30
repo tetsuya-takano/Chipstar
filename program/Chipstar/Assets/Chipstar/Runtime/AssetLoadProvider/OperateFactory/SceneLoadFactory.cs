@@ -60,8 +60,7 @@ namespace Chipstar.Downloads
 		{
 			var data = Database.Find( path );
 			return new SceneLoadOperation( 
-				SceneManager.LoadSceneAsync( path ),
-				Database.AddReference( data.BundleData )
+				SceneManager.LoadSceneAsync( path )
 			);
 		}
 		/// <summary>

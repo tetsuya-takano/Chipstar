@@ -45,8 +45,7 @@ namespace Chipstar.Downloads
 		{
 			var data = Database.Find( path );
 			return new AssetBundleLoadOperation<T>( 
-							data.LoadAsync<T>( ), 
-							Database.AddReference( data.BundleData ) 
+							data.LoadAsync<T>( )
 						);
 		}
 

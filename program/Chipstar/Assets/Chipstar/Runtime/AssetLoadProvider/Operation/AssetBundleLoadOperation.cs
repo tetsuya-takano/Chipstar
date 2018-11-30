@@ -15,7 +15,6 @@ namespace Chipstar.Downloads
 		//	変数
 		//====================================
 		private AssetBundleRequest	m_request		= null;
-		private IDisposable         m_unloadDispose = null;
 		//====================================
 		//	プロパティ
 		//====================================
@@ -28,10 +27,9 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// コンストラクタ
 		/// </summary>
-		public AssetBundleLoadOperation( AssetBundleRequest request, IDisposable unloadDispose )
+		public AssetBundleLoadOperation( AssetBundleRequest request )
 		{
 			m_request		= request;
-			m_unloadDispose = unloadDispose;
 		}
 
 		/// <summary>
@@ -39,11 +37,6 @@ namespace Chipstar.Downloads
 		/// </summary>
 		protected override void DoDispose()
 		{
-			if( m_unloadDispose != null)
-			{
-				m_unloadDispose.Dispose();
-			}
-			m_unloadDispose = null;
 			m_request       = null;
 		}
 	}
