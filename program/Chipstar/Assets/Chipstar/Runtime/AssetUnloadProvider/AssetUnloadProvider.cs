@@ -10,18 +10,31 @@ namespace Chipstar.Downloads
 	/// </summary>
 	public interface IAssetUnloadProvider : IDisposable
 	{
-
+		IDisposable AddReference( IRefCountable data );
 	}
 	/// <summary>
 	/// 
 	/// </summary>
 	public class AssetUnloadProvider : IAssetUnloadProvider
 	{
+		//========================================
+		//	関数
+		//========================================
+
 		/// <summary>
 		/// 破棄
 		/// </summary>
 		public void Dispose()
 		{
+
+		}
+
+		/// <summary>
+		/// 参照の加算
+		/// </summary>
+		public IDisposable AddReference( IRefCountable data )
+		{
+			return new RefCalclater( data );
 		}
 	}
 }

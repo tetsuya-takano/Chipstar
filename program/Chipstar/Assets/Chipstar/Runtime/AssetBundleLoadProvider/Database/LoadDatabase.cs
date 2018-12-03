@@ -17,7 +17,6 @@ namespace Chipstar.Downloads
 		IAccessLocation			ToBuildMapLocation	( );
 		AssetData<TRuntimeData> Find				( string path );
 		bool					Contains			( string path );
-		IDisposable             AddReference		( TRuntimeData data );
 		IAccessLocation			ToBundleLocation	( TRuntimeData data );
 	}
 
@@ -163,14 +162,6 @@ namespace Chipstar.Downloads
 		{
 			return m_assetsTable.ContainsKey( path );
 		}
-
-		/// <summary>
-		/// 参照カウンタの追加
-		/// </summary>
-		public IDisposable AddReference( TRuntimeData data )
-        {
-            return new RefCalclater( data );
-        }
 
 		/// <summary>
 		/// コンテンツマニフェストの場所を取得
