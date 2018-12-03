@@ -13,7 +13,10 @@ namespace Chipstar.Example
         {
 			var builder = AssetBundleBuilder.Default(
                 packageConfigFile	:	"../settings/abPack.csv",
+				
+				buildTargetFolder	:	"Assets/BundleTarget/",
 				outputPath			:	Path.Combine( Application.dataPath, "../../build/windows/" + prefix + "/" ),
+				
 				buildMapFile		:   "buildMap.json",
 				options    : BuildAssetBundleOptions.ForceRebuildAssetBundle | BuildAssetBundleOptions.IgnoreTypeTreeChanges | addOption,
                 platform   : BuildTarget.StandaloneWindows64

@@ -14,6 +14,7 @@ namespace Chipstar.Builder
 		/// </summary>
 		public static IAssetBundleBuilder<ABBuildResult> Default
 			( 
+				string					buildTargetFolder,
 				string					packageConfigFile,
 				string					outputPath,
 				string					buildMapFile,
@@ -21,7 +22,7 @@ namespace Chipstar.Builder
 				BuildTarget				platform
 			)
 		{
-			return new AssetBundleDefaultBuilder( packageConfigFile, outputPath, buildMapFile, options, platform );
+			return new AssetBundleDefaultBuilder( packageConfigFile, buildMapFile, buildTargetFolder, outputPath, options, platform );
 		}
 
 		/// <summary>
@@ -39,13 +40,15 @@ namespace Chipstar.Builder
 			public AssetBundleDefaultBuilder
 				( 
 					string					packageConfigFile,
-					string					outputPath,
 					string					buildMapFile,
+
+					string					buildTargetPath,
+					string					outputPath,
 					BuildAssetBundleOptions	options,
 					BuildTarget				platform
 				) : base
 				(
-					config		: new ABBuildConfig( outputPath, platform, options ),
+					config		: new ABBuildConfig( buildTargetPath, outputPath, platform, options ),
 					fileFilter	: new ABBuildFileFilter(
 					ignorePattern: new string[]
 					{

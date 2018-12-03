@@ -113,8 +113,8 @@ namespace Chipstar.Builder
 		/// アセットバンドル生成結果配列の作成
 		/// </summary>
 		protected virtual IList<TBuildData> CreateAssetBundlePackage(
-			IABBuildConfig		                config              , 
-			string[]					        buildAssets         , 
+			IABBuildConfig		config				, 
+			string[]			buildAssets         , 
 			IList<TPackageData>	packageConfigList   
 		)
 		{

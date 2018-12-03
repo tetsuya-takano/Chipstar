@@ -30,19 +30,36 @@ namespace Chipstar.Builder
 
     public interface IABBuildData
     {
-        string      ABName { get; set; }
-        string[]    Assets { get; set; }
+        string      ABName { get; }
+        string[]    Assets { get; }
 
+		void Apply( string name, string[] assets );
 		AssetBundleBuild ToBuildEntry();
 	}
 
 
+	/// <summary>
+	/// アセットバンドル固めデータ
+	/// バンドル名 ＆ アセット一覧が基本
+	/// </summary>
     public class ABBuildData : IABBuildData
     {
-        public string   ABName { get; set; }
-        public string[] Assets { get; set; }
+        public  string   ABName { get; protected set; }
+        public  string[] Assets { get; protected set; }
 
-		public AssetBundleBuild ToBuildEntry()
+		/// <summary>
+		/// データ保持と必要なら変換
+		/// </summary>
+		public virtual void Apply( string name, string[] assets )
+		{
+			ABName  = name;
+			Assets  = assets;
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public virtual AssetBundleBuild ToBuildEntry()
 		{
 			return new AssetBundleBuild
 			{
@@ -96,10 +113,9 @@ namespace Chipstar.Builder
         {
             var data = new T();
 
-            data.ABName = name;
-            data.Assets = assets;
+			data.Apply( name, assets );
 
-            return data;
+			return data;
         }
 
         public virtual void Read( string line )

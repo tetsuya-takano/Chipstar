@@ -82,7 +82,7 @@ namespace Chipstar.Downloads
             //  アセットの一覧
             foreach (var asset in table.AssetList)
             {
-                var d = new AssetData<TRuntimeData>(asset.Path, asset.Guid);
+                var d = new AssetData<TRuntimeData>( asset );
                 m_assetsTable.Add( asset.Path, d );
             }
 			yield return null;
@@ -92,7 +92,7 @@ namespace Chipstar.Downloads
             {
                 var runtime = new TRuntimeData();
 
-                runtime.Set(bundle.ABName, bundle.Hash);
+                runtime.Set( bundle );
 
                 m_bundleTable.Add(bundle.ABName, runtime);
             }

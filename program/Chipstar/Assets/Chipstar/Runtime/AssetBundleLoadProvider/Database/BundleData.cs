@@ -19,9 +19,9 @@ namespace Chipstar.Downloads
 		void Unload();
         void OnMemory( AssetBundle bundle );
 
-        void Set( string abName, string hash );
-        void Set( AssetData<T>[] assets );
-        void Set( T[]         dependencies );
+        void Set( IBundleBuildData	data		 );
+        void Set( AssetData<T>[]	assets		 );
+        void Set( T[]				dependencies );
     }
 
     public class AssetData<T> where T : IRuntimeBundleData<T>
@@ -30,10 +30,10 @@ namespace Chipstar.Downloads
         public string Guid       { get; private set; }
         public T      BundleData { get; private set; }
 
-        public AssetData(string path, string guid)
+        public AssetData( IAssetBuildData data )
         {
-            Apply(path, guid );
-        }
+			Apply( data.Path, data.Guid );
+		}
         public void Apply( string path, string guid )
         {
             Path = path;
@@ -82,10 +82,10 @@ namespace Chipstar.Downloads
 
         }
 
-        public void Set( string abName, string hash )
+        public void Set( IBundleBuildData data )
         {
-            Name = abName;
-            Hash = Hash128.Parse( hash );
+            Name = data.ABName;
+            Hash = Hash128.Parse( data.Hash );
         }
 
         public void Set(AssetData<T>[] assets)

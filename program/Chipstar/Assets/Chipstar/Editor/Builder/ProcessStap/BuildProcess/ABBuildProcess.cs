@@ -32,7 +32,7 @@ namespace Chipstar.Builder
         /// </summary>
         public virtual TResult Build( 
             IABBuildConfig      settings, 
-            IList<TData>            assetBundleList 
+            IList<TData>        assetBundleList 
         )
         {
             var outputPath = settings.OutputPath;
