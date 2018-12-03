@@ -45,11 +45,7 @@ namespace Chipstar.Builder
             var option     = settings.Options;
             var platform   = settings.BuildTarget;
             var bundleList = assetBundleList
-                                .Select( d => new AssetBundleBuild
-                                {
-                                    assetBundleName = d.ABName,
-                                    assetNames      = d.Assets
-                                })
+                                .Select( d => d.ToBuildEntry() )
                                 .ToArray();
 
             return DoBuild( 

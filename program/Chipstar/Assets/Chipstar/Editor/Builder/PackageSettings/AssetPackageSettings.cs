@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using UnityEditor;
 
 namespace Chipstar.Builder
 {
@@ -31,13 +32,24 @@ namespace Chipstar.Builder
     {
         string      ABName { get; set; }
         string[]    Assets { get; set; }
-    }
+
+		AssetBundleBuild ToBuildEntry();
+	}
 
 
     public class ABBuildData : IABBuildData
     {
         public string   ABName { get; set; }
         public string[] Assets { get; set; }
+
+		public AssetBundleBuild ToBuildEntry()
+		{
+			return new AssetBundleBuild
+			{
+				assetBundleName = ABName,
+				assetNames      = Assets,
+			};
+		}
     }
 
     public abstract class ABPackageData<T> : IABPackageData<T> 
