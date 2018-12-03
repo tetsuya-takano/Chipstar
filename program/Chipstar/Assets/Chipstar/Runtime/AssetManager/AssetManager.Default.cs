@@ -176,6 +176,15 @@ namespace Chipstar
 			}
 
 			/// <summary>
+			/// 参照カウンタオブジェクトを作成
+			/// new で加算、Disposeで減算
+			/// </summary>
+			public IDisposable CreateAssetReference( string path )
+			{
+				return UnloadProvider.CreateRefCounter( path );
+			}
+
+			/// <summary>
 			/// 破棄
 			/// </summary>
 			public IEnumerator Unload( bool isForceUnloadAll )
@@ -194,7 +203,6 @@ namespace Chipstar
 			{
 				DownloadProvider.DoUpdate();
 			}
-
 		}
 	}
 }

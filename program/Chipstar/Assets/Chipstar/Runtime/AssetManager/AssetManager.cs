@@ -42,9 +42,14 @@ namespace Chipstar
 		void				Release( string assetPath );
 
 		/// <summary>
+		/// 参照カウンタ作成
+		/// </summary
+		IDisposable CreateAssetReference( string path );
+
+		/// <summary>
 		/// アセットの破棄
 		/// </summary>
-		IEnumerator			Unload( bool isForceUnloadAll );
+		IEnumerator Unload( bool isForceUnloadAll );
 
 		/// <summary>
 		/// 更新処理

@@ -68,6 +68,13 @@ namespace Chipstar.Example
 			var operation = I.m_manager.LoadAsset<T>( path );
 			return operation;
 		}
+		public IDisposable LoadAsset<T>( string path, Action<T> onLoaded )
+			where T : UnityEngine.Object
+		{
+			var refCounter = m_manager.CreateAssetReference( path );
+			StartCoroutine( DoDownloadWithAssetLoad<T>( path, onLoaded ) );
+			return refCounter;
+		}
 
 		/// <summary>
 		/// シーン遷移のみ処理
@@ -80,10 +87,15 @@ namespace Chipstar.Example
 		//==================================
 		//	関数 
 		//==================================
-		private IEnumerator DoDownload( string path, Action onDone )
+		private IEnumerator DoDownloadWithAssetLoad<T>( string path, Action<T> onLoaded )
+			where T : UnityEngine.Object
 		{
-			var preload = m_manager.Preload( path );
+			var preload  = m_manager.Preload( path );
 			yield return preload;
+			var loadAsset= m_manager.LoadAsset<T>( path );
+			yield return loadAsset;
+
+			onLoaded( loadAsset.Content );
 		}
 
 		//==================================

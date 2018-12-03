@@ -105,6 +105,13 @@ namespace Chipstar
 			}
 
 			/// <summary>
+			/// 
+			/// </summary>
+			public IDisposable CreateAssetReference( string path )
+			{
+				return null;
+			}
+			/// <summary>
 			/// 破棄
 			/// </summary>
 			public IEnumerator Unload( bool isForceUnloadAll )
