@@ -20,15 +20,18 @@ namespace Chipstar.Builder
 		//====================================
 		//	変数
 		//====================================
-		private Regex[] m_regexes = null;
+		private string		m_targetFolder	= null;
+		private Regex[]		m_regexes		= null;
 		//====================================
 		//	変数
 		//====================================
 
-		public ABBuildFileFilter( 
-            string[] ignorePattern
+		public ABBuildFileFilter(
+			string		targetFolder,
+            string[]	ignorePattern
         )
         {
+			m_targetFolder = targetFolder;
             if( ignorePattern == null )
 			{
 				return;
@@ -46,15 +49,15 @@ namespace Chipstar.Builder
         public virtual string[] Refine( string[] allAssetPaths )
         {
             return allAssetPaths
-                    .Where( p => IsInProject( p ))
+                    .Where( p => IsInTarget( p ))
                     .Where( p => !IsFolder  ( p ) )
                     .Where( p => !IsMatchIgnore( p ) )
                     .ToArray();
         }
 
-        protected bool IsInProject( string path )
+        protected bool IsInTarget( string path )
         {
-            return path.StartsWith( "Assets/" );
+            return path.StartsWith( m_targetFolder );
         }
 
 

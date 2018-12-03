@@ -52,8 +52,8 @@ namespace Chipstar.Builder
 		/// </summary>
 		public virtual void Apply( string name, string[] assets )
 		{
-			ABName  = name;
-			Assets  = assets;
+			ABName  =	name;
+			Assets	=	assets;
 		}
 
 		/// <summary>

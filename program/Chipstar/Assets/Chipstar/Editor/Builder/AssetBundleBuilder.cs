@@ -74,10 +74,11 @@ namespace Chipstar.Builder
         /// </summary>
         public virtual TBuildResult Build( )
         {
-            //  ビルド対象アセットの絞り込み
-            var buildAssets     = FilteringBuildAssets( AssetDatabase.GetAllAssetPaths(), FileFilter );
+			//  ビルド対象アセットの絞り込み
+			var projectAllAssets= AssetDatabase.GetAllAssetPaths();
+			var buildAssets     = FileFilter.Refine( projectAllAssets );
 
-            var packageGroup    = CreateBuildPackageGroup( PackageSettings );
+			var packageGroup    = PackageSettings.CreatePackageList();
 
 			//	ビルドマップの生成
 			var assetBundleList = CreateAssetBundlePackage( Config, buildAssets, packageGroup );
@@ -95,20 +96,6 @@ namespace Chipstar.Builder
 
 			return result;
 		}
-
-        protected virtual IList<TPackageData> CreateBuildPackageGroup( IABPackageSettings<TPackageData, TBuildData> packageSettings )
-        {
-            return packageSettings.CreatePackageList();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        protected virtual string[] FilteringBuildAssets( string[] allAssetPaths, IABBuildFileFilter filter )
-        {
-            return filter.Refine( allAssetPaths );
-        }
-
 		/// <summary>
 		/// アセットバンドル生成結果配列の作成
 		/// </summary>
@@ -122,13 +109,13 @@ namespace Chipstar.Builder
             var buildAssetTmp   = new List<string>( buildAssets );
             foreach( var pack in packageConfigList.OrderBy( p => -p.Priority ) )
             {
-                var bundles = Package( pack, ref buildAssetTmp );
+                var bundles = Package( config, pack, ref buildAssetTmp );
                 list.AddRange( bundles );
             }
             return list;
 		}
 
-        protected virtual IList<TBuildData> Package( IABPackageData<TBuildData> pack, ref List<string> targetAssets )
+        protected virtual IList<TBuildData> Package( IABBuildConfig config, IABPackageData<TBuildData> pack, ref List<string> targetAssets )
         {
             //  パッケージ対象を抽出
             var packagedAssets = new List<string>( targetAssets.Where( p => pack.IsMatch( p ) ));

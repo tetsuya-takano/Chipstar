@@ -50,11 +50,12 @@ namespace Chipstar.Builder
 				(
 					config		: new ABBuildConfig( buildTargetPath, outputPath, platform, options ),
 					fileFilter	: new ABBuildFileFilter(
-					ignorePattern: new string[]
-					{
-						"(.*).cs", "(.*).meta", "(.*).asmdef",	//	無視ファイル
-						"(.*)Resources/"						//	無視フォルダ
-					}),
+						targetFolder	: buildTargetPath,
+						ignorePattern	: new string[]
+						{
+							"(.*).cs", "(.*).meta", "(.*).asmdef",	//	無視ファイル
+							"(.*)Resources/"						//	無視フォルダ
+						}),
 					packageSettings	: new ABPackageMstTable( packageConfigFile ),
 					buildProcess	: SimpleABBuildProcess<ABBuildData>.Empty,
 					preProcess		: ABBuildPreProcess<ABBuildData>.Empty,

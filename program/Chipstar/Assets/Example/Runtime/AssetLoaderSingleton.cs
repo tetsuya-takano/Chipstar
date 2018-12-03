@@ -138,7 +138,7 @@ namespace Chipstar.Example
 				CacheStorage = Path.Combine( Application.dataPath, "../../cacheStorage/" ),
 				LocalSaveFile= "localVersion.json"
 			};
-#if UNITY_EDITOR
+#if false
 			m_manager = AssetManager.Simulator();
 #else
 			m_manager = AssetManager.Default<RuntimeBundlleData>( config.ServerUrl, config.BuildInfoFile, config.CacheStorage, config.LocalSaveFile );

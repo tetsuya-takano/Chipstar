@@ -22,8 +22,8 @@ namespace Chipstar.Downloads
         where TBundle   : IBundleBuildData
         where TAssetData: IAssetBuildData
     {
-        IEnumerable<TBundle>    BundleList    { get; }
-        IEnumerable<TAssetData> AssetList     { get; }
+        IEnumerable<TBundle>    BundleList  { get; }
+        IEnumerable<TAssetData> AssetList   { get; }
 
         void Add(TAssetData asset  );
         void Add(TBundle    bundle );
@@ -114,8 +114,10 @@ namespace Chipstar.Downloads
         //===============================
         //  SerializeField
         //===============================
-        [SerializeField] private List<BundleBuildData>  m_bundleList = new List<BundleBuildData>();
-        [SerializeField] private List<AssetBuildData>   m_assetDBList= new List<AssetBuildData>();
+		[SerializeField] private string					m_accessPrefex	= null;
+        [SerializeField] private List<BundleBuildData>  m_bundleList	= new List<BundleBuildData>();
+        [SerializeField] private List<AssetBuildData>   m_assetDBList	= new List<AssetBuildData>();
+
 
         public IEnumerable<BundleBuildData> BundleList { get { return m_bundleList; } }
         public IEnumerable<AssetBuildData>  AssetList  { get { return m_assetDBList   ; } }
