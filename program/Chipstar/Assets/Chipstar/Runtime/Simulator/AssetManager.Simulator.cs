@@ -109,7 +109,7 @@ namespace Chipstar
 			/// </summary>
 			public IDisposable CreateAssetReference( string path )
 			{
-				return null;
+				return EmptyReference.Default;
 			}
 			/// <summary>
 			/// 破棄

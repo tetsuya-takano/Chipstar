@@ -13,10 +13,19 @@ namespace Chipstar.Downloads
         void ClearRef();
     }
 
-    /// <summary>
-    /// 参照カウンタの計算クラス
-    /// </summary>
-    public sealed class RefCalclater : IDisposable
+	/// <summary>
+	/// 空のアセット参照として使用するクラス
+	/// </summary>
+	public sealed class EmptyReference : IDisposable
+	{
+		public static readonly EmptyReference Default = new EmptyReference();
+		public void Dispose() { }
+	}
+
+	/// <summary>
+	/// 参照カウンタの計算クラス
+	/// </summary>
+	public sealed class RefCalclater : IDisposable
     {
         //======================
         //  変数

@@ -83,7 +83,7 @@ namespace Chipstar.Downloads
 			var data = Database.GetAssetData( assetPath );
 			if( data == null )
 			{
-				return null;
+				return EmptyReference.Default;
 			}
 			return new RefCalclater( data.BundleData );
 		}
