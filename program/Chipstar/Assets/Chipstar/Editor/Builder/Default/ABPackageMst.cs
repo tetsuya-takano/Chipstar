@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Chipstar.Example
+namespace Chipstar.Builder
 {
     /// <summary>
     /// アセットバンドルマスタ用クラス

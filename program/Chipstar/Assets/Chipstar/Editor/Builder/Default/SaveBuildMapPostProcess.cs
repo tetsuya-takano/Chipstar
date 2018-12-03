@@ -7,7 +7,7 @@ using System.Linq;
 using Chipstar.Downloads;
 using System.Text;
 
-namespace Chipstar.Example
+namespace Chipstar.Builder
 {
     public class SaveBuildMapPostProcess : ABBuildPostProcess<ABBuildData, ABBuildResult>
     {

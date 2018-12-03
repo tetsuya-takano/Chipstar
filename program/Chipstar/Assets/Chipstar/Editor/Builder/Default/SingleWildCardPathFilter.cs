@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
-namespace Chipstar.Example
+namespace Chipstar.Builder
 {
     /// <summary>
     /// 1個のワイルドカードを許容する

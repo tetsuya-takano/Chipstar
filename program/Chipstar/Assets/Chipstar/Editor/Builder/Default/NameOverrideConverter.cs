@@ -3,7 +3,7 @@ using UnityEditor;
 using Chipstar.Builder;
 using System.Text.RegularExpressions;
 
-namespace Chipstar.Example
+namespace Chipstar.Builder
 {
     public class NameOverrideConverter : ABNameConverter
     {

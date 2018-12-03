@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Chipstar.Downloads;
-namespace Chipstar.Example
+
+namespace Chipstar.Downloads
 {
     public class RuntimeBundlleData : BundleData<RuntimeBundlleData>
     {
