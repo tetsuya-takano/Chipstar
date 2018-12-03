@@ -141,7 +141,7 @@ namespace Chipstar.Example
 #if false
 			m_manager = AssetManager.Simulator();
 #else
-			m_manager = AssetManager.Default<RuntimeBundlleData>( config.ServerUrl, config.BuildInfoFile, config.CacheStorage, config.LocalSaveFile );
+			m_manager = AssetManager.Default<RuntimeBundleData>( config.ServerUrl, config.BuildInfoFile, config.CacheStorage, config.LocalSaveFile );
 #endif
 		}
 

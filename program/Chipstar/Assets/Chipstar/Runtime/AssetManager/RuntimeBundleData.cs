@@ -4,7 +4,7 @@ using Chipstar.Downloads;
 
 namespace Chipstar.Downloads
 {
-    public class RuntimeBundlleData : BundleData<RuntimeBundlleData>
+    public class RuntimeBundleData : BundleData<RuntimeBundleData>
     {
     }
 }
