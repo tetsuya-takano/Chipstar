@@ -13,9 +13,13 @@ namespace Chipstar.Downloads
 	public sealed class AssetLoadSimulator : IAssetLoadProvider
 	{
 		//=================================
+		//
+		//=================================
+		//=================================
 		//	プロパティ
 		//=================================
-		private IFactoryContainer Container { get; set; }
+		private IAssetLogger		Logger		{ get; set; }
+		private IFactoryContainer	Container	{ get; set; }
 
 		//=================================
 		//	関数
@@ -47,7 +51,10 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public IAssetLoadOperation<T> LoadAsset<T>( string path ) where T : UnityEngine.Object
 		{
-			return Container.Get<IAssetLoadFactory>( path ).Create<T>( path );
+			Logger.LoadAsset<T>( path );
+			return Container
+					.Get<IAssetLoadFactory>( path )
+					.Create<T>( path );
 		}
 
 		/// <summary>
@@ -55,6 +62,7 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public ISceneLoadOperation LoadLevel( string path )
 		{
+			Logger.LoadLevel( path );
 			return Container
 					.Get<ISceneLoadFactory>( path )
 					.LoadLevel( path );
@@ -64,6 +72,7 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public ISceneLoadOperation LoadLevelAdditive( string path )
 		{
+			Logger.LoadLevelAdditive( path );
 			return Container
 					.Get<ISceneLoadFactory>( path )
 					.LoadLevelAdditive( path );
