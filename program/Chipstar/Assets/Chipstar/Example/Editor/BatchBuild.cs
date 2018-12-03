@@ -11,32 +11,13 @@ namespace Chipstar.Example
     {
         static void Build( string prefix, BuildAssetBundleOptions addOption )
         {
-            var config  = new ABBuildConfig(
-                outputPath : Path.Combine( Application.dataPath, "../../build/windows/" + prefix + "/"),
-                option     : BuildAssetBundleOptions.ForceRebuildAssetBundle | BuildAssetBundleOptions.IgnoreTypeTreeChanges | addOption,
+			var builder = AssetBundleBuilder.Default(
+                packageConfigFile	:	"../settings/abPack.csv",
+				outputPath			:	Path.Combine( Application.dataPath, "../../build/windows/" + prefix + "/" ),
+				buildMapFile		:   "buildMap.json",
+				options    : BuildAssetBundleOptions.ForceRebuildAssetBundle | BuildAssetBundleOptions.IgnoreTypeTreeChanges | addOption,
                 platform   : BuildTarget.StandaloneWindows64
             );
-
-            var fileFilter      = new ABBuildFileFilter( 
-                ignorePattern: new string[] 
-                {
-                    "(.*).cs", "(.*).meta", "(.*).asmdef",	//	無視ファイル
-					"(.*)Resources/"						//	無視フォルダ
-				} 
-            );
-            //var buildProcess  = new DisableBuildProcess<ABBuildData>();
-            var buildProcess    = SimpleABBuildProcess<ABBuildData>.Empty;
-
-			var builder = new AssetBundleBuilder<ABPackageMst,ABBuildData, ABBuildResult>
-				(
-					config          : config,
-					fileFilter      : fileFilter,
-					packageSettings : new ABPackageMstTable( "../settings/abPack.csv" ),
-					buildProcess    : buildProcess,
-					preProcess      : ABBuildPreProcess <ABBuildData>.Empty,
-					postProcess     : new SaveBuildMapPostProcess( "buildMap.json" )
-				);
-
 			var result = builder.Build();
 			if( result.IsSuccess )
 			{

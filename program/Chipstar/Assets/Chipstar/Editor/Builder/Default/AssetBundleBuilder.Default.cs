@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 namespace Chipstar.Builder
 {
@@ -11,39 +12,53 @@ namespace Chipstar.Builder
 		/// <summary>
 		/// デフォルトビルドを返却
 		/// </summary>
-		public static IAssetBundleBuilder<TResult> Default<TResult>()
+		public static IAssetBundleBuilder<ABBuildResult> Default
+			( 
+				string					packageConfigFile,
+				string					outputPath,
+				string					buildMapFile,
+				BuildAssetBundleOptions	options,
+				BuildTarget				platform
+			)
 		{
-			return null;
+			return new AssetBundleDefaultBuilder( packageConfigFile, outputPath, buildMapFile, options, platform );
 		}
 
-		private sealed class AssetBundleDefaultBuilder
+		/// <summary>
+		/// カスタマイズナシのビルドクラス
+		/// </summary>
+		private sealed class AssetBundleDefaultBuilder : AssetBundleBuilder<ABPackageMst, ABBuildData, ABBuildResult>
 		{
-			public AssetBundleDefaultBuilder()
-			{
-				var config  = new ABBuildConfig(
-					outputPath : Path.Combine( Application.dataPath, "../../build/windows/" + prefix + "/"),
-					option     : BuildAssetBundleOptions.ForceRebuildAssetBundle | BuildAssetBundleOptions.IgnoreTypeTreeChanges | addOption,
-					platform   : BuildTarget.StandaloneWindows64
-				);
+			//===================================
+			//	関数
+			//===================================
 
-				var fileFilter      = new ABBuildFileFilter(
+			/// <summary>
+			/// コンストラクタ
+			/// </summary>
+			public AssetBundleDefaultBuilder
+				( 
+					string					packageConfigFile,
+					string					outputPath,
+					string					buildMapFile,
+					BuildAssetBundleOptions	options,
+					BuildTarget				platform
+				) : base
+				(
+					config		: new ABBuildConfig( outputPath, platform, options ),
+					fileFilter	: new ABBuildFileFilter(
 					ignorePattern: new string[]
 					{
 						"(.*).cs", "(.*).meta", "(.*).asmdef",	//	無視ファイル
 						"(.*)Resources/"						//	無視フォルダ
-					}
-				);
-				//var buildProcess  = new DisableBuildProcess<ABBuildData>();
-				var buildProcess    = SimpleABBuildProcess<ABBuildData>.Empty;
-				var builder = new AssetBundleBuilder<ABPackageMst,ABBuildData, ABBuildResult>
-					(
-						config          : config,
-						fileFilter      : fileFilter,
-						packageSettings : new ABPackageMstTable( "../settings/abPack.csv" ),
-						buildProcess    : buildProcess,
-						preProcess      : ABBuildPreProcess <ABBuildData>.Empty,
-						postProcess     : new SaveBuildMapPostProcess( "buildMap.json" )
-					);
+					}),
+					packageSettings	: new ABPackageMstTable( packageConfigFile ),
+					buildProcess	: SimpleABBuildProcess<ABBuildData>.Empty,
+					preProcess		: ABBuildPreProcess<ABBuildData>.Empty,
+					postProcess		: new SaveBuildMapPostProcess( buildMapFile )
+				)
+			{
+				
 			}
 		}
 	}
