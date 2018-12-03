@@ -50,6 +50,7 @@ namespace Chipstar
 			private ICacheDatabase					CacheDatabase		{ get; set; }
 			private IAssetLoadProvider				AssetLoadProvider	{ get; set; }
 			private IAssetBundleLoadProvider		DownloadProvider	{ get; set; }
+			private IAssetUnloadProvider			UnloadProvider		{ get; set; }
 
 			//======================================
 			//	関数
@@ -96,6 +97,14 @@ namespace Chipstar
 					(
 						container : loadFactContainer
 					);
+
+				//---------------------------------
+				//	破棄機能
+				//---------------------------------
+				UnloadProvider = new AssetUnloadProvider<TRuntimeBundle>
+					(
+						LoadDatabase
+					);
 			}
 
 			/// <summary>
@@ -107,11 +116,13 @@ namespace Chipstar
 				LoadDatabase		.Dispose();
 				DownloadProvider	.Dispose();
 				AssetLoadProvider	.Dispose();
+				UnloadProvider		.Dispose();
 
 				CacheDatabase       = null;
 				LoadDatabase		= null;
 				DownloadProvider	= null;
 				AssetLoadProvider	= null;
+				UnloadProvider      = null;
 			}
 
 			/// <summary>
@@ -135,6 +146,7 @@ namespace Chipstar
 			/// </summary>
 			public IAssetLoadOperation<T> LoadAsset<T>( string assetPath ) where T : UnityEngine.Object
 			{
+				UnloadProvider.AddRef( assetPath );
 				return AssetLoadProvider.LoadAsset<T>( assetPath );
 			}
 
@@ -143,7 +155,8 @@ namespace Chipstar
 			/// </summary>
 			public ISceneLoadOperation LoadLevel( string scenePath )
 			{
-				return AssetLoadProvider.LoadLevel( scenePath );
+						UnloadProvider	 .AddRef	( scenePath );
+				return	AssetLoadProvider.LoadLevel	( scenePath );
 			}
 
 			/// <summary>
@@ -155,12 +168,33 @@ namespace Chipstar
 			}
 
 			/// <summary>
+			/// 解放
+			/// </summary>
+			public void Release( string assetPath )
+			{
+				UnloadProvider.ReleaseRef( assetPath );
+			}
+
+			/// <summary>
+			/// 破棄
+			/// </summary>
+			public IEnumerator Unload( bool isForceUnloadAll )
+			{
+				if( isForceUnloadAll )
+				{
+					yield return UnloadProvider.ForceUnloadAll();
+				}
+				yield return UnloadProvider.UnloadUnusedAssets();
+			}
+
+			/// <summary>
 			/// 更新
 			/// </summary>
 			public void DoUpdate()
 			{
 				DownloadProvider.DoUpdate();
 			}
+
 		}
 	}
 }

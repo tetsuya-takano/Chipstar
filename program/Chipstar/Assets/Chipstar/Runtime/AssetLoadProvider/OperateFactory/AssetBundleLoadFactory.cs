@@ -43,10 +43,8 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public IAssetLoadOperation<T> Create<T>( string path ) where T : UnityEngine.Object
 		{
-			var data = Database.Find( path );
-			return new AssetBundleLoadOperation<T>( 
-							data.LoadAsync<T>( )
-						);
+			var data = Database.GetAssetData( path );
+			return new AssetBundleLoadOperation<T>( data.LoadAsync<T>() );
 		}
 
 		/// <summary>

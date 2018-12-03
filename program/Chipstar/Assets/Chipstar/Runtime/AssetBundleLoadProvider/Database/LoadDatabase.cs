@@ -15,7 +15,7 @@ namespace Chipstar.Downloads
 
         IEnumerator             Initialize			( byte[] data );
 		IAccessLocation			ToBuildMapLocation	( );
-		AssetData<TRuntimeData> Find				( string path );
+		AssetData<TRuntimeData> GetAssetData		( string path );
 		bool					Contains			( string path );
 		IAccessLocation			ToBundleLocation	( TRuntimeData data );
 	}
@@ -151,7 +151,7 @@ namespace Chipstar.Downloads
         /// <summary>
         /// 取得
         /// </summary>
-        public AssetData<TRuntimeData> Find( string path )
+        public AssetData<TRuntimeData> GetAssetData( string path )
         {
             return m_assetsTable[ path ];
         }

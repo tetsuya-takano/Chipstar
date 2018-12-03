@@ -37,6 +37,16 @@ namespace Chipstar
 		ISceneLoadOperation LoadLevelAdditive( string scenePath );
 
 		/// <summary>
+		/// 参照の解放
+		/// </summary>
+		void				Release( string assetPath );
+
+		/// <summary>
+		/// アセットの破棄
+		/// </summary>
+		IEnumerator			Unload( bool isForceUnloadAll );
+
+		/// <summary>
 		/// 更新処理
 		/// </summary>
 		void DoUpdate();

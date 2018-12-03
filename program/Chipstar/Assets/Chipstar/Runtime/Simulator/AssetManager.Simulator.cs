@@ -95,6 +95,26 @@ namespace Chipstar
 			{
 				//	特にナシ
 			}
+
+			/// <summary>
+			/// 
+			/// </summary>
+			public void Release( string assetPath )
+			{
+				//	何もしない
+			}
+
+			/// <summary>
+			/// 破棄
+			/// </summary>
+			public IEnumerator Unload( bool isForceUnloadAll )
+			{
+				if( isForceUnloadAll )
+				{
+					yield return Resources.UnloadUnusedAssets();
+				}
+				yield return Resources.UnloadUnusedAssets();
+			}
 		}
 	}
 }

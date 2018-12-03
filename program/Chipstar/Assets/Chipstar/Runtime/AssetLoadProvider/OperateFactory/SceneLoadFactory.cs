@@ -48,7 +48,7 @@ namespace Chipstar.Downloads
 			{
 				return false;
 			}
-			var data = Database.Find( path );
+			var data = Database.GetAssetData( path );
 
 			return data.BundleData.IsScene;
 		}
@@ -58,7 +58,7 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public ISceneLoadOperation LoadLevel( string path )
 		{
-			var data = Database.Find( path );
+			var data = Database.GetAssetData( path );
 			return new SceneLoadOperation( 
 				SceneManager.LoadSceneAsync( path )
 			);
