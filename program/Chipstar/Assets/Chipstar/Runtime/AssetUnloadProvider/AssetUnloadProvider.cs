@@ -53,11 +53,12 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public void AddRef( string assetPath )
 		{
-			var data = Database.GetAssetData( assetPath );
-			if( data == null )
+			if( !Database.Contains( assetPath ) )
 			{
 				return;
 			}
+			var data = Database.GetAssetData( assetPath );
+
 			data.BundleData.AddRef();
 		}
 
@@ -66,11 +67,11 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public void ReleaseRef( string assetPath )
 		{
-			var data = Database.GetAssetData( assetPath );
-			if( data == null )
+			if( !Database.Contains( assetPath ) )
 			{
 				return;
 			}
+			var data = Database.GetAssetData( assetPath );
 			data.BundleData.ReleaseRef();
 		}
 
