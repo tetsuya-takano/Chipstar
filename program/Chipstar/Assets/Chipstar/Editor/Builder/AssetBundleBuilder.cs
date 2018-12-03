@@ -122,7 +122,7 @@ namespace Chipstar.Builder
             //  パッケージ済みとして、残アセットから削除
             targetAssets.RemoveAll( p => packagedAssets.Contains( p ) );
 
-            return pack.Build( packagedAssets );
+            return pack.Build( config.RootFolder, packagedAssets );
         }
     }
 

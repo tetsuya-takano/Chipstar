@@ -11,7 +11,7 @@ namespace Chipstar.Builder
 	/// </summary>
 	public interface IABBuildConfig
 	{
-		string					BuildTargetFolder	{ get; }
+		string					RootFolder	{ get; }
 		string					OutputPath			{ get; }    //	吐き出し先
 		BuildTarget				BuildTarget			{ get; }	//	プラットフォーム
 		BuildAssetBundleOptions	Options				{ get; }	//	オプション
@@ -22,7 +22,7 @@ namespace Chipstar.Builder
         public virtual BuildTarget              BuildTarget			{ get; private set; }
         public virtual BuildAssetBundleOptions  Options				{ get; private set; }
         public virtual string                   OutputPath			{ get; private set; }
-		public virtual string					BuildTargetFolder	{ get; private set; }
+		public virtual string					RootFolder	{ get; private set; }
 
 		public ABBuildConfig( 
 			string					buildTargetPath,
@@ -31,7 +31,7 @@ namespace Chipstar.Builder
             BuildAssetBundleOptions option 
         )
         {
-			BuildTargetFolder	= buildTargetPath;
+			RootFolder	= buildTargetPath;
             OutputPath			= outputPath;
             Options				= option;
             BuildTarget			= platform;

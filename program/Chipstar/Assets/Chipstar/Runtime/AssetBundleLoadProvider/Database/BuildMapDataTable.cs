@@ -114,7 +114,6 @@ namespace Chipstar.Downloads
         //===============================
         //  SerializeField
         //===============================
-		[SerializeField] private string					m_accessPrefex	= null;
         [SerializeField] private List<BundleBuildData>  m_bundleList	= new List<BundleBuildData>();
         [SerializeField] private List<AssetBuildData>   m_assetDBList	= new List<AssetBuildData>();
 

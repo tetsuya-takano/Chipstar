@@ -24,7 +24,7 @@ namespace Chipstar.Builder
         string      Name        { get; }
         int         Priority    { get; }    //	優先順位
         bool        IsMatch( string path );
-        IList<T>    Build  ( IEnumerable<string> packagedAssets );
+        IList<T>    Build  ( string rootFolder, IEnumerable<string> packagedAssets );
         void        Read   ( string line );
     }
 
@@ -33,7 +33,7 @@ namespace Chipstar.Builder
         string      ABName { get; }
         string[]    Assets { get; }
 
-		void Apply( string name, string[] assets );
+		void Apply( string rootFolder, string name, string[] assets );
 		AssetBundleBuild ToBuildEntry();
 	}
 
@@ -44,16 +44,18 @@ namespace Chipstar.Builder
 	/// </summary>
     public class ABBuildData : IABBuildData
     {
-        public  string   ABName { get; protected set; }
-        public  string[] Assets { get; protected set; }
+		private string	 RemoveFolder	{ get; set; }
+        public  string   ABName			{ get; protected set; }
+        public  string[] Assets			{ get; protected set; }
 
 		/// <summary>
 		/// データ保持と必要なら変換
 		/// </summary>
-		public virtual void Apply( string name, string[] assets )
+		public virtual void Apply( string rootFolder, string name, string[] assets )
 		{
-			ABName  =	name;
-			Assets	=	assets;
+			RemoveFolder=	rootFolder;
+			ABName		=	name;
+			Assets		=	assets;
 		}
 
 		/// <summary>
@@ -95,25 +97,31 @@ namespace Chipstar.Builder
             return PathFilter.IsMatch( path );
         }
 
-        public IList<T> Build( IEnumerable<string> packagedAssets )
+        public IList<T> Build( string rootFolder, IEnumerable<string> packagedAssets )
         {
-            var groups  = packagedAssets.GroupBy( c => NameConverter.Convert( c ));
-            var list    = new List<T>();
+			var groups  = packagedAssets
+							.GroupBy
+							( c => NameConverter
+										.Convert( c )
+										.Replace( rootFolder, string.Empty ) 
+							).ToArray();
+
+			var list    = new List<T>();
             foreach( var item in groups )
             {
                 var name    = item.Key;
                 var assets  = item.ToArray();
-                var data    = DoBuild( name, assets );
+                var data    = DoBuild( rootFolder, name, assets );
                 list.Add( data );
             }
             return list;
         }
 
-        protected virtual T DoBuild( string name, string[] assets )
+        protected virtual T DoBuild( string rootFolder, string name, string[] assets )
         {
             var data = new T();
 
-			data.Apply( name, assets );
+			data.Apply( rootFolder, name, assets );
 
 			return data;
         }

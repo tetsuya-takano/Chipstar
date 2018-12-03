@@ -49,14 +49,14 @@ namespace Chipstar.Builder
                 json.Add( d );
             }
 
-            var assetPaths = bundleList.SelectMany(c => c.Assets).Distinct();
+            var assetPaths = bundleList.SelectMany(c => c.Assets ).Distinct();
             foreach (var assetPath in assetPaths)
             {
                 var d = new AssetBuildData
                 {
                     Path = assetPath,
-                    Guid = AssetDatabase.AssetPathToGUID( assetPath )
-                };
+					Guid = AssetDatabase.AssetPathToGUID( assetPath )
+				};
                 json.Add( d );
             }
             var path        = Path.Combine( settings.OutputPath, FileName );
