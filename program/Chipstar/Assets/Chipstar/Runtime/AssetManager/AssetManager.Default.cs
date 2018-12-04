@@ -44,10 +44,10 @@ namespace Chipstar
 			//	プロパティ
 			//======================================
 			private IEntryPoint						AccessServer		{ get; set; }
-			private IEntryPoint						CacheStorage		{ get; set; }
+			private IEntryPoint						LocalStorage		{ get; set; }
 
 			private ILoadDatabase<TRuntimeBundle>	LoadDatabase		{ get; set; }
-			private ICacheDatabase					CacheDatabase		{ get; set; }
+			private IStorageDatabase				StorageDatabase		{ get; set; }
 
 			private IAssetLoadProvider				AssetLoadProvider	{ get; set; }
 			private IAssetBundleLoadProvider		DownloadProvider	{ get; set; }
@@ -68,11 +68,11 @@ namespace Chipstar
 				//	接続先
 				AccessServer = new EntryPoint( serverUrl );
 				//	保存先
-				CacheStorage = new EntryPoint( storagePath );
+				LocalStorage = new EntryPoint( storagePath );
 				//	コンテンツカタログ
 				LoadDatabase = new LoadDatabase<BuildMapDataTable, BundleBuildData, AssetBuildData, TRuntimeBundle>( AccessServer, buildInfoFile );
 				//	キャッシュ情報
-				CacheDatabase= new CacheDatabase( CacheStorage, localSaveInfoFile );
+				StorageDatabase= new StorageDatabase( LocalStorage, localSaveInfoFile );
 
 				//---------------------------------
 				//	ダウンロード機能
@@ -80,7 +80,7 @@ namespace Chipstar
 				DownloadProvider = new AssetBundleLoadProvider<TRuntimeBundle>
 					(
 						loadDatabase : LoadDatabase,
-						cacheDatabase: CacheDatabase,
+						storageDatabase: StorageDatabase,
 						dlEngine	 : new JobEngine(),
 						jobCreator	 : new WRJobCreator()
 					);
@@ -114,13 +114,13 @@ namespace Chipstar
 			/// </summary>
 			public void Dispose()
 			{
-				CacheDatabase		.Dispose();
+				StorageDatabase		.Dispose();
 				LoadDatabase		.Dispose();
 				DownloadProvider	.Dispose();
 				AssetLoadProvider	.Dispose();
 				UnloadProvider		.Dispose();
 
-				CacheDatabase       = null;
+				StorageDatabase       = null;
 				LoadDatabase		= null;
 				DownloadProvider	= null;
 				AssetLoadProvider	= null;

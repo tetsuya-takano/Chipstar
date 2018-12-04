@@ -130,7 +130,7 @@ namespace Chipstar
 		/// </summary>
 		[Conditional( DETAIL_LOG_MODE )]
 		[Conditional( SIMPLE_LOG_MODE )]
-		internal static void Log_InitCacheDB( string path )
+		internal static void Log_InitStorageDB( string path )
 		{
 			LogCore( string.Format( "Get CacheDB : {0}", path ) );
 		}
@@ -138,7 +138,7 @@ namespace Chipstar
 		/// キャッシュデータベースの取得
 		/// </summary>
 		[Conditional( DETAIL_LOG_MODE )]
-		internal static void Log_InitCacheDB_ReadLocalFile( IEnumerable<LocalBundleData> table )
+		internal static void Log_InitStorageDB_ReadLocalFile( IEnumerable<LocalBundleData> table )
 		{
 			LogCore( string.Format( "Serialized : {0}", table.ToString() ) );
 		}
@@ -146,7 +146,7 @@ namespace Chipstar
 		/// キャッシュデータベースの初回作成
 		/// </summary>
 		[Conditional( DETAIL_LOG_MODE )]
-		internal static void Log_InitCacheDB_FirstCreate( string path )
+		internal static void Log_InitStorageDB_FirstCreate( string path )
 		{
 			LogCore( string.Format( "First Create : {0}", path ) );
 		}

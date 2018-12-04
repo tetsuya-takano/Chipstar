@@ -10,17 +10,17 @@ namespace Chipstar.Downloads
     /// <summary>
     /// キャッシュデータ
     /// </summary>
-    public interface ICacheDatabase : IDisposable
+    public interface IStorageDatabase : IDisposable
     {
 		IEnumerator		Initialize( );
 		IAccessLocation ToLocation( string fileName );
 
-		bool HasCache	( ICachableBundle data );
+		bool HasStorage	( ICachableBundle data );
         void Write		( ICachableBundle data, byte[] content );
         void Apply		( );
 		void Delete		( ICachableBundle bundle );
 	}
-    public class CacheDatabase : ICacheDatabase
+    public class StorageDatabase : IStorageDatabase
     {
         //===============================================
         //  class
@@ -64,9 +64,9 @@ namespace Chipstar.Downloads
 			/// <summary>
 			/// 削除
 			/// </summary>
-			internal void Remove( LocalBundleData cache )
+			internal void Remove( LocalBundleData localData )
 			{
-				m_list.Remove( cache );
+				m_list.Remove( localData );
 			}
 
 			/// <summary>
@@ -90,10 +90,10 @@ namespace Chipstar.Downloads
         //  関数
         //===============================================
         
-		public CacheDatabase( IEntryPoint entryPoint, string cacheDbName )
+		public StorageDatabase( IEntryPoint entryPoint, string storageDbName )
 		{
 			m_entryPoint = entryPoint;
-			m_fileName   = cacheDbName;
+			m_fileName   = storageDbName;
 		}
 
 		/// <summary>
@@ -112,20 +112,20 @@ namespace Chipstar.Downloads
 			//	TODO : 仮処理
 			m_versionFile	= m_entryPoint.ToLocation( m_fileName );
 			var path		= m_versionFile.AccessPath;
-			Chipstar.Log_InitCacheDB( path );
+			Chipstar.Log_InitStorageDB( path );
 
 			var isExist = File.Exists( path );
 			if( !isExist )
 			{
 				//	なければ空データ
 				m_table = new Table();
-				Chipstar.Log_InitCacheDB_FirstCreate( path );
+				Chipstar.Log_InitStorageDB_FirstCreate( path );
 			}
 			else
 			{
 				var bytes	= File.ReadAllBytes( path );
 				m_table		= Load( bytes );
-				Chipstar.Log_InitCacheDB_ReadLocalFile( m_table );
+				Chipstar.Log_InitStorageDB_ReadLocalFile( m_table );
 			}
 			yield return null;
 		}
@@ -147,7 +147,7 @@ namespace Chipstar.Downloads
         /// <summary>
         /// キャッシュ保持
         /// </summary>
-        public bool HasCache( ICachableBundle bundleData ) 
+        public bool HasStorage( ICachableBundle bundleData ) 
         {
             var data = m_table.Find( bundleData.Name );
             if ( data == null )
@@ -228,16 +228,16 @@ namespace Chipstar.Downloads
 		private void SaveVersion( ICachableBundle data )
 		{
 			Chipstar.Log_SaveLocalVersion( data );
-			//  キャッシュテーブルにあるかどうか
-			var cache = m_table.Find(data.Name);
-			if( cache == null )
+			//  ストレージにあるかどうか
+			var storageData = m_table.Find(data.Name);
+			if( storageData == null )
 			{
 				//  なければ追加書き込み
 				m_table.Add( data.Name, data.Hash );
 				return;
 			}
 			//  あったらバージョン情報を上書き
-			cache.Apply( data.Hash );
+			storageData.Apply( data.Hash );
 		}
 
 		/// <summary>
@@ -261,13 +261,13 @@ namespace Chipstar.Downloads
 		private void RemoveVersion( ICachableBundle data )
 		{
 			Chipstar.Log_RemoveLocalVersion( data );
-			var cache = m_table.Find( data.Name );
-			if( cache == null )
+			var storageData = m_table.Find( data.Name );
+			if( storageData == null )
 			{
 				//	保存されてないなら消さなくていい
 				return;
 			}
-			m_table.Remove( cache );
+			m_table.Remove( storageData );
 		}
 
 		public override string ToString()

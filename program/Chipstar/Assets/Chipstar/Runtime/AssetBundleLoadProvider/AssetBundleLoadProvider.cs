@@ -24,7 +24,7 @@ namespace Chipstar.Downloads
         //===============================
         //  プロパティ
         //===============================
-        private ICacheDatabase              CacheDatabase   { get; set; } // ローカルストレージのキャッシュ情報
+        private IStorageDatabase            StorageDatabase { get; set; } // ローカルストレージのキャッシュ情報
         private ILoadDatabase<TRuntimeData> LoadDatabase    { get; set; } // コンテンツテーブルから作成したDB
         private IJobEngine                  JobEngine       { get; set; } // DLエンジン
         private IJobCreator					JobCreator      { get; set; } // ジョブの作成
@@ -36,13 +36,13 @@ namespace Chipstar.Downloads
         public AssetBundleLoadProvider
             ( 
                 ILoadDatabase<TRuntimeData> loadDatabase,
-				ICacheDatabase				cacheDatabase,
+				IStorageDatabase			storageDatabase,
                 IJobEngine                  dlEngine,
                 IJobCreator					jobCreator
             )
         {
             LoadDatabase    = loadDatabase;
-			CacheDatabase   = cacheDatabase;
+			StorageDatabase = storageDatabase;
             JobEngine       = dlEngine;
             JobCreator      = jobCreator;
 
@@ -53,7 +53,7 @@ namespace Chipstar.Downloads
 			JobCreator	.Dispose();
 			JobEngine	.Dispose();
 
-			CacheDatabase	= null;
+			StorageDatabase	= null;
 			LoadDatabase	= null;
 			JobCreator      = null;
 			JobEngine       = null;
@@ -74,7 +74,7 @@ namespace Chipstar.Downloads
                 yield return null;
             }
 			yield return LoadDatabase	.Initialize( loadBuildMap.Content );
-			yield return CacheDatabase	.Initialize( );
+			yield return StorageDatabase.Initialize( );
 
             yield break;
         }
@@ -162,7 +162,7 @@ namespace Chipstar.Downloads
 				//	ロードしてあるならしない
 				return LoadSkip.Default;
 			}
-			if( CacheDatabase.HasCache( data ) )
+			if( StorageDatabase.HasStorage( data ) )
 			{
 				//	更新がないならそのままローカルのファイルを開く
 				return DoLocalOpen( data );
@@ -185,8 +185,8 @@ namespace Chipstar.Downloads
 				{
 					//	ファイルのDL → 書き込み → ローカルロード
 					//	剥がしたい
-					CacheDatabase.Write( data, content );
-					CacheDatabase.Apply();
+					StorageDatabase.Write( data, content );
+					StorageDatabase.Apply();
 				}
 			);
 		}
@@ -196,7 +196,7 @@ namespace Chipstar.Downloads
 		/// </summary>
 		protected virtual ILoadResult DoLocalOpen( TRuntimeData data )
 		{
-			var location	= CacheDatabase.ToLocation( data.Name );
+			var location	= StorageDatabase.ToLocation( data.Name );
 			var job			= JobCreator.OpenLocalBundle( JobEngine, location );
 			return new LoadResult<AssetBundle>(
 				job,

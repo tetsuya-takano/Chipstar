@@ -6,21 +6,21 @@ using System.Text;
 
 namespace Chipstar.Downloads
 {
-	public interface ICacheProvider : IDisposable
+	public interface IStorageProvider : IDisposable
 	{
 		IEnumerator AllClear();
 	}
 	/// <summary>
-	/// キャッシュ管理
+	/// ストレージ管理
 	/// </summary>
-	public class CacheProvider<TRuntimeData> : ICacheProvider
+	public class StorageProvider<TRuntimeData> : IStorageProvider
 		where TRuntimeData : IRuntimeBundleData<TRuntimeData>
 	{
 		//=================================
 		//	プロパティ
 		//=================================
 		private ILoadDatabase<TRuntimeData>	LoadDatabase	{ get; set; }
-		private ICacheDatabase				CacheDatabase	{ get; set; }
+		private IStorageDatabase			StorageDatabase	{ get; set; }
 
 		//=================================
 		//	関数
@@ -29,13 +29,13 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// コンストラクタ
 		/// </summary>
-		public CacheProvider( 
+		public StorageProvider( 
 			ILoadDatabase<TRuntimeData> assetDatabase,
-			ICacheDatabase				cacheDatabase 
+			IStorageDatabase			storageDatabase 
 			)
 		{
 			LoadDatabase    = assetDatabase;
-			CacheDatabase	= cacheDatabase;
+			StorageDatabase	= storageDatabase;
 		}
 
 		/// <summary>
@@ -44,7 +44,7 @@ namespace Chipstar.Downloads
 		public void Dispose()
 		{
 			LoadDatabase = null;
-			CacheDatabase= null;
+			StorageDatabase= null;
 		}
 
 		/// <summary>
@@ -55,10 +55,10 @@ namespace Chipstar.Downloads
 			var list = LoadDatabase.BundleList;
 			foreach( var bundle in list )
 			{
-				CacheDatabase.Delete( bundle );
+				StorageDatabase.Delete( bundle );
 				yield return null;
 			}
-			CacheDatabase.Apply();
+			StorageDatabase.Apply();
 		}
 	}
 }
