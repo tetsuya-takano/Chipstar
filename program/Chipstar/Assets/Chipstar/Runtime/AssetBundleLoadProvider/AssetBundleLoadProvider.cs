@@ -45,6 +45,7 @@ namespace Chipstar.Downloads
 			CacheDatabase   = cacheDatabase;
             JobEngine       = dlEngine;
             JobCreator      = jobCreator;
+
         }
 
 		public void Dispose()
@@ -179,7 +180,6 @@ namespace Chipstar.Downloads
 				job,
 				onCompleted: ( content ) =>
 				{
-					Debug.Log( "Downloaded : " + location.AccessPath );
 					//	ファイルのDL → 書き込み → ローカルロード
 					//	剥がしたい
 					CacheDatabase.Write( data, content );
@@ -199,7 +199,6 @@ namespace Chipstar.Downloads
 				job,
 				onCompleted: ( content ) =>
 				{
-					Debug.Log( "File Opened : " + location.AccessPath );
 					data.OnMemory( content );
 				}
 			);

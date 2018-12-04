@@ -82,7 +82,6 @@ namespace Chipstar.Downloads
 		{
 			if( !Database.Contains( assetPath ) )
 			{
-				Debug.Log( assetPath );
 				return EmptyReference.Default;
 			}
 			var data = Database.GetAssetData( assetPath );

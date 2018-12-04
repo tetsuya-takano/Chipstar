@@ -48,6 +48,7 @@ namespace Chipstar
 
 			private ILoadDatabase<TRuntimeBundle>	LoadDatabase		{ get; set; }
 			private ICacheDatabase					CacheDatabase		{ get; set; }
+
 			private IAssetLoadProvider				AssetLoadProvider	{ get; set; }
 			private IAssetBundleLoadProvider		DownloadProvider	{ get; set; }
 			private IAssetUnloadProvider			UnloadProvider		{ get; set; }
@@ -91,6 +92,7 @@ namespace Chipstar
 				(
 					new AssetBundleLoadFactory<TRuntimeBundle>( LoadDatabase ),
 					new SceneLoadFactory<TRuntimeBundle>( LoadDatabase ),
+					new BuiltInSceneLoadFactory(),
 					new ResourcesLoadFactory()
 				);
 				AssetLoadProvider = new AssetLoadProvider

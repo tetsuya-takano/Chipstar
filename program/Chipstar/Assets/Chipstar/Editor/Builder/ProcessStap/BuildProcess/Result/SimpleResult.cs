@@ -22,5 +22,10 @@ namespace Chipstar.Builder
         {
             Manifest =  manifest;
         }
-    }
+
+		public override string ToString()
+		{
+			return "Manifest : == " + ( Manifest == null ? "null" : Manifest.name );
+		}
+	}
 }

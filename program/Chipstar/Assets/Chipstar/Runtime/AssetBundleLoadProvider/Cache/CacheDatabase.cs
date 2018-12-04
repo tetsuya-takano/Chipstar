@@ -18,6 +18,7 @@ namespace Chipstar.Downloads
 		bool HasCache	( ICachableBundle data );
         void Write		( ICachableBundle data, byte[] content );
         void Apply		( );
+		void Delete		( ICachableBundle bundle );
 	}
     public class CacheDatabase : ICacheDatabase
     {
@@ -60,10 +61,22 @@ namespace Chipstar.Downloads
                 m_list.Add(new LocalBundleData(key, hash));
             }
 
+			/// <summary>
+			/// 削除
+			/// </summary>
+			internal void Remove( LocalBundleData cache )
+			{
+				m_list.Remove( cache );
+			}
+
+			/// <summary>
+			/// 列挙
+			/// </summary>
 			IEnumerator IEnumerable.GetEnumerator()
 			{
 				return ( (IEnumerable<LocalBundleData>)m_list ).GetEnumerator();
 			}
+
 		}
 		//===============================================
 		//  変数
@@ -138,28 +151,27 @@ namespace Chipstar.Downloads
                 return false;
             }
 
-
             return data.IsMatchVersion( bundleData.Hash );
         }
 
         /// <summary>
-        /// バージョンの保存
+        /// キャッシュとバージョンの書き込み
         /// </summary>
         public virtual void Write( ICachableBundle data, byte[] content )
         {
 			//	ファイルの書き込み
 			WriteBundle( data, content );
-            //  キャッシュテーブルにあるかどうか
-            var cache = m_table.Find(data.Name);
-            if (cache == null)
-            {
-                //  なければ追加書き込み
-                m_table.Add(data.Name, data.Hash);
-                return;
-            }
-            //  あったらバージョン情報を上書き
-            cache.Apply( data.Hash );
+			SaveVersion( data );
         }
+
+		/// <summary>
+		/// 削除
+		/// </summary>
+		public virtual void Delete( ICachableBundle data )
+		{
+			DeleteBundle ( data );
+			RemoveVersion( data );
+		}
 
         /// <summary>
         /// 保存
@@ -204,6 +216,50 @@ namespace Chipstar.Downloads
 
 			Debug.Log( "Write File :" + location.AccessPath );
 			File.WriteAllBytes( location.AccessPath, content );
+		}
+		/// <summary>
+		/// バージョンの保存
+		/// </summary>
+		private void SaveVersion( ICachableBundle data )
+		{
+			//  キャッシュテーブルにあるかどうか
+			var cache = m_table.Find(data.Name);
+			if( cache == null )
+			{
+				//  なければ追加書き込み
+				m_table.Add( data.Name, data.Hash );
+				return;
+			}
+			//  あったらバージョン情報を上書き
+			cache.Apply( data.Hash );
+		}
+
+		/// <summary>
+		/// アセットバンドルの削除
+		/// </summary>
+		private void DeleteBundle( ICachableBundle data )
+		{
+			var location = ToLocation( data.Name );
+			var path     = location.AccessPath;
+			if( !File.Exists( path ) )
+			{
+				//	存在しないなら削除しない
+				return;
+			}
+			File.Delete( path );
+		}
+		/// <summary>
+		/// 保存バージョンを破棄
+		/// </summary>
+		private void RemoveVersion( ICachableBundle data )
+		{
+			var cache = m_table.Find( data.Name );
+			if( cache == null )
+			{
+				//	保存されてないなら消さなくていい
+				return;
+			}
+			m_table.Remove( cache );
 		}
 
 		public override string ToString()

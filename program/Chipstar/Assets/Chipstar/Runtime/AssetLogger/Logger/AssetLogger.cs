@@ -54,8 +54,9 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public void Dispose()
 		{
-		}
 
+		}
+		protected virtual void DoDispose() { }
 
 		/// <summary>
 		/// ログを出すかどうか
