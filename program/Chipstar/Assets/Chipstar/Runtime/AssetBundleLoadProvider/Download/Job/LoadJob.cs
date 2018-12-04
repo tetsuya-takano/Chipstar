@@ -78,7 +78,7 @@ namespace Chipstar.Downloads
         /// </summary>
         public virtual void Run()
         {
-			Debug.Log( "Job Run : "  + Location.AccessPath );
+			Chipstar.Log_RunJob( Location );
 			DoRun( Location );
         }
         protected abstract void DoRun( IAccessLocation location );
@@ -88,7 +88,8 @@ namespace Chipstar.Downloads
         /// </summary>
         public virtual void Done()
         {
-            DoDone( Source );
+			Chipstar.Log_DoneJob( Source, Location );
+			DoDone( Source );
         }
 
         protected virtual void DoDone( TSource source )
@@ -106,6 +107,7 @@ namespace Chipstar.Downloads
         /// </summary>
         public virtual void Update()
         {
+			Chipstar.Log_UpdateJob( Source );
             DoUpdate( Source );
         }
 

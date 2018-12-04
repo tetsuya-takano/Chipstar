@@ -64,15 +64,16 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public IEnumerator InitLoad( )
         {
+			Chipstar.Log_Downloader_StartInit( );
 			//	コンテンツデータの取得
 			var location     = LoadDatabase.ToBuildMapLocation( );
-            var loadBuildMap = DoInitielizeLoad( location );
-            while( !loadBuildMap.IsCompleted )
+			var loadBuildMap = DoInitielizeLoad( location );
+			Chipstar.Log_Downloader_RequestBuildMap( location );
+			while( !loadBuildMap.IsCompleted )
             {
                 yield return null;
             }
-
-            yield return LoadDatabase	.Initialize( loadBuildMap.Content );
+			yield return LoadDatabase	.Initialize( loadBuildMap.Content );
 			yield return CacheDatabase	.Initialize( );
 
             yield break;
@@ -83,8 +84,10 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public ILoadResult Load( string path )
 		{
+			Chipstar.Log_LoadStart( path );
 			if( !LoadDatabase.Contains( path ) )
 			{
+				Chipstar.Log_AssetNotFound( path );
 				return LoadSkip.Default;
 			}
 			var data = LoadDatabase.GetAssetData( path );

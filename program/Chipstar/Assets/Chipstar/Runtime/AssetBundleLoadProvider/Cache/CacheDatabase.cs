@@ -112,16 +112,20 @@ namespace Chipstar.Downloads
 			//	TODO : 仮処理
 			m_versionFile	= m_entryPoint.ToLocation( m_fileName );
 			var path		= m_versionFile.AccessPath;
+			Chipstar.Log_InitCacheDB( path );
+
 			var isExist = File.Exists( path );
 			if( !isExist )
 			{
 				//	なければ空データ
 				m_table = new Table();
+				Chipstar.Log_InitCacheDB_FirstCreate( path );
 			}
 			else
 			{
-				var bytes = File.ReadAllBytes( path );
-					Load( bytes );
+				var bytes	= File.ReadAllBytes( path );
+				m_table		= Load( bytes );
+				Chipstar.Log_InitCacheDB_ReadLocalFile( m_table );
 			}
 			yield return null;
 		}
@@ -129,9 +133,9 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// 
 		/// </summary>
-		protected void Load(byte[] data)
+		protected Table Load(byte[] data)
         {
-            m_table = ParseLocalTable( data );
+            return ParseLocalTable( data );
         }
 
         protected virtual Table ParseLocalTable(byte[] data)
@@ -187,7 +191,8 @@ namespace Chipstar.Downloads
 				Directory.CreateDirectory( dirPath );
 			}
 			File.WriteAllText( path, json );
-        }
+			Chipstar.Log_ApplyLocalSaveFile( path );
+		}
 
 		/// <summary>
 		/// 場所の取得
@@ -214,7 +219,7 @@ namespace Chipstar.Downloads
 				File.Delete( filePath );
 			}
 
-			Debug.Log( "Write File :" + location.AccessPath );
+			Chipstar.Log_WriteLocalBundle( location );
 			File.WriteAllBytes( location.AccessPath, content );
 		}
 		/// <summary>
@@ -222,6 +227,7 @@ namespace Chipstar.Downloads
 		/// </summary>
 		private void SaveVersion( ICachableBundle data )
 		{
+			Chipstar.Log_SaveLocalVersion( data );
 			//  キャッシュテーブルにあるかどうか
 			var cache = m_table.Find(data.Name);
 			if( cache == null )
@@ -246,6 +252,7 @@ namespace Chipstar.Downloads
 				//	存在しないなら削除しない
 				return;
 			}
+			Chipstar.Log_DeleteLocalBundle( data );
 			File.Delete( path );
 		}
 		/// <summary>
@@ -253,6 +260,7 @@ namespace Chipstar.Downloads
 		/// </summary>
 		private void RemoveVersion( ICachableBundle data )
 		{
+			Chipstar.Log_RemoveLocalVersion( data );
 			var cache = m_table.Find( data.Name );
 			if( cache == null )
 			{

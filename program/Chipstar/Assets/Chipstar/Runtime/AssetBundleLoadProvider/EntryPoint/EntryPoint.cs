@@ -33,7 +33,7 @@ namespace Chipstar.Downloads
         protected virtual string ToAccessPath( string file )
         {
             var result = Path.Combine( BasePath, file );
-			Debug.Log( result );
+			Chipstar.Log_CreateEntryPoint( result );
             return result;
         }
     }

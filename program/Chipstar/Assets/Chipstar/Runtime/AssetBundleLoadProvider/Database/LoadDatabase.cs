@@ -79,8 +79,9 @@ namespace Chipstar.Downloads
         public IEnumerator Initialize( byte[] datas )
         {
             var table = ParseContentData( datas );
-            //  アセットの一覧
-            foreach (var asset in table.AssetList)
+			Chipstar.Log_GetBuildMap<TTable, TBundle, TAsset>( table );
+			//  アセットの一覧
+			foreach( var asset in table.AssetList)
             {
                 var d = new AssetData<TRuntimeData>( asset );
                 m_assetsTable.Add( asset.Path, d );
