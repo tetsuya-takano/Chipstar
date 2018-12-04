@@ -80,11 +80,12 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public IDisposable CreateRefCounter( string assetPath )
 		{
-			var data = Database.GetAssetData( assetPath );
-			if( data == null )
+			if( !Database.Contains( assetPath ) )
 			{
+				Debug.Log( assetPath );
 				return EmptyReference.Default;
 			}
+			var data = Database.GetAssetData( assetPath );
 			return new RefCalclater( data.BundleData );
 		}
 

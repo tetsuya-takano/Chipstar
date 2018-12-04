@@ -54,10 +54,7 @@ namespace Chipstar.Downloads
 		public IAssetLoadOperation<T> LoadAsset<T>( string path ) where T : UnityEngine.Object
 		{
 			var factory = Container.Get<IAssetLoadFactory>( path );
-			if( factory == null )
-			{
-				return null;
-			}
+			Debug.AssertFormat( factory != null, "Not Found Factory : {0}({1})", path, typeof( IAssetLoadFactory ).Name );
 
 			Debug.LogFormat( "Load Asset ::: {0}", path );
 			return factory.Create<T>( path );
@@ -69,10 +66,7 @@ namespace Chipstar.Downloads
 		public ISceneLoadOperation LoadLevel( string path )
 		{
 			var factory = Container.Get<ISceneLoadFactory>( path );
-			if( factory == null )
-			{
-				return null;
-			}
+			Debug.AssertFormat( factory != null, "Not Found Factory : {0}({1})", path, typeof( ISceneLoadFactory ).Name );
 			Debug.LogFormat( "Load Level ::: {0}", path );
 			return factory.LoadLevel( path );
 		}
@@ -82,10 +76,7 @@ namespace Chipstar.Downloads
 		public ISceneLoadOperation LoadLevelAdditive( string path )
 		{
 			var factory = Container.Get<ISceneLoadFactory>( path );
-			if( factory == null )
-			{
-				return null;
-			}
+			Debug.AssertFormat( factory != null, "Not Found Factory : {0}({1})", path, typeof( ISceneLoadFactory ).Name );
 			Debug.LogFormat( "Load Level Additive ::: {0}", path );
 			return factory.LoadLevelAdditive( path );
 		}

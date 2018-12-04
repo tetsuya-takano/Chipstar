@@ -84,7 +84,7 @@ namespace Chipstar.Downloads
 		{
 			if( !LoadDatabase.Contains( path ) )
 			{
-				return null;
+				return LoadSkip.Default;
 			}
 			var data = LoadDatabase.GetAssetData( path );
 			return DoLoad( data );

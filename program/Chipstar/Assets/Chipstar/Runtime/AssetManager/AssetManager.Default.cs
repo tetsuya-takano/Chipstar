@@ -90,8 +90,8 @@ namespace Chipstar
 				var loadFactContainer = new FactoryContainer
 				(
 					new AssetBundleLoadFactory<TRuntimeBundle>( LoadDatabase ),
-					new ResourcesLoadFactory(),
-					new SceneLoadFactory<TRuntimeBundle>( LoadDatabase )
+					new SceneLoadFactory<TRuntimeBundle>( LoadDatabase ),
+					new ResourcesLoadFactory()
 				);
 				AssetLoadProvider = new AssetLoadProvider
 					(

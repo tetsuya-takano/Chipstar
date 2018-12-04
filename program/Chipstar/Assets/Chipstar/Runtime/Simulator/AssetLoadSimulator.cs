@@ -30,7 +30,8 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public AssetLoadSimulator()
 		{
-			Container = new FactoryContainer
+			Logger		= new AssetLogger();
+			Container	= new FactoryContainer
 				(
 					new ResourcesLoadFactory(),
 					new EditorLoadAssetFactory(),
