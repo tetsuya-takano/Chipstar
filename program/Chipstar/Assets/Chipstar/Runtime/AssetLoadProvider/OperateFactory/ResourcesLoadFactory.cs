@@ -30,8 +30,8 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public bool CanLoad( string path )
 		{
-			//	拡張子指定ナシはたぶんResources
-			return m_regex.IsMatch( path );
+			//	Resourcesは素通し
+			return true;
 		}
 
 		/// <summary>
@@ -42,7 +42,7 @@ namespace Chipstar.Downloads
 			var match = m_regex.Match( path );
 			if( !match.Success )
 			{
-				return null;
+				return new ResourcesLoadOperation<T>( Resources.LoadAsync<T>( path ) );
 			}
 
 			//	Resources以下を拾う

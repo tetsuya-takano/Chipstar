@@ -58,10 +58,7 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public ISceneLoadOperation LoadLevel( string path )
 		{
-			var data = Database.GetAssetData( path );
-			return new SceneLoadOperation( 
-				SceneManager.LoadSceneAsync( path )
-			);
+			return new SceneLoadOperation( SceneManager.LoadSceneAsync( path ) );
 		}
 		/// <summary>
 		/// 加算ロード
