@@ -27,13 +27,20 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// コンストラクタ
 		/// </summary>
-		public AssetLoadSimulator()
+		public AssetLoadSimulator( string assetAccessPrefix )
 		{
 			Container	= new FactoryContainer
 				(
-					new ResourcesLoadFactory(),
-					new EditorLoadAssetFactory(),
-					new EditorSceneLoadFactory()
+					assets : new IAssetLoadFactory[]
+					{
+						new EditorLoadAssetFactory( assetAccessPrefix ),
+						new ResourcesLoadFactory()
+					},
+					scenes : new ISceneLoadFactory[]
+					{
+						new BuiltInSceneLoadFactory(),
+						new EditorSceneLoadFactory(),
+					}
 				);
 		}
 
@@ -50,9 +57,11 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public IAssetLoadOperation<T> LoadAsset<T>( string path ) where T : UnityEngine.Object
 		{
-			return Container
-					.Get<IAssetLoadFactory>( path )
-					.Create<T>( path );
+			var factory = Container .GetFromAsset( path );
+
+			Chipstar.Log_LoadAsset<T>( path, factory );
+
+			return factory.Create<T>( path );
 		}
 
 		/// <summary>
@@ -60,18 +69,22 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public ISceneLoadOperation LoadLevel( string path )
 		{
-			return Container
-					.Get<ISceneLoadFactory>( path )
-					.LoadLevel( path );
+			var factory = Container .GetFromScene( path );
+
+			Chipstar.Log_LoadLevel( path, factory );
+
+			return factory.LoadLevel( path );
 		}
 		/// <summary>
 		/// シーン加算
 		/// </summary>
 		public ISceneLoadOperation LoadLevelAdditive( string path )
 		{
-			return Container
-					.Get<ISceneLoadFactory>( path )
-					.LoadLevelAdditive( path );
+			var factory = Container .GetFromScene( path );
+
+			Chipstar.Log_LoadLevelAdditive( path, factory );
+
+			return factory.LoadLevelAdditive( path );
 		}
 	}
 }

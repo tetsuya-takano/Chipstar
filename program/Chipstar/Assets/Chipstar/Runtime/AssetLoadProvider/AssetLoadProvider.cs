@@ -52,8 +52,8 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public IAssetLoadOperation<T> LoadAsset<T>( string path ) where T : UnityEngine.Object
 		{
-			var factory = Container.Get<IAssetLoadFactory>( path );
-			Chipstar.Log_LoadAsseT<T>( path, factory );
+			var factory = Container.GetFromAsset( path );
+			Chipstar.Log_LoadAsset<T>( path, factory );
 			return factory.Create<T>( path );
 		}
 
@@ -62,7 +62,7 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public ISceneLoadOperation LoadLevel( string path )
 		{
-			var factory = Container.Get<ISceneLoadFactory>( path );
+			var factory = Container.GetFromScene( path );
 			Chipstar.Log_LoadLevel( path, factory );
 			return factory.LoadLevel( path );
 		}
@@ -71,7 +71,7 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public ISceneLoadOperation LoadLevelAdditive( string path )
 		{
-			var factory = Container.Get<ISceneLoadFactory>( path );
+			var factory = Container.GetFromScene( path );
 			Chipstar.Log_LoadLevelAdditive( path, factory );
 			return factory.LoadLevelAdditive( path );
 		}

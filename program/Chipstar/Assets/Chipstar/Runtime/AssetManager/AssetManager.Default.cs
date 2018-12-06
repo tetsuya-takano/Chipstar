@@ -52,6 +52,7 @@ namespace Chipstar
 			private IAssetLoadProvider				AssetLoadProvider	{ get; set; }
 			private IAssetBundleLoadProvider		DownloadProvider	{ get; set; }
 			private IAssetUnloadProvider			UnloadProvider		{ get; set; }
+			private IStorageProvider				StorageProvider		{ get; set; }
 
 			//======================================
 			//	関数
@@ -84,16 +85,29 @@ namespace Chipstar
 						dlEngine	 : new JobEngine(),
 						jobCreator	 : new WRJobCreator()
 					);
-
+				//---------------------------------
+				//	キャッシュ情報
+				//---------------------------------
+				StorageProvider = new StorageProvider<TRuntimeBundle>
+					(
+						assetDatabase  : LoadDatabase,
+						storageDatabase: StorageDatabase
+					);
 				//---------------------------------
 				//	アセットロード機能
 				//---------------------------------
 				var loadFactContainer = new FactoryContainer
 				(
-					new AssetBundleLoadFactory<TRuntimeBundle>( LoadDatabase ),
-					new SceneLoadFactory<TRuntimeBundle>( LoadDatabase ),
-					new BuiltInSceneLoadFactory(),
-					new ResourcesLoadFactory()
+					assets : new IAssetLoadFactory[]
+					{
+						new AssetBundleLoadFactory<TRuntimeBundle>( LoadDatabase ),
+						new ResourcesLoadFactory()
+					},
+					scenes : new ISceneLoadFactory[]
+					{
+						new BuiltInSceneLoadFactory(),
+						new SceneLoadFactory<TRuntimeBundle>( LoadDatabase ),
+					}
 				);
 				AssetLoadProvider = new AssetLoadProvider
 					(
@@ -133,6 +147,7 @@ namespace Chipstar
 			public IEnumerator Setup()
 			{
 				yield return DownloadProvider.InitLoad();
+				Chipstar.Log_Dump_Version_Database( StorageProvider.ToString() );
 			}
 
 			/// <summary>

@@ -34,6 +34,14 @@ namespace Chipstar.Downloads
 			ILoadOperation
 	{
 		/// <summary>
+		/// コンストラクタ
+		/// </summary>
+		public LoadOperation()
+		{
+			Chipstar.Log_StartOperation( this );
+		}
+
+		/// <summary>
 		/// 破棄処理
 		/// </summary>
 		public void Dispose()

@@ -34,35 +34,56 @@ namespace Chipstar.Builder
         {
             var json        = new BuildMapDataTable();
             var manifest    = result.Manifest;
-            foreach (var data in bundleList)
-            {
-                var absPath  = Path.Combine( settings.OutputPath, data.ABName );
-                var fileInfo = new FileInfo( absPath );
-                var d = new BundleBuildData
-                {
-                    ABName      = data.ABName,
-                    Assets      = data.Assets,
-                    Hash        = manifest.GetAssetBundleHash( data.ABName ).ToString(),
-                    Dependencies= manifest.GetAllDependencies( data.ABName ),
-                    FileSize    = fileInfo.Length
-                };
-                json.Add( d );
-            }
+			var prefix      = settings.RootFolder;
+			json.Prefix		= prefix;
 
-            var assetPaths = bundleList.SelectMany(c => c.Assets ).Distinct();
-            foreach (var assetPath in assetPaths)
-            {
-                var d = new AssetBuildData
-                {
-                    Path = assetPath,
-					Guid = AssetDatabase.AssetPathToGUID( assetPath )
-				};
-                json.Add( d );
-            }
-            var path        = Path.Combine( settings.OutputPath, FileName );
+			using( var scope = new ProgressDialogScope( "Create Bundle Manifest : " + FileName, bundleList.Count ) )
+			{
+				for( int i = 0; i < bundleList.Count; i++ )
+				{
+					var data     = bundleList[ i ];
+					var absPath  = Path.Combine( settings.OutputPath, data.ABName );
+					var fileInfo = new FileInfo( absPath );
+					var crc      = 0u;
+					BuildPipeline.GetCRCForAssetBundle( absPath, out crc );
+					var d = new BundleBuildData
+					{
+						ABName      = data.ABName,
+						Assets      = data.Address,
+						Hash        = manifest.GetAssetBundleHash( data.ABName ).ToString(),
+						Crc			= crc,
+						Dependencies= manifest.GetAllDependencies( data.ABName ),
+						FileSize    = fileInfo.Length
+					};
+
+					scope.Show( data.ABName, i);
+					json.Add( d );
+				}
+			}
+			var addresses = bundleList
+								.SelectMany(c => c.Address )
+								.Distinct()
+								.ToArray();
+
+			using( var scope = new ProgressDialogScope( "Create Asset Table : " + FileName, addresses.Length) )
+			{
+				for( int i = 0; i < addresses.Length; i++)
+				{
+					var address = addresses[ i ];
+					var path	= address.StartsWith( prefix ) ? address : prefix + address;
+					var d = new AssetBuildData
+					{
+						Path = address,
+						Guid = AssetDatabase.AssetPathToGUID( path )
+					};
+					scope.Show( address, i);
+					json.Add( d );
+				}
+			}
+            var saveFilePath= Path.Combine( settings.OutputPath, FileName );
             var contents    = JsonUtility.ToJson( json, true );
             //  書き込み
-            File.WriteAllText( path, contents );
+            File.WriteAllText( saveFilePath, contents );
         }
     }
 }

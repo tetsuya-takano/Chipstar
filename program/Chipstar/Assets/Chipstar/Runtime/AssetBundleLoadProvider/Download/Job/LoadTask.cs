@@ -6,9 +6,10 @@ namespace Chipstar.Downloads
     {
         float       Progress    { get; }
         bool        IsCompleted { get; }
-    }
+		bool		IsError		{ get; }
+	}
 
-    public interface ILoadTask<T> : ILoadTask
+	public interface ILoadTask<T> : ILoadTask
     {
         T Content { get; }
     }

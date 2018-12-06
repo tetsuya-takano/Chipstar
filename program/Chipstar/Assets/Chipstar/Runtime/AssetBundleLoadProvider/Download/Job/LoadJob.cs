@@ -5,36 +5,38 @@ namespace Chipstar.Downloads
 {
     public interface ILoadJob : ILoadTask, IDisposable
     {
-        Action OnLoaded { set; }
-
-        void Run();
+		void Run();
         void Update();
         void Done();
     }
 
     public interface ILoadJob<T> : ILoadJob, ILoadTask<T>
     {
-    }
+		Action<T> OnLoaded { set; }
+	}
 
 
-    /// <summary>
-    /// DLジョブ
-    /// </summary>
-    public abstract class LoadJob<THandler, TSource, TData> 
+	/// <summary>
+	/// DLジョブ
+	/// </summary>
+	public abstract class LoadJob<THandler, TSource, TData> 
 			:	CustomYieldInstruction,
 				ILoadJob<TData> where THandler : ILoadJobHandler<TSource, TData>
 	{
         //===============================
         //  プロパティ
         //===============================
-        public      IAccessLocation Location	{ get; protected set; }
-        public      float           Progress	{ get; protected set; }
-        public      bool            IsCompleted	{ get; protected set; }
-        public      TData           Content		{ get; protected set; }
-        public      Action          OnLoaded	{ protected get; set; }
+        public      TData           Content		{ get; private set; }
+        public      IAccessLocation Location	{ get; private set; }
+        public      float           Progress	{ get; private set; }
+        public      bool            IsCompleted	{ get; private set; }
+		public		bool			IsError		{ get; private set; }
+
+		public      Action<TData>   OnLoaded	{ protected get; set; }
 
         protected   TSource  Source				{ get; set; }
         protected   THandler DLHandler			{ get; set; }
+
 
 		public override bool keepWaiting		{ get { return !IsCompleted; } }
 		//===============================
@@ -70,7 +72,6 @@ namespace Chipstar.Downloads
             DLHandler = default(THandler);
             Location  = null;
             OnLoaded  = null;
-
         }
 
         /// <summary>
@@ -91,7 +92,9 @@ namespace Chipstar.Downloads
 			Chipstar.Log_DoneJob( Source, Location );
 			DoDone( Source );
         }
-
+		/// <summary>
+		/// 完了派生処理
+		/// </summary>
         protected virtual void DoDone( TSource source )
         {
             Content = DLHandler.Complete(source);
@@ -99,7 +102,7 @@ namespace Chipstar.Downloads
             {
                 return;
             }
-            OnLoaded( );
+            OnLoaded( Content );
         }
 
         /// <summary>
@@ -109,8 +112,14 @@ namespace Chipstar.Downloads
         {
 			Chipstar.Log_UpdateJob( Source );
             DoUpdate( Source );
+			Progress    = DoGetProgress	( Source );
+			IsCompleted = DoIsComplete	( Source );
+			IsError		= DoIsError		( Source );
         }
 
-        protected abstract void DoUpdate( TSource source );
-    }
+        protected virtual  void		DoUpdate		( TSource source ) { }
+		protected abstract float	DoGetProgress	( TSource source );
+		protected abstract bool		DoIsComplete	( TSource source );
+		protected abstract bool		DoIsError		( TSource source );
+	}
 }

@@ -197,7 +197,7 @@ namespace Chipstar.Downloads
 		protected virtual ILoadResult DoLocalOpen( TRuntimeData data )
 		{
 			var location	= StorageDatabase.ToLocation( data.Name );
-			var job			= JobCreator.OpenLocalBundle( JobEngine, location );
+			var job			= JobCreator.OpenLocalBundle( JobEngine, location, data.Hash, data.Crc );
 			return new LoadResult<AssetBundle>(
 				job,
 				onCompleted: ( content ) =>

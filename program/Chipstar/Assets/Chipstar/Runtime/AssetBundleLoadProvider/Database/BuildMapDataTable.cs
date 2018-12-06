@@ -11,6 +11,7 @@ namespace Chipstar.Downloads
         string      ABName       { get; }
         string[]    Assets       { get; }
         string      Hash         { get; }
+		uint		Crc			 { get; }
         string[]    Dependencies { get; }
     }
     public interface IAssetBuildData
@@ -24,8 +25,9 @@ namespace Chipstar.Downloads
     {
         IEnumerable<TBundle>    BundleList  { get; }
         IEnumerable<TAssetData> AssetList   { get; }
+		string					Prefix		{ get; }
 
-        void Add(TAssetData asset  );
+		void Add(TAssetData asset  );
         void Add(TBundle    bundle );
     }
 
@@ -39,6 +41,7 @@ namespace Chipstar.Downloads
         [SerializeField] private string[] m_assets;
         [SerializeField] private string[] m_dependencies;
         [SerializeField] private string m_hash;
+		[SerializeField] private uint   m_crc;
         [SerializeField] private long   m_fileSize;
 
         //===============================
@@ -71,20 +74,28 @@ namespace Chipstar.Downloads
             set { m_fileSize = value; }
         }
 
-        //===============================
-        //  関数
-        //===============================
-        public BundleBuildData(
+		public uint Crc
+		{
+			get { return m_crc; }
+			set { m_crc = value; }
+		}
+
+		//===============================
+		//  関数
+		//===============================
+		public BundleBuildData(
             string  abName,
             string[]assets,
             string[]dependenceis,
             string  hash,
+			uint	crc,
             long    size
             )
         {
             m_abName        = abName;
             m_assets        = assets;
             m_hash          = hash;
+			m_crc           = crc;
             m_dependencies  = dependenceis;
             m_fileSize      = size;
         }
@@ -114,22 +125,26 @@ namespace Chipstar.Downloads
         //===============================
         //  SerializeField
         //===============================
+		[SerializeField] private string					m_prefix		= string.Empty;
         [SerializeField] private List<BundleBuildData>  m_bundleList	= new List<BundleBuildData>();
         [SerializeField] private List<AssetBuildData>   m_assetDBList	= new List<AssetBuildData>();
 
+		//===============================
+		//  プロパティ
+		//===============================
+		public string Prefix
+		{
+			get { return m_prefix; }
+			set { m_prefix = value; }
+		}
+		public IEnumerable<BundleBuildData> BundleList { get { return m_bundleList; } }
+		public IEnumerable<AssetBuildData> AssetList { get { return m_assetDBList; } }
 
-        public IEnumerable<BundleBuildData> BundleList { get { return m_bundleList; } }
-        public IEnumerable<AssetBuildData>  AssetList  { get { return m_assetDBList   ; } }
 
-        //===============================
-        //  プロパティ
-        //===============================
-
-
-        //===============================
-        //  関数
-        //===============================
-        public BuildMapDataTable()
+		//===============================
+		//  関数
+		//===============================
+		public BuildMapDataTable()
         {
             m_bundleList = new List<BundleBuildData>();
             m_assetDBList= new List<AssetBuildData>();

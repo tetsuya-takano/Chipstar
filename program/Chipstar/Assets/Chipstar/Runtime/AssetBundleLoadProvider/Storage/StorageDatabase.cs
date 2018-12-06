@@ -19,6 +19,8 @@ namespace Chipstar.Downloads
         void Write		( ICachableBundle data, byte[] content );
         void Apply		( );
 		void Delete		( ICachableBundle bundle );
+
+		Hash128 GetVersion( ICachableBundle data );
 	}
     public class StorageDatabase : IStorageDatabase
     {
@@ -131,6 +133,19 @@ namespace Chipstar.Downloads
 		}
 
 		/// <summary>
+		/// 取得
+		/// </summary>
+		public Hash128 GetVersion( ICachableBundle key )
+		{
+			var data = m_table.Find( key.Name );
+			if( data == null)
+			{
+				return new Hash128();
+			}
+			return data.Version;
+		}
+
+		/// <summary>
 		/// 
 		/// </summary>
 		protected Table Load(byte[] data)
@@ -154,7 +169,11 @@ namespace Chipstar.Downloads
             {
                 return false;
             }
-
+			var file = m_entryPoint.ToLocation( bundleData.Name );
+			if( !File.Exists( file.AccessPath ))
+			{
+				return false;
+			}
             return data.IsMatchVersion( bundleData.Hash );
         }
 

@@ -41,8 +41,14 @@ namespace Chipstar
 				LoadProvider = new AssetLoadProvider(
 					new FactoryContainer
 					( 
-						new BuiltInSceneLoadFactory(),
-						new ResourcesLoadFactory() 
+						assets : new IAssetLoadFactory[] 
+						{
+							new ResourcesLoadFactory()
+						},
+						scenes : new ISceneLoadFactory[]
+						{
+							new BuiltInSceneLoadFactory(),
+						}
 					)
 				);
 			}

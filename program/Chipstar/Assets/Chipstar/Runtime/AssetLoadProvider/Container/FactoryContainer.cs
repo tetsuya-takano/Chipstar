@@ -7,7 +7,8 @@ namespace Chipstar.Downloads
 {
 	public interface IFactoryContainer : IDisposable
 	{
-		T Get<T>( string path ) where T : ILoadOperateFactory;
+		ISceneLoadFactory GetFromScene( string path );
+		IAssetLoadFactory GetFromAsset( string path );
 	}
 	/// <summary>
 	/// リクエスト作成クラスのコンテナ
@@ -17,15 +18,20 @@ namespace Chipstar.Downloads
 		//===============================
 		//	変数
 		//===============================
-		private List<ILoadOperateFactory> m_factories = null;
+		private IAssetLoadFactory[] m_assets = null;
+		private ISceneLoadFactory[] m_scenes = null;
 
 		//===============================
 		//	関数
 		//===============================
 
-		public FactoryContainer( params ILoadOperateFactory[] factories )
+		public FactoryContainer( 
+			IAssetLoadFactory[] assets,
+			ISceneLoadFactory[] scenes
+		)
 		{
-			m_factories = new List<ILoadOperateFactory>( factories );
+			m_assets = assets;
+			m_scenes = scenes;
 		}
 
 		/// <summary>
@@ -33,22 +39,28 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public void Dispose()
 		{
-			foreach( var f in m_factories)
+			foreach( var f in m_assets)
 			{
 				f.Dispose();
 			}
-			m_factories.Clear();
+			foreach( var f in m_scenes )
+			{
+				f.Dispose();
+			}
+
+			m_assets = null;
+			m_scenes = null;
 		}
 
 		/// <summary>
 		/// 使用可能なものを取得
 		/// </summary>
-		public T Get<T>( string path ) where T : ILoadOperateFactory
+		private T Get<T>( string path, IList<T> list ) where T : ILoadOperateFactory
 		{
-			for( int i = 0; i < m_factories.Count; i++ )
+			for( int i = 0; i < list.Count; i++ )
 			{
 				//	型チェック
-				var factory = m_factories[ i ];
+				var factory = list[ i ];
 				if( !( factory is T ) )
 				{
 					continue;
@@ -59,7 +71,17 @@ namespace Chipstar.Downloads
 					return (T)factory;
 				}
 			}
-			throw new UnassignedReferenceException( path + "\nをロード出来る機能がありません" );
+			throw new Exception( string.Format( "{0}({1})\nをロード出来る機能がありません", path, typeof( T ) ) );
+		}
+
+		public IAssetLoadFactory GetFromAsset( string path )
+		{
+			return Get<IAssetLoadFactory>( path, m_assets );
+		}
+
+		public ISceneLoadFactory GetFromScene( string path )
+		{
+			return Get<ISceneLoadFactory>( path, m_scenes );
 		}
 	}
 }

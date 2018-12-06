@@ -40,7 +40,7 @@ namespace Chipstar.Downloads
 		private IEntryPoint                                 m_entryPoint    = null;
         private Dictionary<string, TRuntimeData>            m_bundleTable	= new Dictionary<string, TRuntimeData             >( StringComparer.OrdinalIgnoreCase ); // バンドル名   → バンドルデータテーブル
         private Dictionary<string, AssetData<TRuntimeData>> m_assetsTable	= new Dictionary<string, AssetData<TRuntimeData>  >( StringComparer.OrdinalIgnoreCase ); // アセットパス → アセットデータテーブル
-
+		private string                                      m_prefix        = string.Empty;
         //=========================================
         //  プロパティ
         //=========================================
@@ -80,6 +80,7 @@ namespace Chipstar.Downloads
         {
             var table = ParseContentData( datas );
 			Chipstar.Log_GetBuildMap<TTable, TBundle, TAsset>( table );
+			m_prefix  = table.Prefix;
 			//  アセットの一覧
 			foreach( var asset in table.AssetList)
             {
@@ -129,7 +130,7 @@ namespace Chipstar.Downloads
             for (var i = 0; i < dependencies.Length; i++)
             {
                 var name = dependencies[i];
-                list[i] = m_bundleTable[name];
+                list[i] = m_bundleTable[ name ];
             }
             return list;
         }
@@ -154,6 +155,7 @@ namespace Chipstar.Downloads
         /// </summary>
         public AssetData<TRuntimeData> GetAssetData( string path )
         {
+			Chipstar.Log_GetAssetDatabase( path );
             return m_assetsTable[ path ];
         }
 		/// <summary>

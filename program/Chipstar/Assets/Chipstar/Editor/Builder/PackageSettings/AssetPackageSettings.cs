@@ -30,9 +30,9 @@ namespace Chipstar.Builder
 
     public interface IABBuildData
     {
-        string      ABName { get; }
-        string[]    Assets { get; }
-
+        string      ABName	{ get; }
+        string[]    Assets	{ get; }
+		string[]    Address { get; }
 		void Apply( string rootFolder, string name, string[] assets );
 		AssetBundleBuild ToBuildEntry();
 	}
@@ -44,18 +44,20 @@ namespace Chipstar.Builder
 	/// </summary>
     public class ABBuildData : IABBuildData
     {
-		private string	 RemoveFolder	{ get; set; }
+		private string	 FolderPrefix	{ get; set; }
         public  string   ABName			{ get; protected set; }
         public  string[] Assets			{ get; protected set; }
+		public  string[] Address		{ get; protected set; }
 
 		/// <summary>
 		/// データ保持と必要なら変換
 		/// </summary>
 		public virtual void Apply( string rootFolder, string name, string[] assets )
 		{
-			RemoveFolder=	rootFolder;
+			FolderPrefix=	string.Intern( rootFolder );
 			ABName		=	name;
 			Assets		=	assets;
+			Address     =   ToAddress( assets );
 		}
 
 		/// <summary>
@@ -67,7 +69,21 @@ namespace Chipstar.Builder
 			{
 				assetBundleName = ABName,
 				assetNames      = Assets,
+				addressableNames= Address,
 			};
+		}
+		private string[] ToAddress( string[] assetPaths )
+		{
+			var adresses = new string[assetPaths.Length];
+			for( int i = 0; i < Assets.Length; i++ )
+			{
+				var path		= Assets[ i ];
+				//	MEMO : シーンアセットはロード用アドレスを変更できないらしい
+				//		   通常のアセットはビルド先ルートフォルダを削る
+				var isSceneAsset= AssetDatabase.LoadAssetAtPath<SceneAsset>( path ) != null;
+				adresses[ i ]	= isSceneAsset ? path : path.Replace( FolderPrefix, string.Empty );
+			}
+			return adresses;
 		}
     }
 
@@ -77,8 +93,8 @@ namespace Chipstar.Builder
         //==========================
         //  プロパティ
         //==========================
-        public virtual string   Name     { get; protected set; }
-        public virtual int      Priority { get; protected set; }
+        public abstract string   Name     { get; }
+        public virtual  int      Priority { get; protected set; }
 
         protected IABNameConverter NameConverter   { get; set; }
         protected IABPathFilter    PathFilter      { get; set; }

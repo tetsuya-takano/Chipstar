@@ -8,8 +8,8 @@ namespace Chipstar.Downloads
         ILoadJob<byte[]>        BytesLoad       ( IJobEngine engine, IAccessLocation location );
         ILoadJob<string>        TextLoad        ( IJobEngine engine, IAccessLocation location );
         ILoadJob<AssetBundle>   DownloadBundle  ( IJobEngine engine, IAccessLocation location );
-		ILoadJob<AssetBundle>	OpenLocalBundle	( IJobEngine engine, IAccessLocation location );
-    }
+		ILoadJob<AssetBundle>	OpenLocalBundle	( IJobEngine engine, IAccessLocation location, Hash128 hash, uint crc );
+	}
     public abstract class JobCreator : IJobCreator
     {
         //=======================================
@@ -53,9 +53,9 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// ローカルアセットバンドルオープン
 		/// </summary>
-		public ILoadJob<AssetBundle> OpenLocalBundle( IJobEngine engine, IAccessLocation location )
+		public ILoadJob<AssetBundle> OpenLocalBundle( IJobEngine engine, IAccessLocation location, Hash128 hash, uint crc )
 		{
-			return AddJob( engine, DoCreateLocalLoad( location ));
+			return AddJob( engine, DoCreateLocalLoad( location, hash, crc ));
 		}
 
         protected virtual ILoadJob<T> AddJob<T>( IJobEngine engine, ILoadJob<T> job )
@@ -67,6 +67,6 @@ namespace Chipstar.Downloads
         protected abstract ILoadJob<byte[]>         DoCreateBytesLoad   ( IAccessLocation location );
         protected abstract ILoadJob<string>         DoCreateTextLoad    ( IAccessLocation location );
         protected abstract ILoadJob<AssetBundle>    DoCreateDownload	( IAccessLocation location );
-		protected abstract ILoadJob<AssetBundle>    DoCreateLocalLoad	( IAccessLocation location );
+		protected abstract ILoadJob<AssetBundle>    DoCreateLocalLoad	( IAccessLocation location, Hash128 hash, uint crc );
 	}
 }

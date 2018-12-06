@@ -13,16 +13,21 @@ namespace Chipstar.Downloads
 		: LoadJob<LocalABHandler, AssetBundleCreateRequest, AssetBundle>
 	{
 		//===============================
+		//	変数
+		//===============================
+		private uint m_crc = 0;
+
+		//===============================
 		//	関数
 		//===============================
 
 		/// <summary>
 		/// コンストラクタ
 		/// </summary>
-		public LocalFileLoadJob( IAccessLocation location )
+		public LocalFileLoadJob( IAccessLocation location, uint crc )
 			: base( location, new LocalABHandler() ) 
 		{
-
+			m_crc = crc;
 		}
 
 		/// <summary>
@@ -30,16 +35,22 @@ namespace Chipstar.Downloads
 		/// </summary>
 		protected override void DoRun( IAccessLocation location )
 		{
-			Source = AssetBundle.LoadFromFileAsync( location.AccessPath );
+			Source = AssetBundle.LoadFromFileAsync( location.AccessPath, m_crc );
 		}
 
-		/// <summary>
-		/// 更新
-		/// </summary>
-		protected override void DoUpdate( AssetBundleCreateRequest source )
+		protected override float DoGetProgress( AssetBundleCreateRequest source )
 		{
-			Progress	= source.progress;
-			IsCompleted = source.isDone;
+			return source.progress;
+		}
+
+		protected override bool DoIsComplete( AssetBundleCreateRequest source )
+		{
+			return source.isDone;
+		}
+
+		protected override bool DoIsError( AssetBundleCreateRequest source )
+		{
+			return source.isDone && source.assetBundle == null;
 		}
 	}
 

@@ -28,22 +28,27 @@ namespace Chipstar.Downloads
             Source.Dispose();
             base.DoDispose();
         }
-
-        /// <summary>
-        /// 開始時
-        /// </summary>
-        protected override void DoRun( IAccessLocation location )
+		/// <summary>
+		/// 開始時
+		/// </summary>
+		protected override void DoRun( IAccessLocation location )
         {
             Source = DLHandler.CreateRequest( location );
             Source.SendWebRequest();
         }
-        /// <summary>
-        /// 更新時
-        /// </summary>
-        protected override void DoUpdate( UnityWebRequest source )
-        {
-            IsCompleted = source.isDone;
-            Progress    = source.downloadProgress;
-        }
-    }
+		protected override float DoGetProgress( UnityWebRequest source )
+		{
+			return source.downloadProgress;
+		}
+
+		protected override bool DoIsComplete( UnityWebRequest source )
+		{
+			return source.isDone;
+		}
+
+		protected override bool DoIsError( UnityWebRequest source )
+		{
+			return source.isNetworkError || source.isHttpError;
+		}
+	}
 }

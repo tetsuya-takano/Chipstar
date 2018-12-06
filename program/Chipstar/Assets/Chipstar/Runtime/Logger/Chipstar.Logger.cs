@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Chipstar.Downloads;
 using UnityEngine;
 using System.Diagnostics;
+using System.IO;
 
 namespace Chipstar
 {
@@ -18,7 +19,6 @@ namespace Chipstar
 		private const string TAG = "[Chipstar]";
 
 		private const string SIMPLE_LOG_MODE = "CHIPSTAR_ENABLE_LOG";
-		private const string DETAIL_LOG_MODE = "CHIPSTAR_ENABLE_DETAIL_LOG";
 		//=============================
 		//	プロパティ
 		//=============================
@@ -28,6 +28,7 @@ namespace Chipstar
 			private get { return _logger ?? ( _logger = new Logger( UnityEngine.Debug.unityLogger ) ); }
 			set { _logger = value; }
 		}
+
 		//=============================
 		//	関数
 		//=============================
@@ -35,15 +36,16 @@ namespace Chipstar
 		/// <summary>
 		/// ジョブ実行時
 		/// </summary>
-		[Conditional( DETAIL_LOG_MODE )]
+		[Conditional( SIMPLE_LOG_MODE )]
 		internal static void Log_RunJob( IAccessLocation location )
 		{
 			LogCore( string.Format( "Run Job : {0}", location.AccessPath ) );
 		}
+
 		/// <summary>
 		/// ジョブ進行時
 		/// </summary>
-		[Conditional( DETAIL_LOG_MODE )]
+		[Conditional( SIMPLE_LOG_MODE )]
 		internal static void Log_UpdateJob<TSource>( TSource source )
 		{
 			LogCore( string.Format( "Update Job : {0}", source.ToString() ) );
@@ -51,7 +53,7 @@ namespace Chipstar
 		/// <summary>
 		/// ジョブ完了時
 		/// </summary>
-		[Conditional( DETAIL_LOG_MODE )]
+		[Conditional( SIMPLE_LOG_MODE )]
 		internal static void Log_DoneJob<TSource>( TSource source, IAccessLocation location )
 		{
 			LogCore( string.Format( "Done Job : {0} : {1}", source.ToString(), location.AccessPath ) );
@@ -59,7 +61,7 @@ namespace Chipstar
 		/// <summary>
 		/// 取得先の作成
 		/// </summary>
-		[Conditional( DETAIL_LOG_MODE )]
+		[Conditional( SIMPLE_LOG_MODE )]
 		[Conditional( SIMPLE_LOG_MODE )]
 
 		internal static void Log_CreateEntryPoint( string result )
@@ -69,7 +71,7 @@ namespace Chipstar
 		/// <summary>
 		/// ジョブの登録
 		/// </summary>
-		[Conditional( DETAIL_LOG_MODE )]
+		[Conditional( SIMPLE_LOG_MODE )]
 		internal static void Log_AddJob( ILoadJob job )
 		{
 			LogCore( string.Format( "Enqueue : {0}", job.ToString() ) );
@@ -78,7 +80,6 @@ namespace Chipstar
 		/// <summary>
 		/// 読み込み開始
 		/// </summary>
-		[Conditional( DETAIL_LOG_MODE )]
 		[Conditional( SIMPLE_LOG_MODE )]
 		internal static void Log_LoadStart( string path )
 		{
@@ -88,7 +89,6 @@ namespace Chipstar
 		/// <summary>
 		/// 対象Fileが見つからない
 		/// </summary>
-		[Conditional( DETAIL_LOG_MODE )]
 		[Conditional( SIMPLE_LOG_MODE )]
 		internal static void Log_AssetNotFound( string path )
 		{
@@ -98,7 +98,7 @@ namespace Chipstar
 		/// <summary>
 		/// アセットデータベースの初期化開始
 		/// </summary>
-		[Conditional( DETAIL_LOG_MODE )]
+		[Conditional( SIMPLE_LOG_MODE )]
 		internal static void Log_Downloader_StartInit()
 		{
 			LogCore( "InitTable" );
@@ -107,8 +107,7 @@ namespace Chipstar
 		/// <summary>
 		/// 
 		/// </summary>
-		[Conditional( DETAIL_LOG_MODE )]
-		[Conditional( SIMPLE_LOG_MODE )]
+		[Conditional( SIMPLE_LOG_MODE ) ]
 		internal static void Log_Downloader_RequestBuildMap( IAccessLocation location )
 		{
 			LogCore( string.Format( "Get Request : {0}", location.AccessPath ) );
@@ -116,7 +115,7 @@ namespace Chipstar
 		/// <summary>
 		/// アセットデータベースの取得
 		/// </summary>
-		[Conditional( DETAIL_LOG_MODE )]
+		[Conditional( SIMPLE_LOG_MODE )]
 		internal static void Log_GetBuildMap<TTable, TBundle, TAsset>( TTable table )
 			where TTable : IBuildMapDataTable<TBundle, TAsset>
 			where TBundle : IBundleBuildData
@@ -128,8 +127,7 @@ namespace Chipstar
 		/// <summary>
 		/// キャッシュデータベースの初期化
 		/// </summary>
-		[Conditional( DETAIL_LOG_MODE )]
-		[Conditional( SIMPLE_LOG_MODE )]
+		[Conditional( SIMPLE_LOG_MODE ) ]
 		internal static void Log_InitStorageDB( string path )
 		{
 			LogCore( string.Format( "Get CacheDB : {0}", path ) );
@@ -137,7 +135,7 @@ namespace Chipstar
 		/// <summary>
 		/// キャッシュデータベースの取得
 		/// </summary>
-		[Conditional( DETAIL_LOG_MODE )]
+		[Conditional( SIMPLE_LOG_MODE )]
 		internal static void Log_InitStorageDB_ReadLocalFile( IEnumerable<LocalBundleData> table )
 		{
 			LogCore( string.Format( "Serialized : {0}", table.ToString() ) );
@@ -145,66 +143,88 @@ namespace Chipstar
 		/// <summary>
 		/// キャッシュデータベースの初回作成
 		/// </summary>
-		[Conditional( DETAIL_LOG_MODE )]
+		[Conditional( SIMPLE_LOG_MODE )]
 		internal static void Log_InitStorageDB_FirstCreate( string path )
 		{
 			LogCore( string.Format( "First Create : {0}", path ) );
 		}
-		[Conditional( DETAIL_LOG_MODE )]
+
+		[Conditional( SIMPLE_LOG_MODE )]
+		internal static void Log_Dump_Version_Database( string v )
+		{
+			var filePath = Path.Combine( Application.dataPath, "versionDump.log" );
+			File.WriteAllText( filePath, v );
+		}
+
+		[Conditional( SIMPLE_LOG_MODE )]
 		internal static void Log_WriteLocalBundle( IAccessLocation location )
 		{
 			LogCore( string.Format( "Write Cache File : {0}", location.AccessPath ) );
 		}
-		[Conditional( DETAIL_LOG_MODE )]
+		[Conditional( SIMPLE_LOG_MODE )]
 		internal static void Log_SaveLocalVersion( ICachableBundle data )
 		{
 			LogCore( string.Format( "Save File Version : {0}", data.ToString() ) );
 		}
-		[Conditional( DETAIL_LOG_MODE )]
+		[Conditional( SIMPLE_LOG_MODE )]
 		internal static void Log_DeleteLocalBundle( ICachableBundle data )
 		{
 			LogCore( string.Format( "Delete Cache File : {0}", data.Name ) );
 		}
-		[Conditional( DETAIL_LOG_MODE )]
+		[Conditional( SIMPLE_LOG_MODE )]
 		internal static void Log_RemoveLocalVersion( ICachableBundle data )
 		{
 			LogCore( string.Format( "Delete File Version : {0}", data.ToString() ) );
 		}
-		[Conditional( DETAIL_LOG_MODE )]
+		[Conditional( SIMPLE_LOG_MODE )]
 		internal static void Log_ApplyLocalSaveFile( string path )
 		{
 			LogCore( string.Format( "Apply Cache SaveData : {0}", path ) );
 		}
-		[Conditional( DETAIL_LOG_MODE )]
 		[Conditional( SIMPLE_LOG_MODE )]
-		internal static void Log_LoadAsseT<T>( string path, IAssetLoadFactory factory ) where T : UnityEngine.Object
+		internal static void Log_StartOperation<T>( T loadOperation ) where T : ILoadOperation
+		{
+			LogCore( string.Format( "Load Async {0}({1}) ", typeof( T ), loadOperation.ToString() ) );
+		}
+
+		[Conditional( SIMPLE_LOG_MODE ) ]
+		internal static void Log_LoadAsset<T>( string path, IAssetLoadFactory factory ) where T : UnityEngine.Object
 		{
 			LogCore( string.Format( "Asset Load {0}({1}) => {2}", path, typeof( T ), typeof( IAssetLoadFactory ).Name ) );
 		}
-		[Conditional( DETAIL_LOG_MODE )]
-		[Conditional( SIMPLE_LOG_MODE )]
+		[Conditional( SIMPLE_LOG_MODE ) ]
 		internal static void Log_LoadLevel( string path, ISceneLoadFactory factory )
 		{
 			LogCore( string.Format( "Load Scene {0} => {1}", path, typeof( IAssetLoadFactory ).Name ) );
 		}
-		[Conditional( DETAIL_LOG_MODE )]
 		[Conditional( SIMPLE_LOG_MODE )]
+		internal static void Log_GetAssetDatabase( string path )
+		{
+			LogCore( string.Format( "Get Database Asset = {0}", path ) );
+		}
+
+		[Conditional( SIMPLE_LOG_MODE ) ]
 		internal static void Log_LoadLevelAdditive( string path, ISceneLoadFactory factory )
 		{
 			LogCore( string.Format( "Load Scene Additive {0} => {1}", path, typeof( IAssetLoadFactory ).Name ) );
 		}
+
+		[Conditional( SIMPLE_LOG_MODE )]
+		internal static void Log_WarningNotHasExtensions( string path )
+		{
+			WarningCore( string.Format( "Not Has Extensions : {0}", path ) );
+		}
+
 		/// <summary>
 		/// ログ表示
 		/// </summary>
-		[Conditional( DETAIL_LOG_MODE )]
-		[Conditional( SIMPLE_LOG_MODE )]
+		[Conditional( SIMPLE_LOG_MODE ) ]
 		[DebuggerHidden, DebuggerStepThrough]
 		private static void LogCore( string message )
 		{
 			Logger.Log( LogType.Log, TAG, message );
 		}
-		[Conditional( DETAIL_LOG_MODE )]
-		[Conditional( SIMPLE_LOG_MODE )]
+		[Conditional( SIMPLE_LOG_MODE ) ]
 		[DebuggerHidden, DebuggerStepThrough]
 		private static void WarningCore( string message )
 		{

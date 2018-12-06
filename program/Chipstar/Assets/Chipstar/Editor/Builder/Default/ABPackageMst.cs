@@ -11,7 +11,9 @@ namespace Chipstar.Builder
     /// </summary>
     public class ABPackageMst : ABPackageData<ABBuildData>
     {
-        public string	PathPattern { get; private set; }	// ファイルパス
+		public override string Name { get { return PathPattern; } }
+
+		public string	PathPattern { get; private set; }	// ファイルパス
 		public string	PackName    { get; private set; }	// アセットバンドル名
         public string	MatchKey    { get; private set; }	// 名前の共通部分抜き出し用
 

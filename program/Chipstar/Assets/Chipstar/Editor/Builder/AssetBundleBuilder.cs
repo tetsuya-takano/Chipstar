@@ -107,11 +107,18 @@ namespace Chipstar.Builder
 		{
             var list            = new List<TBuildData>();
             var buildAssetTmp   = new List<string>( buildAssets );
-            foreach( var pack in packageConfigList.OrderBy( p => -p.Priority ) )
-            {
-                var bundles = Package( config, pack, ref buildAssetTmp );
-                list.AddRange( bundles );
-            }
+			var packList		= packageConfigList.OrderBy( p => -p.Priority ).ToArray();
+
+			using( var scope = new ProgressDialogScope( "Calclate Package", packList.Length ) )
+			{
+				for( var i = 0; i < packList.Length; i++ )
+				{
+					var pack    = packList[ i ];
+					scope.Show( pack.Name, i );
+					var bundles = Package( config, pack, ref buildAssetTmp );
+					list.AddRange( bundles );
+				}
+			}
             return list;
 		}
 

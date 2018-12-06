@@ -39,19 +39,25 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public IAssetLoadOperation<T> Create<T>( string path ) where T : UnityEngine.Object
 		{
-			var match = m_regex.Match( path );
+			var key = path;
+			if( !Path.HasExtension( key ) )
+			{
+				//	拡張子の無いリクエストは警告を出す
+				Chipstar.Log_WarningNotHasExtensions( key );
+			}
+			else
+			{
+				//	拡張子があったら削る
+				key = path.Replace( Path.GetExtension( key ), string.Empty );
+			}
+			var match = m_regex.Match( key );
 			if( !match.Success )
 			{
-				return new ResourcesLoadOperation<T>( Resources.LoadAsync<T>( path ) );
+				return new ResourcesLoadOperation<T>( Resources.LoadAsync<T>( key ) );
 			}
 
 			//	Resources以下を拾う
 			var accessKey = match.Groups[2].Value;
-			if( Path.HasExtension( accessKey ))
-			{
-				//	拡張子は削る
-				accessKey = accessKey.Replace( Path.GetExtension( accessKey ), string.Empty );
-			}
 			return new ResourcesLoadOperation<T>( Resources.LoadAsync<T>( accessKey ) );
 		}
 

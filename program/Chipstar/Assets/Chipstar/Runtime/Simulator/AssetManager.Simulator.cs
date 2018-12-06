@@ -16,9 +16,9 @@ namespace Chipstar
 		/// <summary>
 		/// エディタシミュレータモード
 		/// </summary>
-		public static IAssetManager Simulator()
+		public static IAssetManager Simulator( string assetAccessPrefix )
 		{
-			return new AssetManagerEditorSimulator();
+			return new AssetManagerEditorSimulator( assetAccessPrefix  );
 		}
 
 		/// <summary>
@@ -38,9 +38,9 @@ namespace Chipstar
 			/// <summary>
 			/// コンストラクタ
 			/// </summary>
-			public AssetManagerEditorSimulator()
+			public AssetManagerEditorSimulator( string assetAccessPrefix )
 			{
-				AssetProvider = new AssetLoadSimulator();
+				AssetProvider = new AssetLoadSimulator( assetAccessPrefix );
 			}
 
 			/// <summary>

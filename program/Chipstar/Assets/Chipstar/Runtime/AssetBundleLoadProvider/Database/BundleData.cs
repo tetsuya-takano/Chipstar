@@ -14,6 +14,7 @@ namespace Chipstar.Downloads
         T[]             Dependencies{ get; }
         bool            IsOnMemory  { get; }
 		bool            IsScene		{ get; }
+		uint			Crc			{ get; }
 
 		AssetBundleRequest LoadAsync<TAssetType>( string path ) where TAssetType : UnityEngine.Object;
 		void Unload();
@@ -61,6 +62,7 @@ namespace Chipstar.Downloads
         public      string          Name        { get; private set; }
         public      AssetData<T>[]  Assets      { get; private set; }
         public      Hash128         Hash        { get; private set; }
+		public      uint			Crc			{ get; private set; }
         public      T[]             Dependencies{ get; private set; }
         public      bool            IsOnMemory  { get { return Bundle != null; } }
 		public      bool            IsScene		{ get { return Bundle.isStreamedSceneAssetBundle; } }
@@ -86,6 +88,7 @@ namespace Chipstar.Downloads
         {
             Name = data.ABName;
             Hash = Hash128.Parse( data.Hash );
+			Crc  = data.Crc;
         }
 
         public void Set(AssetData<T>[] assets)

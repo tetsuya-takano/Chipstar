@@ -7,6 +7,8 @@ namespace Chipstar.Downloads
 {
     public interface ILocalBundleData : IDisposable
     {
+		Hash128	Version { get; }
+
         bool IsMatchKey     ( string    key     ); // 存在するかどうか
         bool IsMatchVersion ( Hash128   version ); // キャッシュ済みかどうか
         void Apply(Hash128 hash );
@@ -26,25 +28,25 @@ namespace Chipstar.Downloads
         //=================================
         //  プロパティ
         //=================================
-        protected string            Key
+        public string            Key
         {
             get { return m_key; }
             set { m_key = value; }
         }
-        protected Hash128           Version
+        public Hash128           Version
         {
             get { return m_version; }
 			set { m_version = value; }
 		}
 
-        //=================================
-        //  関数
-        //=================================
+		//=================================
+		//  関数
+		//=================================
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public LocalBundleData( string key, Hash128 hash )
+		/// <summary>
+		/// 
+		/// </summary>
+		public LocalBundleData( string key, Hash128 hash )
         {
             Key         = key;
             Version     = hash;

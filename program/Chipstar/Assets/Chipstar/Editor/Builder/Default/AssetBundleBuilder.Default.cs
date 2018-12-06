@@ -53,7 +53,7 @@ namespace Chipstar.Builder
 						targetFolder	: buildTargetPath,
 						ignorePattern	: new string[]
 						{
-							"(.*).cs", "(.*).meta", "(.*).asmdef",	//	無視ファイル
+							"(.*).cs$", "(.*).meta", "(.*).asmdef",	//	無視ファイル
 							"(.*)Resources/"						//	無視フォルダ
 						}),
 					packageSettings	: new ABPackageMstTable( packageConfigFile ),

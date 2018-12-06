@@ -60,5 +60,39 @@ namespace Chipstar.Downloads
 			}
 			StorageDatabase.Apply();
 		}
+
+		public override string ToString()
+		{
+			var builder = new StringBuilder();
+
+			foreach( var bundle in LoadDatabase.BundleList )
+			{
+				var hasStorage		= StorageDatabase.HasStorage( bundle );
+				var localVersion	= StorageDatabase.GetVersion( bundle );
+				var localCrc        = 0u;
+				var storage			= StorageDatabase.ToLocation( bundle.Name );
+				var remoteVersion   = bundle.Hash;
+				var remoteCrc       = bundle.Crc;
+				var server          = LoadDatabase.ToBundleLocation( bundle );
+
+				builder
+					.AppendLine()
+					.AppendLine( bundle.Name )
+					.AppendLine( "[Local]")
+					.AppendLine( storage.AccessPath )
+					.AppendLine( localVersion.ToString() )
+					.AppendLine( localCrc.ToString() )
+					.AppendLine()
+					.AppendLine( "[Remote]")
+					.AppendLine( server.AccessPath )
+					.AppendLine( remoteVersion.ToString() )
+					.AppendLine( remoteCrc.ToString() )
+					.AppendLine()
+					.AppendFormat( "Not Update:{0}", hasStorage )
+					.AppendLine()
+					.AppendLine("================================================="); 
+			}
+			return builder.ToString();
+		}
 	}
 }

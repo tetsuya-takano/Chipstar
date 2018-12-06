@@ -20,9 +20,9 @@ namespace Chipstar.Downloads
 			return WRDL.GetAssetBundle( location );
 		}
 
-		protected override ILoadJob<AssetBundle> DoCreateLocalLoad( IAccessLocation location )
+		protected override ILoadJob<AssetBundle> DoCreateLocalLoad( IAccessLocation location, Hash128 hash, uint crc )
 		{
-			return new LocalFileLoadJob( location );
+			return new LocalFileLoadJob( location, crc );
 		}
 
 		protected override ILoadJob<string> DoCreateTextLoad( IAccessLocation location )

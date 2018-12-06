@@ -41,10 +41,10 @@ namespace Chipstar.Downloads
         )
         {
             m_job           = job;
-            m_job.OnLoaded  = () =>
+            m_job.OnLoaded  = (content) =>
             {
                 IsCompleted = true;
-                Content     = m_job.Content;
+                Content     = content;
                 onCompleted( Content );
             };
         }

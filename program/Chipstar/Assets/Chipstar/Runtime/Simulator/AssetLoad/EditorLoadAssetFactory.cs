@@ -2,6 +2,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
 using UnityEngine;
 
 namespace Chipstar.Downloads
@@ -11,12 +13,29 @@ namespace Chipstar.Downloads
 	/// </summary>
 	public sealed class EditorLoadAssetFactory : IAssetLoadFactory
 	{
+		//============================
+		//	変数
+		//============================
+		private string m_folderPrefix = null;
+
+		//============================
+		//	関数
+		//============================
+
+		/// <summary>
+		/// コンストラクタ
+		/// </summary>
+		public EditorLoadAssetFactory(string prefex )
+		{
+			m_folderPrefix = prefex;
+		}
 		/// <summary>
 		/// 判定
 		/// </summary>
 		public bool CanLoad( string path )
 		{
-			return true;
+			var isExist = File.Exists( Path.Combine( m_folderPrefix, path ) );
+			return isExist;
 		}
 
 		/// <summary>
@@ -24,7 +43,8 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public IAssetLoadOperation<T> Create<T>( string path ) where T : UnityEngine.Object
 		{
-			return new EditorLoadAssetOperation<T>( path );
+			var fullPath = Path.Combine( m_folderPrefix, path );
+			return new EditorLoadAssetOperation<T>( fullPath );
 		}
 
 		/// <summary>
