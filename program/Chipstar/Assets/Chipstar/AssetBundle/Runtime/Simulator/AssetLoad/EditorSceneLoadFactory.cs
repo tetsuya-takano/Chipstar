@@ -1,0 +1,61 @@
+﻿#if UNITY_EDITOR
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+
+namespace Chipstar.Downloads
+{
+	/// <summary>
+	/// エディタでのシーン読み込み処理
+	/// </summary>
+	public sealed class EditorSceneLoadFactory : ISceneLoadFactory
+	{
+		//======================================
+		//	変数
+		//======================================
+
+		//======================================
+		//	関数
+		//======================================
+
+		/// <summary>
+		/// 判定
+		/// </summary>
+		public bool CanLoad( string path )
+		{
+			return SceneUtility.GetBuildIndexByScenePath( path ) == -1;
+		}
+
+		/// <summary>
+		/// 破棄
+		/// </summary>
+		public void Dispose() { }
+
+		/// <summary>
+		/// 遷移
+		/// </summary>
+		public ISceneLoadOperation LoadLevel( string path )
+		{
+			var param		= new LoadSceneParameters( LoadSceneMode.Single );
+			var operation	= EditorSceneManager.LoadSceneAsyncInPlayMode( path, param );
+			return new SceneLoadOperation( operation );
+		}
+
+		/// <summary>
+		/// 加算
+		/// </summary>
+		public ISceneLoadOperation LoadLevelAdditive( string path )
+		{
+			var param       = new LoadSceneParameters( LoadSceneMode.Additive );
+			var operation   = EditorSceneManager.LoadSceneAsyncInPlayMode( path, param );
+
+			return new SceneLoadOperation( operation );
+		}
+	}
+}
+#endif
