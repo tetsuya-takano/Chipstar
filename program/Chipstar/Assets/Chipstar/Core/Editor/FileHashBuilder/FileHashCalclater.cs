@@ -5,7 +5,7 @@ using System.IO;
 using System.Security.Cryptography;
 using UnityEngine;
 
-namespace Chipstar.Builder.CriWare
+namespace Chipstar.Builder
 {
 	public interface IFileHashCalclater : IDisposable
 	{

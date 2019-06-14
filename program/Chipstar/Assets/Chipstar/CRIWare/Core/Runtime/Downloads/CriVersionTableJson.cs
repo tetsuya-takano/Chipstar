@@ -61,7 +61,7 @@ namespace Chipstar.Downloads.CriWare
 		public void AddNew( string key, string hash )
 		{
 			var data = Find( key );
-			Chipstar.AssertNotNull(data, $"Only Add New : {key}");
+			ChipstarLog.AssertNotNull(data, $"Only Add New : {key}");
 			m_list.Add( new Data
 			{
 				key = key,

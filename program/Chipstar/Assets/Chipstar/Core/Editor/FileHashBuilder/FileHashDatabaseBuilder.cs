@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Linq;
 
-namespace Chipstar.Builder.CriWare
+namespace Chipstar.Builder
 {
 	/// <summary>
 	/// ファイル差分情報のデータベースファイルを作成するクラス

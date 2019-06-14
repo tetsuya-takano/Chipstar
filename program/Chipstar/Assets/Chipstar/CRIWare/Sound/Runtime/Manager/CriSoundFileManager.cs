@@ -11,19 +11,17 @@ namespace Chipstar.Downloads.CriWare
 {
 	public interface ICriSoundFileManager : IDisposable
 	{
-		IAccessPoint GetFileDir( string cueSheetName );
+		IAccessPoint GetFileDir(string cueSheetName);
 
-		IEnumerator		Setup( string includeRelativePath, string saveFileName );
-		IEnumerator		Login( IAccessPoint accessPoint );
-		void			Logout();
+		IEnumerator Setup(string includeRelativePath, string saveFileName);
+		IEnumerator Login(IAccessPoint accessPoint);
+		void Logout();
+		IPreloadOperation Prepare(string cueSheetName);
 
+		ISoundFileData FindDLData(string cueSheetName);
+		ISoundFileData FindLocalData(string cueSheetName);
 
-		IEnumerator		Prepare( string cueSheetName );
-
-		ISoundFileData	FindDLData		( string cueSheetName );
-		ISoundFileData	FindLocalData	( string cueSheetName );
-
-		bool HasFile( string cueSheetName );
+		bool HasFile(string cueSheetName);
 
 		IEnumerable<ISoundFileData> GetDLDataList();
 
@@ -31,6 +29,7 @@ namespace Chipstar.Downloads.CriWare
 
 		IEnumerator StorageClear();
 		void DoUpdate();
+		void Stop();
 	}
 	/// <summary>
 	/// Criのファイル管理をする
@@ -65,8 +64,9 @@ namespace Chipstar.Downloads.CriWare
 		public CriSoundFileManager(
 			IAccessPoint includeStorage,
 			IAccessPoint downloadStorage,
-			StreamingAssetsDatabase streamingAssetsDatabase
-		) : base(downloadStorage, includeStorage )
+			StreamingAssetsDatabase streamingAssetsDatabase,
+			IJobEngine engine
+		) : base(downloadStorage, includeStorage, engine)
 		{
 			m_encoding          = new UTF8Encoding( false );
 			m_streamingAssetsDB = streamingAssetsDatabase;
@@ -83,7 +83,11 @@ namespace Chipstar.Downloads.CriWare
 
 		protected override void DoInit(ICriDownloader downloader)
 		{
-			downloader.OnInstalled    = (key, hash) => m_cacheDB.Replace(key, hash);
+			downloader.OnInstalled = (key, hash) =>
+		 {
+			 m_cacheDB.Replace(key, hash);
+			 DoDatabaseSave();
+		 };
 		}
 
 		/// <summary>
@@ -95,7 +99,7 @@ namespace Chipstar.Downloads.CriWare
 			//	StreamingAssetsから内包サウンドの情報を引っ張り出す
 			m_localDB = new LocalSoundDatabase( includeRelativePath, m_streamingAssetsDB.AssetList );
 			m_cacheDB = CriVersionTableJson.ReadLocal( CacheDbLocation.FullPath, m_encoding );
-			Chipstar.Log_ReadLocalTable(m_cacheDB, CacheDbLocation);
+			ChipstarLog.Log_ReadLocalTable(m_cacheDB, CacheDbLocation);
 
 			//	StreamingAssets内のファイルをOBB用に出力
 
@@ -114,7 +118,7 @@ namespace Chipstar.Downloads.CriWare
 		protected override IEnumerator DoLogin( string json )
 		{
 			m_remoteDB = JsonUtility.FromJson<SoundFileDatabase>( json );
-			Chipstar.AssertNotNull(m_remoteDB, $"Sound Remote DB is Null : { RemoteDbLocation.FullPath }");
+			ChipstarLog.AssertNotNull(m_remoteDB, $"Sound Remote DB is Null : { RemoteDbLocation.FullPath }");
 			if (m_remoteDB == null)
 			{
 				m_remoteDB = new SoundFileDatabase();
@@ -135,56 +139,48 @@ namespace Chipstar.Downloads.CriWare
 		/// <summary>
 		/// サウンド準備
 		/// </summary>
-		public IEnumerator Prepare( string cueSheetName )
+		public IPreloadOperation Prepare( string cueSheetname )
 		{
-			//	そもそもあるかどうか
-			if( IsExistsRemoteSoundFile( cueSheetName ))
+			var process = PrepareImpl(cueSheetname);
+			var operation = new PreloadOperation(process);
+			return AddQueue( operation );
+		}
+		private ILoadProcess PrepareImpl( string cueSheetName )
+		{
+			if( m_remoteDB == null )
 			{
-				//	DL済みファイルなので素通り
-				yield break;
-			}
-			if( IsExistsLocalSoundFile( cueSheetName ))
-			{
-				//	ローカルファイルなので飛ばして良い
-				yield break;
-			}
-
-			if( m_remoteDB == null)
-			{
-				yield break;
+				if (IsExistsLocalSoundFile(cueSheetName))
+				{
+					//	ローカルファイルなので飛ばして良い
+					return SkipLoadProcess.Default;
+				}
+				//	TODO : 保存済みファイルを調べる
+				return SkipLoadProcess.Default;
 			}
 			//	あったら落とす
 			var fileData = m_remoteDB.Find( cueSheetName );
 			if( fileData == null)
 			{
-				Chipstar.Log_RequestCueSheet_Error( cueSheetName );
-				yield break;
+				ChipstarLog.Log_RequestCueSheet_Error( cueSheetName );
+				return SkipLoadProcess.Default;
 			}
-			Chipstar.Log_Download_Sound(fileData);
-			//	Acbファイルを落とす
+			ChipstarLog.Log_Download_Sound(fileData);
+			ILoadProcess acbJob = SkipLoadProcess.Default;
+			if (!HasAcb(fileData))
 			{
-				var job = Download(
-							relativePath: fileData.AcbPath,
-							fileVersion: fileData.AcbHash,
-							size: fileData.AcbSize
-						);
-				yield return job;
+				acbJob = Download(fileData.AcbPath, fileData.AcbHash, fileData.AcbSize);
 			}
-
-			//	Awbファイルがある場合
-			if( fileData.HasAwb())
+			if (!fileData.HasAwb())
 			{
-				{
-					var job = Download(
-								relativePath: fileData.AwbPath,
-								fileVersion: fileData.AwbHash,
-								size: fileData.AwbSize
-							);
-					yield return job;
-				}
+				//	Awbファイルがないならココまで
+				return acbJob;
 			}
-			DoDatabaseSave();
-			yield break;
+			ILoadProcess awbJob = SkipLoadProcess.Default;
+			if (!HasAwb(fileData))
+			{
+				awbJob = Download(fileData.AwbPath, fileData.AwbHash, fileData.AwbSize);
+			}
+			return acbJob.ToJoin(awbJob);
 		}
 
 		/// <summary>
@@ -227,7 +223,7 @@ namespace Chipstar.Downloads.CriWare
 			}
 			if( !m_remoteDB.Contains( cueSheetName ) )
 			{
-				Chipstar.Log_NotContains_RemoteDB_Sound( cueSheetName );
+				ChipstarLog.Log_NotContains_RemoteDB_Sound( cueSheetName );
 				return false;
 			}
 
@@ -236,17 +232,11 @@ namespace Chipstar.Downloads.CriWare
 
 			// --- acb-check
 
-			if (IsBreakFile(data.AcbPath, data.AcbSize))
+			if (!HasAcb(data))
 			{
 				return false;
 			}
-			if (!m_cacheDB.IsSameVersion(data.AcbPath, data.AcbHash))
-			{
-				// バージョン不一致 :: データ更新
-				Chipstar.Log_MissMatchVersion(data.AcbPath, m_cacheDB.GetVersion(data.AcbPath), data.AcbHash);
-				return false;
-			}
-			
+
 			if (!data.HasAwb())
 			{
 				//	Awb無いならここまででいい
@@ -254,26 +244,60 @@ namespace Chipstar.Downloads.CriWare
 			}
 
 			// --- awb-check
-			if( IsBreakFile(data.AwbPath,data.AwbSize))
+			//
+			if( !HasAwb ( data ))
 			{
 				return false;
 			}
 
-			//
-			if (!m_cacheDB.IsSameVersion(data.AwbPath, data.AwbHash))
+			return true;
+		}
+
+		/// <summary>
+		/// Awbチェック
+		/// </summary>
+		private bool HasAwb( ISoundFileData data )
+		{
+			if (data == null)
 			{
-				// バージョン不一致 :: 更新
-				Chipstar.Log_MissMatchVersion(data.AwbPath, m_cacheDB.GetVersion(data.AwbPath), data.AwbHash);
+				return false;
+			}
+			var path = data.AwbPath;
+			var hash = data.AwbHash;
+			var size = data.AwbSize;
+			return HasCacheFile(path, hash, size);
+		}
+		private bool HasAcb(ISoundFileData data)
+		{
+			if (data == null)
+			{
+				return false;
+			}
+			var path = data.AcbPath;
+			var hash = data.AcbHash;
+			var size = data.AcbSize;
+			return HasCacheFile(path, hash, size);
+		}
+
+		private bool HasCacheFile(string path, string hash, long size)
+		{
+			if (!m_cacheDB.IsSameVersion(path, hash))
+			{
+				return false;
+			}
+			if (IsBreakFile(path, size))
+			{
 				return false;
 			}
 			return true;
 		}
+
 		private bool IsExistsLocalSoundFile( string cueSheetName )
 		{
 			var isExists = m_localDB.Contains( cueSheetName );
 			if( !isExists )
 			{
-				Chipstar.Log_NotContains_LocalDB_Sound( cueSheetName );
+				ChipstarLog.Log_NotContains_LocalDB_Sound( cueSheetName );
 			}
 			return isExists;
 		}
@@ -329,6 +353,11 @@ namespace Chipstar.Downloads.CriWare
 		protected override void DoDatabaseClear()
 		{
 			m_cacheDB = new CriVersionTableJson();
+		}
+
+		public void Stop()
+		{
+			Cancel();
 		}
 	}
 }

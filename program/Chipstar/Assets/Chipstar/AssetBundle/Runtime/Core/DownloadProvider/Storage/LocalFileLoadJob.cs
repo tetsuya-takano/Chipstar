@@ -52,6 +52,32 @@ namespace Chipstar.Downloads
 		{
 			return source.isDone && source.assetBundle == null;
 		}
+
+		protected override ResultCode DoError(AssetBundleCreateRequest source)
+		{
+			if( source == null )
+			{
+				return ChipstarResult.Generic;
+			}
+			return ChipstarResult.ClientError($"Local Asset Bundle Load Error : {Location?.FullPath ?? string.Empty}");
+		}
+		/// <summary>
+		/// キャンセル処理
+		/// </summary>
+		protected override void DoCancel(AssetBundleCreateRequest source)
+		{
+			if( source == null )
+			{
+				return;
+			}
+			var bundle = source.assetBundle;
+			if (!bundle)
+			{
+				return;
+			}
+			// ロード時に失敗したので破棄する
+			bundle.Unload(true);
+		}
 	}
 
 	public sealed class LocalABHandler : ILoadJobHandler<AssetBundleCreateRequest, AssetBundle>

@@ -24,5 +24,18 @@ namespace Chipstar
 			}
 			self.Dispose();
 		}
+
+		public static void OnceInvoke( ref Action act)
+		{
+			var tmp = act;
+			act = null;
+			tmp?.Invoke();
+		}
+		public static void OnceInvoke<T>(ref Action<T> act, T content )
+		{
+			var tmp = act;
+			act = null;
+			tmp?.Invoke( content );
+		}
 	}
 }

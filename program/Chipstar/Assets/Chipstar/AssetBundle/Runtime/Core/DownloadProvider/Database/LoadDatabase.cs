@@ -13,8 +13,8 @@ namespace Chipstar.Downloads
         IEnumerable<TRuntimeData>            BundleList { get; }
         IEnumerable<AssetData<TRuntimeData>> AssetList  { get; }
 
-		IEnumerator Clear();
-		IEnumerator Create(byte[] data);
+		void Clear();
+		void Create(byte[] data);
 		AssetData<TRuntimeData> GetAssetData(string path);
 		TRuntimeData GetBundleData(string name);
 		bool Contains(string path);
@@ -36,11 +36,9 @@ namespace Chipstar.Downloads
 		//=========================================
 		//  変数
 		//=========================================
-		private Encoding                                    m_encoding      = null;
-		private string                                      m_dbFileName    = null;
-		private Dictionary<string, TRuntimeData>            m_bundleTable	= new Dictionary<string, TRuntimeData             >( StringComparer.OrdinalIgnoreCase ); // バンドル名   → バンドルデータテーブル
-        private Dictionary<string, AssetData<TRuntimeData>> m_assetsTable	= new Dictionary<string, AssetData<TRuntimeData>  >( StringComparer.OrdinalIgnoreCase ); // アセットパス → アセットデータテーブル
-		private string                                      m_prefix        = string.Empty;
+		private IDatabaseParser<TTable> m_parser = null;
+		private Dictionary<string, TRuntimeData> m_bundleTable = new Dictionary<string, TRuntimeData>(StringComparer.OrdinalIgnoreCase); // バンドル名   → バンドルデータテーブル
+		private Dictionary<string, AssetData<TRuntimeData>> m_assetsTable	= new Dictionary<string, AssetData<TRuntimeData>  >( StringComparer.OrdinalIgnoreCase ); // アセットパス → アセットデータテーブル
         //=========================================
         //  プロパティ
         //=========================================
@@ -54,10 +52,9 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// コンストラクタ
 		/// </summary>
-		public LoadDatabase( string dbFileName, Encoding encoding )
+		public LoadDatabase( IDatabaseParser<TTable> parser )
 		{
-			m_dbFileName = dbFileName;
-			m_encoding   = encoding;
+			m_parser = parser;
 		}
 
         /// <summary>
@@ -76,79 +73,65 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// 
 		/// </summary>
-		public IEnumerator Create( byte[] datas )
+		public void Create( byte[] datas )
         {
 			if( datas == null || datas.Length == 0 )
 			{
-				Chipstar.Log_Database_NotFound( );
+				ChipstarLog.Log_Database_NotFound( );
+				return;
 			}
-            var table = ParseContentData( datas );
-			Chipstar.Log_GetBuildMap<TTable, TBundle, TAsset>( table );
+            var table = m_parser.Parse( datas );
+			ChipstarLog.Log_GetBuildMap<TTable, TBundle, TAsset>( table );
 			if( table == null)
 			{
-				yield break;
+				return;
 			}
-			m_prefix  = table.Prefix;
 			//  アセットの一覧
 			foreach( var asset in table.AssetList)
-            {
-                var d = new AssetData<TRuntimeData>( asset );
-                m_assetsTable.Add( asset.Path, d );
-            }
-			yield return null;
+			{
+				var d = new AssetData<TRuntimeData>(asset);
+				m_assetsTable.Add(asset.Path, d);
+			}
+			//  バンドルの一覧
+			foreach (var bundle in table.BundleList)
+			{
+				var runtime = new TRuntimeData();
 
-            //  バンドルの一覧
-            foreach (var bundle in table.BundleList)
-            {
-                var runtime = new TRuntimeData();
+				runtime.Set(bundle);
 
-                runtime.Set( bundle );
-
-                m_bundleTable.Add(bundle.ABName, runtime);
-            }
-			yield return null;
+				m_bundleTable.Add(bundle.ABName, runtime);
+			}
 			//  依存関係とアセットデータを接続
 			foreach (var bundle in table.BundleList)
-            {
-                var runtime      = m_bundleTable[bundle.ABName];
-                var dependencies = CreateDependencies( bundle );
-                var assets       = CreateAssets      ( bundle );
-                foreach (var asset in assets )
-                {
-                    asset.Connect( runtime );
-                }
-                runtime.Set( dependencies );
-                runtime.Set( assets );
-            }
-			yield return null;
+			{
+				var runtime = m_bundleTable[bundle.ABName];
+				var dependencies = CreateDependencies(bundle);
+				var assets = CreateAssets(bundle);
+				foreach (var asset in assets)
+				{
+					asset.Connect(runtime);
+				}
+				runtime.Set(dependencies);
+				runtime.Set(assets);
+			}
 		}
 
 		/// <summary>
 		/// 既存データの破棄
 		/// </summary>
-		public IEnumerator Clear()
+		public void Clear()
 		{
 			foreach( var d in m_bundleTable )
 			{
 				d.Value.Dispose();
 			}
 			m_bundleTable.Clear();
-			yield return null;
 			foreach( var d in m_assetsTable )
 			{
 				d.Value.Dispose();
 			}
 			m_assetsTable.Clear();
-
-			yield break;
 		}
-
-		protected virtual TTable ParseContentData( byte[] data )
-        {
-			var json = m_encoding.GetString( data );
-			Chipstar.Log_Parse_Result( json );
-            return JsonUtility.FromJson<TTable>( json );
-        }
         /// <summary>
         /// 依存関係データ作成
         /// </summary>

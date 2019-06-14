@@ -18,7 +18,6 @@ namespace Chipstar.Downloads
 		bool IsScene { get; }
 		long FileSize { get; }
 		string[] Labels { get; }
-		string AssetVersion { get; }
 		AssetBundleRequest LoadAsync<TAssetType>(string path) where TAssetType : UnityEngine.Object;
 		void Unload();
 		void OnMemory(AssetBundle bundle);
@@ -81,7 +80,6 @@ namespace Chipstar.Downloads
 		public long FileSize { get; private set; }
 		public bool IsFree { get { return RefCount <= 0; } }
 		public string[] Labels { get; private set; }
-		public string AssetVersion { get; private set; }
 		protected AssetBundle Bundle { get; set; }
 		public int RefCount { get; private set; }
 		public Hash128 Hash { get; private set; }
@@ -108,7 +106,6 @@ namespace Chipstar.Downloads
 			Crc = data.Crc;
 			FileSize = data.FileSize;
 			Labels = data.Labels;
-			AssetVersion = data.AssetVersion;
 		}
 
 		public void Set(AssetData<T>[] assets)
@@ -152,11 +149,12 @@ namespace Chipstar.Downloads
 		{
 			if (!IsFree)
 			{
-				Chipstar.Log_Unload_Error(this);
+				ChipstarLog.Log_Unload_Error(this);
 				return;
 			}
 			if (Bundle)
 			{
+				ChipstarLog.Log_Unload_Bundle( this );
 				Bundle.Unload(true);
 			}
 			Bundle = null;

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Chipstar.Downloads
 {
@@ -19,7 +20,7 @@ namespace Chipstar.Downloads
 	/// </summary>
 	public interface IAssetLoadFactory : ILoadOperateFactory
 	{
-		IAssetLoadOperation<T> Create<T>( string path ) where T : UnityEngine.Object;
+		IAssetLoadOperater<T> Create<T>( string path ) where T : UnityEngine.Object;
 	}
 
 	/// <summary>
@@ -27,7 +28,6 @@ namespace Chipstar.Downloads
 	/// </summary>
 	public interface ISceneLoadFactory : ILoadOperateFactory
 	{
-		ISceneLoadOperation LoadLevel		 ( string path );
-		ISceneLoadOperation LoadLevelAdditive( string path );
+		ISceneLoadOperater Create(string path, LoadSceneMode mode);
 	}
 }

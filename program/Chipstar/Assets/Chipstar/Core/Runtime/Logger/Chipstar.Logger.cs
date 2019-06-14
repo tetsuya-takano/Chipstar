@@ -12,7 +12,7 @@ namespace Chipstar
 	/// <summary>
 	/// ログを管理する部分
 	/// </summary>
-	public static partial class Chipstar
+	public static partial class ChipstarLog
 	{
 		//=============================
 		//	enum
@@ -46,7 +46,6 @@ namespace Chipstar
 		private static bool EnableLogDeep { get { return LogLevelMode == LogLevel.DeepDetail; } }
 		public static LogLevel LogLevelMode { get; set; } = LogLevel.None;
 
-
 		//=============================
 		//	関数
 		//=============================
@@ -65,7 +64,7 @@ namespace Chipstar
 		[Conditional( ENABLE_CHIPSTAR_LOG )]
 		internal static void Log_UpdateJob<TSource>( TSource source )
 		{
-			LogDeepDetail( string.Format( "Update Job : {0}", source.ToString() ) );
+			LogDeepDetail( string.Format( "Update Job : {0}", source?.ToString() ) );
 		}
 		/// <summary>
 		/// ジョブ完了時
@@ -76,6 +75,10 @@ namespace Chipstar
 			LogDetail( string.Format( "Done Job : {0} : {1}", source.ToString(), location.FullPath ) );
 		}
 
+		internal static void Log_OoperationDisposed(LoadOperation loadOperation)
+		{
+			LogDeepDetail($"{loadOperation?.GetType()?.Name} :: Disposed");
+		}
 		/// <summary>
 		/// ログイン処理時
 		/// </summary>
@@ -142,6 +145,12 @@ namespace Chipstar
 			LogSimple( string.Format( "Write Cache File : {0} [Size = {1} byte]", location.FullPath, content.Length ) );
 		}
 
+		[Conditional(ENABLE_CHIPSTAR_LOG)]
+		internal static void Log_CancelJob(ILoadJob job)
+		{
+			LogSimple(job?.ToString() ?? string.Empty);
+		}
+
 		public static void AssertNotNull<T>(T obj, string message) where T : class
 		{
 			if (obj != null)
@@ -149,6 +158,11 @@ namespace Chipstar
 				return;
 			}
 			AssertSimple(message);
+		}
+		[Conditional(ENABLE_CHIPSTAR_LOG)]
+		internal static void Log_Unload_Bundle<T>(BundleData<T> bundleData) where T : IRuntimeBundleData<T>
+		{
+			LogDeepDetail($"{bundleData?.Name} Unload");
 		}
 
 		[Conditional( ENABLE_CHIPSTAR_LOG )]

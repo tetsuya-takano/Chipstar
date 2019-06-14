@@ -26,7 +26,7 @@ namespace Chipstar.Downloads.CriWare
 		//====================================
 		//	プロパティ
 		//====================================
-		
+
 		/// <summary>
 		/// 接続先
 		/// </summary>
@@ -47,12 +47,15 @@ namespace Chipstar.Downloads.CriWare
 		/// DLエンジン
 		/// </summary>
 		protected IJobEngine Engine { get; private set; }
-
 		private ICriDownloader Downloader { get; set; }
-
+		private OperationRoutine Routine { get; set; }
+		private List<ResultCode> ErrorList { get; } = new List<ResultCode>();
+		private bool IsRunning { get; set; }
 
 		public OnGetManifestDelegate GetManifestLocation { private get; set; }
 		public OnGetFileDelegate GetFileDLLocation { private get; set; }
+		public Action<IReadOnlyList<ResultCode>> OnLoadError { private get; set; }
+
 		//====================================
 		//	関数
 		//====================================
@@ -65,22 +68,26 @@ namespace Chipstar.Downloads.CriWare
 			Engine = null;
 			GetManifestLocation = null;
 			GetFileDLLocation = null;
+			ErrorList.Clear();
 			DoDispose();
 		}
 		protected virtual void DoDispose() { }
 
 		public CriFileManager(
 			IAccessPoint cacheStorage,
-			IAccessPoint includeStorage
+			IAccessPoint includeStorage,
+			IJobEngine engine
 		)
 		{
 			CacheStorage   = cacheStorage;
 			IncludeStorage = includeStorage;
 
-			Engine         = new JobEngine();
+			Engine         = engine;
+			Routine        = new OperationRoutine();
 			Downloader     = new CriDownloader( CacheStorage );
 			Downloader.GetFileDLLocation = (server, relativePath) => GetFileDLLocation?.Invoke( server, relativePath );
 			Downloader.GetSuccessDL = (file, size) => !IsBreakFile(file, size);
+			Downloader.OnError = code => OnError( code );
 			DoInit( Downloader );
 		}
 
@@ -99,6 +106,7 @@ namespace Chipstar.Downloads.CriWare
 
 		public IEnumerator Login( IAccessPoint server )
 		{
+			IsRunning = true;
 			AccessPoint = server;
 			RemoteDbLocation = GetManifestLocation?.Invoke( AccessPoint );
 
@@ -124,6 +132,11 @@ namespace Chipstar.Downloads.CriWare
 		{
 			return Downloader.Start( Engine, relativePath, fileVersion, size );
 		}
+		protected T AddQueue<T>(T operation) where T : ILoadOperater
+		{
+			operation.OnError = code => OnError(code);
+			return Routine.Register(operation);
+		}
 
 		/// <summary>
 		/// 保存済みファイルの情報を取得
@@ -144,13 +157,13 @@ namespace Chipstar.Downloads.CriWare
 			if (info == null || !info.Exists)
 			{
 				//	持ってない :: 新規DL
-				Chipstar.Log_NotFound_Downloaded_File(relativePath);
+				ChipstarLog.Log_NotFound_Downloaded_File(relativePath);
 				return true;
 			}
 			if (info.Length != size)
 			{
 				// サイズ違い :: 破損
-				Chipstar.Log_MaybeFileBreak(info, size);
+				ChipstarLog.Log_MaybeFileBreak(info, size);
 				return true;
 			}
 			return false;
@@ -175,7 +188,31 @@ namespace Chipstar.Downloads.CriWare
 
 		public void DoUpdate()
 		{
+			if( ErrorList.Count > 0 )
+			{
+				OnLoadError?.Invoke( ErrorList );
+				IsRunning = false;
+				return;
+			}
 			Engine?.Update();
+			Routine?.Update();
 		}
+
+		protected void Cancel()
+		{
+			IsRunning = false;
+			Engine?.Cancel();
+			Routine.Clear();
+			ErrorList.Clear();
+		}
+
+		/// <summary>
+		/// エラー受信
+		/// </summary>
+		private void OnError(ResultCode code)
+		{
+			ErrorList.Add(code);
+		}
+
 	}
 }

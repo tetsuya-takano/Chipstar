@@ -12,9 +12,19 @@ namespace Chipstar.Downloads
 	/// </summary>
 	public interface IAssetLoadProvider : IDisposable
 	{
-		IAssetLoadOperation<T>	LoadAsset<T>	 ( string path ) where T : UnityEngine.Object;
-		ISceneLoadOperation		LoadLevel		 ( string path );
-		ISceneLoadOperation		LoadLevelAdditive( string path );
+		Action<ResultCode> OnError { set; }
+
+		Action StartAny { set; }
+		Action StopAny { set; }
+
+		IAssetLoadOperation<T> LoadAsset<T>(string path) where T : UnityEngine.Object;
+		IAssetLoadOperation<T> LoadAsset<T>(string path, Func<string, ILoadProcess>[] preProcess) where T : UnityEngine.Object;
+
+		ISceneLoadOperation LoadLevel(string path, LoadSceneMode mode);
+		ISceneLoadOperation LoadLevel(string path, LoadSceneMode mode, Func<string, ILoadProcess>[] preProcess);
+
+		IPreloadOperation Preload( ILoadProcess process );
+
 		void Cancel();
 		void DoUpdate();
 	}
@@ -22,13 +32,17 @@ namespace Chipstar.Downloads
 	/// <summary>
 	/// アセット読み込み統括
 	/// </summary>
-	public class AssetLoadProvider : IAssetLoadProvider
+	public sealed class AssetLoadProvider : IAssetLoadProvider
 	{
 		//=======================
-		//	変数
+		//	プロパティ
 		//=======================
+		public Action<ResultCode> OnError { private get; set; }
 		private IFactoryContainer Container { get; set; }
 		private OperationRoutine  Routine { get; set; }
+		public Action StartAny { private get; set; }
+		public Action StopAny { private get; set; }
+
 		//=======================
 		//	関数
 		//=======================
@@ -49,7 +63,9 @@ namespace Chipstar.Downloads
 		{
 			Container.Dispose();
 			Container = null;
-			Routine.Clear();
+			OnError = null;
+			StartAny = null;
+			StopAny = null;
 		}
 
 		/// <summary>
@@ -58,33 +74,66 @@ namespace Chipstar.Downloads
 		public IAssetLoadOperation<T> LoadAsset<T>( string path ) where T : UnityEngine.Object
 		{
 			var factory = Container.GetFromAsset( path );
-			Chipstar.Log_LoadAsset<T>( path, factory );
+			ChipstarLog.Log_LoadAsset<T>( path, factory );
 			return AddCueue(factory.Create<T>(path));
+		}
+
+		/// <summary>
+		/// DLつきAssetLoad
+		/// </summary>
+		public IAssetLoadOperation<T> LoadAsset<T>(string path, Func<string,ILoadProcess>[] preProcess ) where T : UnityEngine.Object
+		{
+			var factory = Container.GetFromAsset(path);
+			// ダウンロードを待ってからロードする機能
+			var operation = new DownloadAssetOperation<T>(
+				path,
+				preProcess, 
+				factory.Create<T>( path )
+			);
+			return AddCueue(operation);
 		}
 
 		/// <summary>
 		/// シーン遷移
 		/// </summary>
-		public ISceneLoadOperation LoadLevel( string path )
+		public ISceneLoadOperation LoadLevel( string path, LoadSceneMode mode )
 		{
 			var factory = Container.GetFromScene( path );
-			Chipstar.Log_LoadLevel( path, factory );
-			return AddCueue(factory.LoadLevel(path));
+			ChipstarLog.Log_LoadLevel( path, factory );
+			return AddCueue(factory.Create(path, mode));
 		}
 		/// <summary>
 		/// シーン加算
 		/// </summary>
-		public ISceneLoadOperation LoadLevelAdditive( string path )
+		public ISceneLoadOperation LoadLevel(string path, LoadSceneMode mode, Func<string, ILoadProcess>[] preProcess)
 		{
 			var factory = Container.GetFromScene( path );
-			Chipstar.Log_LoadLevelAdditive( path, factory );
-			return AddCueue(factory.LoadLevelAdditive(path));
+			ChipstarLog.Log_LoadLevel( path, factory );
+			// ダウンロードを待ってからDLする機能
+			var operation = new DownloadSceneOperation(
+				path,
+				preProcess,
+				factory.Create(path, mode)
+			);
+			return AddCueue(operation);
 		}
+		/// <summary>
+		/// 事前ロード用処理
+		/// </summary>
+		/// <param name="process"></param>
+		/// <returns></returns>
+		public IPreloadOperation Preload(ILoadProcess process)
+		{
+			var operation = new PreloadOperation(process);
+			return AddCueue( operation );
+		}
+
 		/// <summary>
 		/// 追加
 		/// </summary>
-		private T AddCueue<T>( T operation ) where T : ILoadOperation
+		private T AddCueue<T>( T operation ) where T : ILoadOperater
 		{
+			operation.OnError = (code) => OnError?.Invoke( code );
 			return Routine.Register(operation);
 		}
 		/// <summary>

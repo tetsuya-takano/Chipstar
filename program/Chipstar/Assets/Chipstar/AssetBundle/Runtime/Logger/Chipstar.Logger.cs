@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Chipstar
 {
-	public static partial class Chipstar
+	public static partial class ChipstarLog
 	{
 		[Conditional(ENABLE_CHIPSTAR_LOG)]
 		internal static void Log_LoadAsset<T>(string path, IAssetLoadFactory factory) where T : UnityEngine.Object

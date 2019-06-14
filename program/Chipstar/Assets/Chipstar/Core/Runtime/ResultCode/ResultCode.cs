@@ -9,24 +9,25 @@ namespace Chipstar.Downloads
 		Warning,
 		Error,
 	}
-	public sealed partial class ChipstarResultCode
+	public sealed partial class ResultCode
 	{
-		public int Code { get; }
+		public long Code { get; }
 		public ErrorLevel Level { get; }
 		public string Message { get; }
 
-		public ChipstarResultCode(int code, ErrorLevel level, string message)
+		public ResultCode(long code, ErrorLevel level, string message)
 		{
 			Code = code;
 			Level = level;
 			Message = message;
 		}
+
+		public override string ToString()
+		{
+			return $"{Level}[Code={Code}]::{Message}";
+		}
 	}
 
-	public sealed partial class ChipstarResultCode
-	{
-		public static ChipstarResultCode Generic { get; } = new ChipstarResultCode(0, ErrorLevel.Error, "Error Generic");
-		public static ChipstarResultCode None { get; } = new ChipstarResultCode(-1, ErrorLevel.None, "None");
-	}
+	
 
 }

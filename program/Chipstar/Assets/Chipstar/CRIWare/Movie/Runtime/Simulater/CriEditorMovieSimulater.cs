@@ -36,8 +36,8 @@ namespace Chipstar.Downloads.CriWare
 		//=============================
 		//	変数
 		//=============================
-		private ContentGroupConfig              m_movieConfig       = null;
-
+		private ContentGroupConfig m_movieConfig = null;
+		private OperationRoutine m_routine = new OperationRoutine();
 		private IAccessPoint m_sourceDirPath;
 		private IAccessPoint m_movieIncludeDir   = null; //	内包データパス
 		private IAccessPoint m_movieRawDir       = null; //	ダウンロード先
@@ -46,6 +46,7 @@ namespace Chipstar.Downloads.CriWare
 		private Dictionary<string, MovieFileSetData> m_localMovieTable  = new Dictionary<string, MovieFileSetData>();
 
 		private bool m_isLogin           = false;
+		//=============================
 		//	プロパティ
 		//=============================
 
@@ -71,6 +72,7 @@ namespace Chipstar.Downloads.CriWare
 		/// </summary>
 		public void Dispose()
 		{
+			m_routine.Clear();
 			m_remoteMovieTable.Clear();
 		}
 
@@ -140,9 +142,9 @@ namespace Chipstar.Downloads.CriWare
 			}
 			return m_movieIncludeDir;
 		}
-		public IEnumerator Prepare( string path )
+		public IPreloadOperation Prepare( string path )
 		{
-			yield return null;
+			return m_routine.Register(new PreloadOperation(SkipLoadProcess.Default));
 		}
 
 		public IMovieFileData FindDLData( string path )
@@ -192,11 +194,19 @@ namespace Chipstar.Downloads.CriWare
 		{
 			yield return null;
 		}
-		public void DoUpdate() { }
+		public void DoUpdate()
+		{
+			m_routine?.Update();
+		}
 
 		public IEnumerable<IMovieFileData> GetNeedDLList()
 		{
 			return new IMovieFileData[ 0 ];
+		}
+
+		public void Stop()
+		{
+			m_routine.Clear();
 		}
 	}
 }

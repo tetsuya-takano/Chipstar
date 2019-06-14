@@ -17,7 +17,7 @@ namespace Chipstar.Downloads.CriWare
 		IEnumerator Login(IAccessPoint accessPoint);
 		void Logout();
 
-		IEnumerator Prepare(string key);
+		IPreloadOperation Prepare(string key);
 
 		IMovieFileData FindDLData(string key);
 		IMovieFileData FindLocalData(string key);
@@ -30,6 +30,8 @@ namespace Chipstar.Downloads.CriWare
 		IEnumerator StorageClear();
 
 		void DoUpdate();
+
+		void Stop();
 	}
 	/// <summary>
 	/// Criのファイル管理をする
@@ -62,8 +64,9 @@ namespace Chipstar.Downloads.CriWare
 		public CriMovieFileManager(
 			IAccessPoint includeStorage,
 			IAccessPoint downloadStorage,
-			StreamingAssetsDatabase streamingAssetsDatabase
-		) : base(downloadStorage, includeStorage)
+			StreamingAssetsDatabase streamingAssetsDatabase,
+			IJobEngine engine
+		) : base(downloadStorage, includeStorage, engine)
 		{
 			//	-------------------
 			//	共通
@@ -79,7 +82,11 @@ namespace Chipstar.Downloads.CriWare
 
 		protected override void DoInit(ICriDownloader downloader)
 		{
-			downloader.OnInstalled    = (key, hash) => m_cacheDB.Replace(key, hash);
+			downloader.OnInstalled = (key, hash) =>
+			{
+				m_cacheDB.Replace(key, hash);
+				DoDatabaseSave();
+			};
 		}
 
 		/// <summary>
@@ -98,7 +105,7 @@ namespace Chipstar.Downloads.CriWare
 			yield return m_streamingAssetsDB.InitLoad();
 			m_localDB = new LocalMovieDatabase( includeDirPath, m_streamingAssetsDB.AssetList );
 			m_cacheDB = CriVersionTableJson.ReadLocal( CacheDbLocation.FullPath, m_encoding );
-			Chipstar.Log_ReadLocalTable(m_cacheDB, CacheDbLocation);
+			ChipstarLog.Log_ReadLocalTable(m_cacheDB, CacheDbLocation);
 			//	StreamingAssets内のファイルをOBB用に出力
 			foreach ( var movie in m_localDB )
 			{
@@ -114,7 +121,7 @@ namespace Chipstar.Downloads.CriWare
 		protected override IEnumerator DoLogin( string json )
 		{
 			m_remoteDB = JsonUtility.FromJson<MovieFileDatabase>(json);
-			Chipstar.AssertNotNull(m_remoteDB, $"Movie Remote DB is Null : {RemoteDbLocation.FullPath }");
+			ChipstarLog.AssertNotNull(m_remoteDB, $"Movie Remote DB is Null : {RemoteDbLocation.FullPath }");
 			if (m_remoteDB == null)
 			{
 				m_remoteDB = new MovieFileDatabase();
@@ -135,42 +142,36 @@ namespace Chipstar.Downloads.CriWare
 		/// <summary>
 		/// ムービー準備
 		/// </summary>
-		public IEnumerator Prepare( string key )
+		public IPreloadOperation Prepare( string key)
 		{
-			//	そもそもあるかどうか
-			if( IsExistsRemoteMovieFile( key ))
+			var process = PrepareImpl(key);
+			return AddQueue(new PreloadOperation(process));
+		}
+		private ILoadProcess PrepareImpl( string key )
+		{
+			if( m_remoteDB == null )
 			{
-				//	DL済みファイルなので素通り
-				yield break;
-			}
-			if( IsExistsLocalMovieFile( key ))
-			{
-				//	ローカルファイルなので飛ばして良い
-				yield break;
-			}
-
-			if( m_remoteDB == null)
-			{
-				//CriUtils.Assert( "Request Remote File. But RemoteDB is Null." );
-				yield break;
+				if( IsExistsLocalMovieFile( key ))
+				{
+					return SkipLoadProcess.Default;
+				}
+				//	TODO : 保存済みファイルを調べる
+				return SkipLoadProcess.Default;
 			}
 			//	あったら落とす
 			var fileData = m_remoteDB.Find( key );
 			if( fileData == null)
 			{
 				//CriUtils.Warning( "Movie File Key Not Found : {0}", key );
-				yield break;
+				return SkipLoadProcess.Default;
+			}
+			if (HasUsm(fileData))
+			{
+				return SkipLoadProcess.Default;
 			}
 			//	Usmファイルを落とす
-			var job = Download(
-						relativePath: fileData.Path,
-						fileVersion: fileData.Hash,
-						size : fileData.Size
-					);
-			yield return job;
-			DoDatabaseSave();
 
-			yield break;
+			return Download(relativePath: fileData.Path, fileVersion: fileData.Hash, size: fileData.Size);
 		}
 
 		/// <summary>
@@ -220,16 +221,33 @@ namespace Chipstar.Downloads.CriWare
 			}
 
 			var data = m_remoteDB.Find( key );
-			if (IsBreakFile(data.Path, data.Size))
-			{
-				return false;
-			}
-			//	バージョン不一致
-			if( !m_cacheDB.IsSameVersion( data.Path, data.Hash ) )
+			if (!HasCacheFile(data.Path, data.Hash, data.Size))
 			{
 				return false;
 			}
 
+			return true;
+		}
+		private bool HasUsm( IMovieFileData data )
+		{
+			if( data == null )
+			{
+				return false;
+			}
+			return HasCacheFile(data.Path, data.Hash, data.Size);
+		}
+
+		private bool HasCacheFile(string path, string hash, long size)
+		{
+			//	バージョン不一致
+			if (!m_cacheDB.IsSameVersion(path, hash))
+			{
+				return false;
+			}
+			if (IsBreakFile(path, size))
+			{
+				return false;
+			}
 			return true;
 		}
 
@@ -301,6 +319,11 @@ namespace Chipstar.Downloads.CriWare
 		protected override void DoDatabaseClear()
 		{
 			m_cacheDB = new CriVersionTableJson();
+		}
+
+		public void Stop()
+		{
+			Cancel();
 		}
 	}
 }

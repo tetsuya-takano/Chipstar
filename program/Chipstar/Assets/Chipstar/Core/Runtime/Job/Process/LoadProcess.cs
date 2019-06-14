@@ -15,10 +15,9 @@ namespace Chipstar.Downloads
 	/// <summary>
 	/// ロードを処理受付
 	/// </summary>
-	public interface ILoadProcess : ILoadStatus, 
+	public interface ILoadProcess : ILoadStatus,
 		IEnumerator
 	{
-
 	}
 	/// <summary>
 	/// 結果を取る処理
@@ -42,11 +41,16 @@ namespace Chipstar.Downloads
 		//  プロパティ
 		//=====================================
 		public T Content { get; private set; }
-		public bool IsCompleted { get; private set; }
-		public bool IsError { get; private set; }
+		public bool IsCompleted { get; private set; } = false;
+		public bool IsError { get; private set; } = false;
 
-		public float Progress { get { return m_job == null ? 0 : m_job.Progress; } }
+		public float Progress => m_job?.Progress ?? 0;
 		object IEnumerator.Current => null;
+
+		public bool IsCanceled => m_job?.IsCanceled ?? false;
+
+		public bool IsDisposed => m_job?.IsDisposed ?? true;
+		public bool IsRunning => m_job?.IsRunning ?? false;
 
 		//=====================================
 		//  関数
@@ -55,7 +59,7 @@ namespace Chipstar.Downloads
 		public LoadProcess(
 			ILoadJob<T> job,
 			Action<T> onCompleted,
-			Action<ChipstarResultCode> onError = null
+			Action<ResultCode> onError = null
 		)
 		{
 			m_onCompleted = onCompleted;
@@ -63,16 +67,13 @@ namespace Chipstar.Downloads
 			m_job.OnSuccess = () =>
 		   {
 			   Content = m_job.Content;
-			   var act = m_onCompleted;
-			   m_onCompleted = null;
-			   act?.Invoke( Content );
-
+			   ChipstarUtils.OnceInvoke( ref m_onCompleted, Content );
 			   IsCompleted = true;
 		   };
 			m_job.OnError = code =>
 			{
 				m_onCompleted = null;
-				onError?.Invoke( code );
+				onError?.Invoke(code);
 				IsError = true;
 			};
 		}
@@ -81,9 +82,9 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public void Dispose()
 		{
-			m_job = null;
 			m_onCompleted = null;
-			
+			m_job?.Dispose();
+			m_job = null;
 		}
 
 		bool IEnumerator.MoveNext()
@@ -94,5 +95,71 @@ namespace Chipstar.Downloads
 		void IEnumerator.Reset() { }
 	}
 
-	
+	/// <summary>
+	/// プロセスの状態を通知する
+	/// </summary>
+	public sealed class LoadProcessReporter : ILoadProcess
+	{
+		//=================================
+		//	変数
+		//=================================
+		private ILoadProcess m_process = null;
+		private Action m_onComplete = null;
+
+		//=================================
+		//	プロパティ
+		//=================================
+		public float Progress => m_process?.Progress ?? 1;
+
+		public bool IsCompleted => m_process?.IsCompleted ?? true;
+
+		public bool IsError => m_process?.IsError ?? false;
+
+		public object Current => null;
+
+		public Action OnCompleted { set => m_onComplete = value; }
+		public Action<float> OnProgress { set; private get; }
+
+		public bool IsCanceled => m_process?.IsCanceled ?? false;
+
+		public bool IsDisposed => m_process?.IsDisposed ?? true;
+
+		public bool IsRunning => m_process?.IsRunning ?? false;
+
+		//=================================
+		//	関数
+		//=================================
+
+		public LoadProcessReporter( ILoadProcess process)
+		{
+			m_process = process;
+		}
+
+		public void Dispose()
+		{
+			OnProgress = null;
+			OnCompleted = null;
+			m_process.DisposeIfNotNull();
+			m_process = null;
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public void Report()
+		{
+			OnProgress?.Invoke( Progress );
+			if( IsCompleted && m_onComplete != null )
+			{
+				ChipstarUtils.OnceInvoke(ref m_onComplete );
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			return !IsCompleted;
+		}
+
+		void IEnumerator.Reset() { }
+	}
 }

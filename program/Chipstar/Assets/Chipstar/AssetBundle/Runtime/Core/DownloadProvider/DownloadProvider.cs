@@ -7,7 +7,9 @@ namespace Chipstar.Downloads
 {
     public interface IDownloadProvider : IDisposable
 	{
-		IEnumerator InitLoad(IAccessPoint accessPoint);
+		Action<ResultCode> OnLoadError { set; }
+
+		ILoadProcess InitLoad(IAccessPoint accessPoint);
 		ILoadProcess CacheOrDownload(string name);
 		ILoadProcess LoadFile( string name );
 
@@ -27,8 +29,7 @@ namespace Chipstar.Downloads
 		//===============================
 		//  変数
 		//===============================
-		private List<ChipstarResultCode> m_errorList = new List<ChipstarResultCode>();
-		private bool m_isRunning = false;
+		private bool IsRunning = false;
 
 		//===============================
 		//  プロパティ
@@ -40,7 +41,7 @@ namespace Chipstar.Downloads
 		private IAccessPoint Server { get; set; } // 接続先
 		public Func<IAccessPoint, IAccessLocation> GetBuildMapLocation { private get; set; }
 		public Func<IAccessPoint, TRuntimeData, IAccessLocation> GetBundleLocation { private get; set; }
-		public Action<IReadOnlyList<ChipstarResultCode>> OnLoadError { set; private get; }
+		public Action<ResultCode> OnLoadError { set; private get; }
 		//===============================
 		//  関数
 		//===============================
@@ -71,34 +72,31 @@ namespace Chipstar.Downloads
 
 			GetBundleLocation = null;
 			GetBuildMapLocation = null;
-
-			m_errorList.Clear();
+			OnLoadError = null;
 		}
 
 		/// <summary>
 		/// 初期化処理
 		/// </summary>
-		public IEnumerator InitLoad( IAccessPoint accessServer )
+		public ILoadProcess InitLoad( IAccessPoint accessServer )
         {
-			m_isRunning = true;
+			ChipstarLog.Log_Downloader_StartInit();
+			// リセット
+			IsRunning = true;
 			Server = accessServer;
-			Chipstar.Log_Downloader_StartInit( );
-			//	初期化
-			yield return LoadDatabase.Clear();
-
-			//	アクセス先を保持
-
+			LoadDatabase.Clear();
 			//	コンテンツデータの取得
 			var location = GetBuildMapLocation?.Invoke( Server );
-
 			var loadBuildMap = DoInitielizeLoad( location );
-			Chipstar.Log_Downloader_RequestBuildMap( location );
-			while( !loadBuildMap.IsCompleted )
-            {
-                yield return null;
-            }
-			yield return LoadDatabase.Create( loadBuildMap.Content );
-            yield break;
+			var process = new LoadProcess<byte[]>(
+				job : loadBuildMap, 
+				onCompleted : c => 
+				{
+					LoadDatabase.Create( c );
+				}, 
+				onError: (code) => OnError(code)
+			);
+			return process;
         }
 
 		/// <summary>
@@ -106,13 +104,6 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public void DoUpdate()
 		{
-			if ( m_errorList.Count > 0  && m_isRunning )
-			{
-				//	統合エラー処理
-				OnLoadError?.Invoke( m_errorList );
-				m_isRunning = false;
-				return;
-			}
 			JobEngine?.Update();
 		}
 
@@ -161,7 +152,7 @@ namespace Chipstar.Downloads
 			if( data.IsOnMemory )
 			{
 				//	ロードしてあるならしない
-				Chipstar.Log_Skip_OnMemory( data.Name );
+				ChipstarLog.Log_Skip_OnMemory( data.Name );
 				return SkipLoadProcess.Default;
 			}
 			//	ローカルファイルを開く
@@ -181,7 +172,7 @@ namespace Chipstar.Downloads
 			}
 			var localPath = StorageDatabase.ToLocation( data );
             var job = JobCreator.FileDL( JobEngine, location, localPath );
-			Chipstar.Log_RequestDownload( data );
+			ChipstarLog.Log_RequestDownload( data );
 			return new LoadProcess<Empty>(
 				job,
 				onCompleted: ( _ ) =>
@@ -216,16 +207,15 @@ namespace Chipstar.Downloads
 				onError : code => OnError( code )
 			);
 		}
-		private void OnError( ChipstarResultCode code )
+		private void OnError( ResultCode code )
 		{
-			m_errorList.Add( code );
+			OnLoadError?.Invoke( code );
 		}
 
 		public void Cancel()
 		{
-			m_isRunning = false;
+			IsRunning = false;
 			JobEngine?.Cancel();
-			m_errorList.Clear();
 		}
 	}
 }

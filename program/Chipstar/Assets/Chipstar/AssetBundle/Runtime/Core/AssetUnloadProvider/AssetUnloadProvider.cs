@@ -11,9 +11,6 @@ namespace Chipstar.Downloads
 	/// </summary>
 	public interface IAssetUnloadProvider : IDisposable
 	{
-		void		AddRef				( string assetPath );
-		void		ReleaseRef			( string assetPath );
-		IDisposable CreateRefCounter	( string assetPath );
 		IEnumerator UnloadUnusedAssets	();
 		IEnumerator ForceReleaseAll		();
 	}
@@ -47,50 +44,6 @@ namespace Chipstar.Downloads
 		public void Dispose()
 		{
 			Database = null;
-		}
-
-		/// <summary>
-		/// 参照の加算
-		/// </summary>
-		public void AddRef( string assetPath )
-		{
-			if( !Database.Contains( assetPath ) )
-			{
-				return;
-			}
-			var data = Database.GetAssetData( assetPath );
-
-			data?.AddRef();
-		}
-
-		/// <summary>
-		/// 参照の減算
-		/// </summary>
-		public void ReleaseRef( string assetPath )
-		{
-			if( Database == null)
-			{
-				return;
-			}
-			if( !Database.Contains( assetPath ) )
-			{
-				return;
-			}
-			var data = Database.GetAssetData( assetPath );
-			data?.ReleaseRef();
-		}
-
-		/// <summary>
-		/// 参照カウンタ用のインスタンスを追加
-		/// </summary>
-		public IDisposable CreateRefCounter( string assetPath )
-		{
-			if( !Database.Contains( assetPath ) )
-			{
-				return EmptyReference.Default;
-			}
-			var data = Database.GetAssetData( assetPath );
-			return new RefCalclater( data );
 		}
 
 		/// <summary>

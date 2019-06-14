@@ -17,16 +17,14 @@ namespace Chipstar.Downloads
 		//===============================
 		//	変数
 		//===============================
-		private T   m_asset     = null;
+		private string m_path = string.Empty;
 		private int m_waitFrame = 0;
 		private int m_frameCount = 0;
+		private T m_asset = null;
 
 		//===============================
 		//	プロパティ
 		//===============================
-		public override T		Content		{ get { return m_asset	; } }
-		public override bool	IsCompleted { get { return m_frameCount > m_waitFrame;} }
-
 		//===============================
 		//	関数
 		//===============================
@@ -38,9 +36,8 @@ namespace Chipstar.Downloads
 		{
 			m_frameCount = 0;
 			m_waitFrame = waitFrame;
-			m_asset = AssetDatabase.LoadAssetAtPath<T>( path );
 		}
-		protected override void DoUpdate()
+		protected override void DoPreUpdate()
 		{
 			m_frameCount++;
 		}
@@ -51,6 +48,32 @@ namespace Chipstar.Downloads
 		protected override void DoDispose()
 		{
 			m_asset = null;
+		}
+
+		protected override float GetProgress()
+		{
+			return Mathf.InverseLerp(0, m_waitFrame, m_frameCount);
+		}
+
+		protected override T GetContent()
+		{
+			return m_asset;
+		}
+
+		protected override bool GetComplete()
+		{
+			return m_frameCount >= m_waitFrame;
+		}
+
+		protected override void DoComplete()
+		{
+			m_asset = AssetDatabase.LoadAssetAtPath<T>(m_path);
+			base.DoComplete();
+		}
+
+		protected override void DoRun()
+		{
+			m_frameCount = 0;
 		}
 	}
 }

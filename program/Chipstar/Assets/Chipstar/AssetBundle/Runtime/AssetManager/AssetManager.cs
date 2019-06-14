@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using UnityEngine.SceneManagement;
 
 namespace Chipstar.Downloads
 {
@@ -24,6 +25,7 @@ namespace Chipstar.Downloads
 		private IDownloadProvider DownloadProvider { get; set; }
 		private IAssetUnloadProvider UnloadProvider { get; set; }
 		private IStorageProvider<TBundleData> StorageProvider { get; set; }
+		private IErrorHandler ErrorHandler { get; set; }
 
 		//======================================
 		//	関数
@@ -38,7 +40,8 @@ namespace Chipstar.Downloads
 			IDownloadProvider downloadProvider,
 			IStorageProvider<TBundleData> storageProvider,
 			IAssetLoadProvider assetProvider,
-			IAssetUnloadProvider unloadProvider
+			IAssetUnloadProvider unloadProvider,
+			IErrorHandler errorHandler = null
 		)
 		{
 			//	Resources情報
@@ -64,6 +67,16 @@ namespace Chipstar.Downloads
 			//	破棄機能
 			//---------------------------------
 			UnloadProvider = unloadProvider;
+
+			//-----------------------
+			// エラー受信機
+			//-----------------------
+			ErrorHandler = errorHandler;
+			if( ErrorHandler != null)
+			{
+				DownloadProvider.OnLoadError = code => ErrorHandler.Receive( code );
+				AssetLoadProvider.OnError = code => ErrorHandler.Receive( code );
+			}
 		}
 
 		/// <summary>
@@ -71,13 +84,14 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public void Dispose()
 		{
-			StorageDatabase.Dispose();
-			LoadDatabase.Dispose();
-			ResourcesDatabase.Dispose();
-			DownloadProvider.Dispose();
-			AssetLoadProvider.Dispose();
-			UnloadProvider.Dispose();
-			StorageProvider.Dispose();
+			StorageDatabase?.Dispose();
+			LoadDatabase?.Dispose();
+			ResourcesDatabase?.Dispose();
+			DownloadProvider?.Dispose();
+			AssetLoadProvider?.Dispose();
+			UnloadProvider?.Dispose();
+			StorageProvider?.Dispose();
+			ErrorHandler?.Dispose();
 
 			StorageDatabase = null;
 			LoadDatabase = null;
@@ -110,14 +124,16 @@ namespace Chipstar.Downloads
 
 		public void Logout()
 		{
+			ErrorHandler?.Init();
 			DownloadProvider.Cancel();
+			AssetLoadProvider?.Cancel();
 			UnloadProvider.ForceReleaseAll();
 			LoadDatabase.Clear();
 		}
 		/// <summary>
 		///事前ロード処理 
 		/// </summary>
-		public ILoadProcess DeepDownload( string assetPath )
+		private ILoadProcess DeepDownloadImpl( string assetPath )
 		{
 			var asset = LoadDatabase.GetAssetData( assetPath );
 			if( asset == null)
@@ -128,34 +144,45 @@ namespace Chipstar.Downloads
 			if( bundle.Dependencies.Length == 0 )
 			{
 				// 1個しかないなら自分だけ
-				return SingleDownload( bundle.Name );
+				return SingleDownloadImpl( bundle.Name );
 			}
 			var prev = bundle
 						.Dependencies
 						.Where( c => !c.IsOnMemory )
 						.Where( c => !StorageDatabase.HasStorage(c))
-						.Select(c => SingleDownload(c.Name))
+						.Select(c => SingleDownloadImpl(c.Name))
 						.ToArray()
 						.ToParallel()
 						;
-			var job = prev.ToJoin( SingleDownload( bundle.Name ));
+			var job = prev.ToJoin(SingleDownloadImpl( bundle.Name ));
 
 			return job;
+		}
+		public IPreloadOperation DeepDownload(string assetPath)
+		{
+			var process = DeepDownloadImpl( assetPath );
+
+			return AssetLoadProvider.Preload( process );
 		}
 
 		/// <summary>
 		/// バンドル単体のDL
 		/// </summary>
-		public ILoadProcess SingleDownload( string abName )
+		private ILoadProcess SingleDownloadImpl( string abName )
 		{
 			return DownloadProvider.CacheOrDownload(abName);
 		}
 
+		public IPreloadOperation SingleDownload(string abName)
+		{
+			var process = SingleDownloadImpl( abName );
+			return AssetLoadProvider.Preload( process );
+		}
 
 		/// <summary>
 		/// ファイルオープン
 		/// </summary>
-		public ILoadProcess DeepOpenFile( string assetPath )
+		public ILoadProcess DeepOpenFileImpl( string assetPath )
 		{
 			var asset = LoadDatabase.GetAssetData( assetPath );
 			if( asset == null )
@@ -166,72 +193,98 @@ namespace Chipstar.Downloads
 			if (bundle.Dependencies.Length == 0)
 			{
 				// 1個しかないなら自分だけ
-				return SingleOpenFile( bundle.Name );
+				return SingleOpenFileImpl( bundle.Name );
 			}
 			//	そうでないなら依存先をDLしてから自分
 
 			var prev = bundle
 						.Dependencies
 						.Where( d => !d.IsOnMemory )
-						.Select(c => SingleOpenFile( c.Name ) )
+						.Select(c => SingleOpenFileImpl( c.Name ) )
 						.ToArray()
 						.ToParallel()
 						;
-			var job = prev.ToJoin(SingleOpenFile(bundle.Name));
+			var job = prev.ToJoin(SingleOpenFileImpl(bundle.Name));
 
 			return job;
 		}
 
+		public IPreloadOperation DeepOpenFile( string assetPath )
+		{
+			var process = DeepOpenFileImpl( assetPath );
+			return AssetLoadProvider.Preload( process );
+		}
 		/// <summary>
 		/// 単一ロード
 		/// </summary>
-		public ILoadProcess SingleOpenFile( string abName)
+		private ILoadProcess SingleOpenFileImpl( string abName)
 		{
 			return DownloadProvider.LoadFile(abName);
 		}
+		public IPreloadOperation SingleOpenFile(string abName)
+		{
+			var process = SingleOpenFileImpl(abName);
+			return AssetLoadProvider.Preload( process );
+		}
+
 
 		/// <summary>
 		/// アセットアクセス
 		/// </summary>
 		public IAssetLoadOperation<T> LoadAsset<T>( string assetPath ) where T : UnityEngine.Object
 		{
-			UnloadProvider.AddRef( assetPath );
-			return AssetLoadProvider.LoadAsset<T>( assetPath );
+			//	DBにない == Resources はDL処理がいらない
+			if (!LoadDatabase.Contains( assetPath ))
+			{
+				return LoadAssetInternal<T>(assetPath);
+			}
+			return LoadAssetDownloads<T>(assetPath);
+		}
+
+		private IAssetLoadOperation<T> LoadAssetInternal<T>( string assetPath) where T : UnityEngine.Object
+		{
+			return AssetLoadProvider.LoadAsset<T>(assetPath);
+		}
+
+		private IAssetLoadOperation<T> LoadAssetDownloads<T>(string assetPath) where T : UnityEngine.Object
+		{
+			// DL処理をつくって事前処理に渡す
+
+			var preProcess = new Func<string, ILoadProcess>[]
+			{
+				p => DeepDownloadImpl( p ),
+				p => DeepOpenFileImpl( p ),
+			};
+			return AssetLoadProvider.LoadAsset<T>(assetPath, preProcess);
 		}
 
 		/// <summary>
 		/// シーン遷移
 		/// </summary>
-		public ISceneLoadOperation LoadLevel( string scenePath )
+		public ISceneLoadOperation LoadLevel( string scenePath, LoadSceneMode mode )
 		{
-			UnloadProvider.AddRef( scenePath );
-			return AssetLoadProvider.LoadLevel( scenePath );
+			//	DBにない == Resources はDL処理がいらない
+			if (!LoadDatabase.Contains(scenePath))
+			{
+				return LoadLevelInternal(scenePath, mode);
+			}
+			return LoadLevelDownloads( scenePath, mode );
 		}
 
-		/// <summary>
-		/// シーン加算
-		/// </summary>
-		public ISceneLoadOperation LoadLevelAdditive( string scenePath )
+		private ISceneLoadOperation LoadLevelInternal( string scenePath, LoadSceneMode mode)
 		{
-			UnloadProvider.AddRef( scenePath );
-			return AssetLoadProvider.LoadLevelAdditive( scenePath );
+			return AssetLoadProvider.LoadLevel(scenePath, mode);
 		}
 
-		/// <summary>
-		/// 解放
-		/// </summary>
-		public void Release( string assetPath )
+		private ISceneLoadOperation LoadLevelDownloads(string scenePath, LoadSceneMode mode)
 		{
-			UnloadProvider.ReleaseRef( assetPath );
-		}
-
-		/// <summary>
-		/// 参照カウンタオブジェクトを作成
-		/// new で加算、Disposeで減算
-		/// </summary>
-		public IDisposable CreateAssetReference( string path )
-		{
-			return UnloadProvider.CreateRefCounter( path );
+			// DL処理をつくって事前処理に渡す
+			var preProcess = new Func<string, ILoadProcess>[]
+			{
+				p => DeepDownloadImpl( p ),
+				p => DeepOpenFileImpl( p ),
+			};
+			return AssetLoadProvider.LoadLevel(scenePath, mode, preProcess);
 		}
 
 		/// <summary>
@@ -260,8 +313,14 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public void DoUpdate()
 		{
+			if (ErrorHandler?.IsError ?? false)
+			{
+				//	エラー発生したら止める
+				return;
+			}
 			DownloadProvider?.DoUpdate();
 			AssetLoadProvider?.DoUpdate();
+			ErrorHandler?.Update();
 		}
 
 		/// <summary>
@@ -388,6 +447,7 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public void Stop()
 		{
+			AssetLoadProvider.Cancel();
 			DownloadProvider.Cancel();
 		}
 	}

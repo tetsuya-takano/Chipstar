@@ -18,6 +18,7 @@ namespace Chipstar.Example
 				outputPath			:	Path.Combine( Application.dataPath, "../../build/windows/" + prefix + "/" ),
 				
 				buildMapFile		:   "buildMap.json",
+                assetVersionFile:string.Empty,
 				options    : BuildAssetBundleOptions.ForceRebuildAssetBundle | BuildAssetBundleOptions.IgnoreTypeTreeChanges | addOption,
                 platform   : BuildTarget.StandaloneWindows64
             );

@@ -20,12 +20,18 @@ namespace Chipstar.Downloads
 		//===============================
 		//	プロパティ
 		//===============================
-		public bool IsCompleted { get { return m_onWait == null ? true : m_onWait(); } }
-		public float Progress { get { return IsCompleted ? 1 : 0; } }
+		public bool IsCompleted => m_onWait?.Invoke() ?? true;
+		public float Progress => IsCompleted ? 1 : 0;
 
 		object IEnumerator.Current => null;
 
 		public bool IsError => false;
+
+		public bool IsCanceled => false;
+
+		public bool IsDisposed => m_onWait == null;
+
+		public bool IsRunning => true;
 
 		//===============================
 		//	関数

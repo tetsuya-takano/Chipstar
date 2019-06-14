@@ -24,17 +24,27 @@ namespace Chipstar.Downloads
 					engine.SetState(EngineStatus.Wait);
 					return;
 				}
+				//	キャンセル時
+				if (job.IsCanceled || job.IsDisposed)
+				{
+					engine.Refresh();
+					engine.SetState(EngineStatus.Wait);
+					return;
+				}
 				job.Update();
+				//	エラー
 				if( job.IsError )
 				{
 					engine.SetState( EngineStatus.Error );
 					return;
 				}
+				//	完了
 				if( job.IsCompleted )
 				{
 					engine.SetState( EngineStatus.Complete );
 					return;
 				}
+
 			}
 		}
 	}

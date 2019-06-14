@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
-
+using UnityEngine.SceneManagement;
 
 namespace Chipstar.Downloads
 {
@@ -56,7 +56,7 @@ namespace Chipstar.Downloads
 
 		public IEnumerator Login(IAccessPoint server )
 		{
-			Chipstar.Log_Login(server);
+			ChipstarLog.Log_Login(server);
 			yield return null;
 			AssetProvider.SetLoginMode(true);
 		}
@@ -69,21 +69,21 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// 事前ロード
 		/// </summary>
-		public ILoadProcess DeepDownload(string path)
+		public IPreloadOperation DeepDownload(string path)
 		{
-			return SkipLoadProcess.Default;
+			return AssetProvider.Preload(SkipLoadProcess.Default);
 		}
-		public ILoadProcess SingleDownload(string name)
+		public IPreloadOperation SingleDownload(string name)
 		{
-			return SkipLoadProcess.Default;
+			return AssetProvider.Preload(SkipLoadProcess.Default);
 		}
-		public ILoadProcess DeepOpenFile(string path)
+		public IPreloadOperation DeepOpenFile(string path)
 		{
-			return SkipLoadProcess.Default;
+			return AssetProvider.Preload(SkipLoadProcess.Default);
 		}
-		public ILoadProcess SingleOpenFile(string name)
+		public IPreloadOperation SingleOpenFile(string name)
 		{
-			return SkipLoadProcess.Default;
+			return AssetProvider.Preload(SkipLoadProcess.Default);
 		}
 
 		public IAssetLoadOperation<T> LoadAsset<T>(string assetPath) where T : UnityEngine.Object
@@ -94,17 +94,9 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// シーン遷移
 		/// </summary>
-		public ISceneLoadOperation LoadLevel(string scenePath)
+		public ISceneLoadOperation LoadLevel(string scenePath, LoadSceneMode mode )
 		{
-			return AssetProvider.LoadLevel(scenePath);
-		}
-
-		/// <summary>
-		/// シーン加算
-		/// </summary>
-		public ISceneLoadOperation LoadLevelAdditive(string scenePath)
-		{
-			return AssetProvider.LoadLevelAdditive(scenePath);
+			return AssetProvider.LoadLevel(scenePath, mode );
 		}
 
 		/// <summary>
@@ -118,18 +110,6 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Release(string assetPath)
-		{
-			//	何もしない
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public IDisposable CreateAssetReference(string path)
-		{
-			return EmptyReference.Default;
-		}
 		/// <summary>
 		/// 破棄
 		/// </summary>

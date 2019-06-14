@@ -18,7 +18,6 @@ namespace Chipstar.Downloads
 		long		FileSize	 { get; }
         string[]    Dependencies { get; }
 		string[]	Labels		 { get; }
-		string		AssetVersion { get; }
 	}
     public interface IAssetBuildData
     {
@@ -46,7 +45,6 @@ namespace Chipstar.Downloads
         [SerializeField] private string		m_abName;
         [SerializeField] private string[]	m_assets;
         [SerializeField] private string[]	m_dependencies;
-		[SerializeField] private string		m_assetVersionHash;
         [SerializeField] private string		m_hash;
 		[SerializeField] private uint		m_crc;
         [SerializeField] private long		m_fileSize;
@@ -94,12 +92,6 @@ namespace Chipstar.Downloads
 			set { m_labels = value; }
 		}
 
-		public string AssetVersion
-		{
-			get { return m_assetVersionHash;  }
-			set { m_assetVersionHash = value; }
-		}
-
 		//===============================
 		//  関数
 		//===============================
@@ -110,8 +102,7 @@ namespace Chipstar.Downloads
             string		hash,
 			uint		crc,
             long		size,
-			string[]	labels,
-			string		version
+			string[]	labels
             )
         {
             m_abName         = abName;
@@ -121,7 +112,6 @@ namespace Chipstar.Downloads
             m_dependencies   = dependenceis;
             m_fileSize       = size;
 			m_labels         = labels;
-			m_assetVersionHash=version;
         }
     }
 
@@ -149,7 +139,7 @@ namespace Chipstar.Downloads
 		//===============================
 		//  const
 		//===============================
-		private static readonly Encoding Encode = new UTF8Encoding( false );
+		public static readonly Encoding Encode = new UTF8Encoding( false );
 
 		//===============================
 		//  SerializeField
@@ -269,6 +259,20 @@ namespace Chipstar.Downloads
 
 			m_runtimeAssetTable = m_assetDBList.ToDictionary( c => c.Path );
 			m_assetDBList.Clear();
+		}
+
+		public override string ToString()
+		{
+			var builder = new StringBuilder();
+
+			foreach( var d in m_runtimeBundleTable)
+			{
+				builder.AppendLine(d.Key);
+			}
+
+
+
+			return builder.ToString();
 		}
 	}
 }

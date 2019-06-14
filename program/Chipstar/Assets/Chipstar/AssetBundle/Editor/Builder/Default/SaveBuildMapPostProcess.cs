@@ -9,13 +9,16 @@ using System.Text;
 
 namespace Chipstar.Builder
 {
+	/// <summary>
+	/// ビルドマップファイルを書き出す処理
+	/// </summary>
     public class SaveBuildMapPostProcess : ABBuildPostProcess<ABBuildData, ABBuildResult>
     {
         //=========================================
         //  プロパティ
         //=========================================
         private string ManifestFileName { get; set; }
-		private string AssetVersionPath	{ get; set; }
+		private IManifestWriter Writer { get; }
 		//=========================================
 		//  関数
 		//=========================================
@@ -23,29 +26,26 @@ namespace Chipstar.Builder
 		/// <summary>
 		/// コンストラクタ
 		/// </summary>
-		public SaveBuildMapPostProcess( string manifestName, string versionFilePath )
+		public SaveBuildMapPostProcess( string manifestName, IManifestWriter writer )
 		{
             ManifestFileName = manifestName;
-			AssetVersionPath = versionFilePath;
+			Writer = writer;
         }
+		public SaveBuildMapPostProcess(string manifestName) : this(manifestName, new RawTextJsonWriter(BuildMapDataTable.Encode)) { }
 
-        /// <summary>
-        /// ビルドマップを作成
-        /// </summary>
-        protected override void DoProcess( IABBuildConfig settings, ABBuildResult result, IList<ABBuildData> bundleList )
+		/// <summary>
+		/// ビルドマップを作成
+		/// </summary>
+		protected override void DoProcess( IABBuildConfig settings, ABBuildResult result, IList<ABBuildData> bundleList )
         {
             var json        = new BuildMapDataTable();
 			var saveFilePath   = Path.Combine( settings.OutputPath, ManifestFileName );
 			
 			//	旧テーブルを取得
-			var oldTable     = BuildMapDataTable.Read( saveFilePath    );
 			//	アセットバージョンファイルを取得
-			var versionTable = AssetVersionTable.Read( AssetVersionPath );
-
 			//	外部情報
 			var manifest     = result.Manifest;
 			var prefix       = settings.RootFolder;
-			var newestVersion= versionTable.NewestVersion;
 			json.Prefix		 = prefix;
 
 			using( var scope = new ProgressDialogScope( "Create Bundle Manifest : " + ManifestFileName, bundleList.Count ) )
@@ -57,10 +57,8 @@ namespace Chipstar.Builder
 					var fileData= bundleList[ i ];
 					//	Path
 					var absPath = Path.Combine( settings.OutputPath, fileData.ABName );
-					//	更新されたかどうか
-					var oldData = oldTable.GetBundle( fileData.ABName );
 					//	Create BuildMap Data
-					var d       = CreateBuildData( absPath, fileData, oldData, newestVersion, manifest );
+					var d       = CreateBuildData( absPath, fileData, manifest );
 
 					scope.Show( fileData.ABName, i);
 					json.Add( d );
@@ -86,21 +84,19 @@ namespace Chipstar.Builder
 					json.Add( d );
 				}
 			}
-			BuildMapDataTable.Write( saveFilePath, json );
-        }
+			Writer.Write(saveFilePath, json);
+		}
 
 		/// <summary>
 		/// 単一データ作成
 		/// </summary>
-		private BundleBuildData CreateBuildData( string absPath, ABBuildData buildFileData, BundleBuildData oldData, string newestVersion, AssetBundleManifest manifest )
+		private BundleBuildData CreateBuildData( string absPath, ABBuildData buildFileData, AssetBundleManifest manifest )
 		{
 			var abName		 = buildFileData?.ABName;
 			var crc          = FsUtillity.TryGetCrc( absPath );
 			var hash         = manifest.TryGetHashString( abName );
 			var dependencies = manifest.TryGetDependencies( abName );
 			var size         = FsUtillity.TryGetFileSize( absPath );
-			var isUpdate     = oldData.Hash != hash || string.IsNullOrEmpty( oldData.Hash ) ||  string.IsNullOrEmpty( oldData.AssetVersion );
-			var assetVersion = isUpdate ? newestVersion : oldData.AssetVersion;
 
 			var d = new BundleBuildData
 			{
@@ -111,7 +107,6 @@ namespace Chipstar.Builder
 				Dependencies= dependencies,
 				FileSize    = size,
 				Labels      = buildFileData?.Labels,
-				AssetVersion= assetVersion
 			};
 
 			return d;

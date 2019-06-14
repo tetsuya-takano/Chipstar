@@ -39,22 +39,9 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// 遷移
 		/// </summary>
-		public ISceneLoadOperation LoadLevel( string path )
+		public ISceneLoadOperater Create( string path, LoadSceneMode mode )
 		{
-			var param		= new LoadSceneParameters( LoadSceneMode.Single );
-			var operation	= EditorSceneManager.LoadSceneAsyncInPlayMode( path, param );
-			return new SceneLoadOperation( operation );
-		}
-
-		/// <summary>
-		/// 加算
-		/// </summary>
-		public ISceneLoadOperation LoadLevelAdditive( string path )
-		{
-			var param       = new LoadSceneParameters( LoadSceneMode.Additive );
-			var operation   = EditorSceneManager.LoadSceneAsyncInPlayMode( path, param );
-
-			return new SceneLoadOperation( operation );
+			return new EditorSceneLoadOperation( path, mode );
 		}
 	}
 }

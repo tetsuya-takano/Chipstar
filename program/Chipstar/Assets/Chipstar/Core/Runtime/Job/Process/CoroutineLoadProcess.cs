@@ -22,9 +22,12 @@ namespace Chipstar.Downloads
 		//	プロパティ
 		//========================================
 		public override bool keepWaiting { get { return !IsCompleted; } }
-		public float Progress { get { return m_self != null ? m_self.Progress : 0; } }
+		public float Progress => m_self?.Progress ?? 0;
 		public bool IsCompleted => m_self?.IsCompleted ?? true;
 		public bool IsError => m_self?.IsError ?? false;
+		public bool IsRunning => m_self?.IsRunning ?? false;
+		public bool IsCanceled => m_self?.IsCanceled ?? false;
+		public bool IsDisposed => m_self?.IsDisposed ?? true;
 
 		//========================================
 		//	関数

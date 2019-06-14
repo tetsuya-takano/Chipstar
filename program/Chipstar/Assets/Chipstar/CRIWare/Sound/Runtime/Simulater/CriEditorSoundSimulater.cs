@@ -42,8 +42,8 @@ namespace Chipstar.Downloads.CriWare
 		//=============================
 		//	変数
 		//=============================
-		private ContentGroupConfig              m_soundConfig       = null;
-
+		private ContentGroupConfig m_soundConfig = null;
+		private OperationRoutine m_routine = new OperationRoutine();
 		private IAccessPoint m_sourceDirPath = null;    //	保存先
 
 		private IAccessPoint m_soundIncludeDir = null;  //	内包データパス
@@ -79,6 +79,7 @@ namespace Chipstar.Downloads.CriWare
 		/// </summary>
 		public void Dispose()
 		{
+			m_routine.Clear();
 			m_remoteSoundTable.Clear();
 		}
 
@@ -193,9 +194,9 @@ namespace Chipstar.Downloads.CriWare
 			return false;
 		}
 
-		public IEnumerator Prepare( string cueSheetName )
+		public IPreloadOperation Prepare( string cueSheetName )
 		{
-			yield return null;
+			return m_routine.Register(new PreloadOperation(SkipLoadProcess.Default));
 		}
 
 		public IEnumerable<ISoundFileData> GetDLDataList()
@@ -211,11 +212,19 @@ namespace Chipstar.Downloads.CriWare
 		{
 			yield return null;
 		}
-		public void DoUpdate() { }
+		public void DoUpdate()
+		{
+			m_routine.Update();
+		}
 
 		public IEnumerable<ISoundFileData> GetNeedDLList()
 		{
 			return new ISoundFileData[ 0 ];
+		}
+
+		public void Stop()
+		{
+			m_routine.Clear();
 		}
 	}
 }

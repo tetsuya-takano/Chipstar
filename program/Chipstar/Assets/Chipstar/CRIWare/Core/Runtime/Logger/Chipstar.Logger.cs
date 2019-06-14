@@ -10,7 +10,7 @@ namespace Chipstar
 	/// <summary>
 	/// Cri絡み用のLogger
 	/// </summary>
-	public static partial class Chipstar
+	public static partial class ChipstarLog
 	{
 		/// <summary>
 		/// セーブデータ情報ログ

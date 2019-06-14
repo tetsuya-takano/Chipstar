@@ -37,7 +37,7 @@ namespace Chipstar.Downloads
 			var manifestLocation = server
 									.ToAppend( version.Hash )
 									.ToLocation( m_fileName );
-			Chipstar.Log_RequestVersionManifest( manifestLocation );
+			ChipstarLog.Log_RequestVersionManifest( manifestLocation );
 			//	とりあえず素の機能で落とす
 			var www = UnityWebRequest.Get( manifestLocation.FullPath );
 			www.SendWebRequest();
@@ -54,7 +54,7 @@ namespace Chipstar.Downloads
 			{
 				m_contents = www.downloadHandler.text;
 			}
-			Chipstar.Log_DLVersionManifest( m_contents );
+			ChipstarLog.Log_DLVersionManifest( m_contents );
 		}
 
 		/// <summary>

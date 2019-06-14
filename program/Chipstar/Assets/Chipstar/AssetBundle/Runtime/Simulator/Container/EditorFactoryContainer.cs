@@ -54,7 +54,7 @@ namespace Chipstar.Downloads
 				if( !m_isLogin )
 				{
 					//	ログイン前なので警告を出力
-					Chipstar.Log_WarningAccessAfterLoginAsset( path );
+					ChipstarLog.Log_WarningAccessAfterLoginAsset( path );
 				}
 				return afterLogin;
 			}

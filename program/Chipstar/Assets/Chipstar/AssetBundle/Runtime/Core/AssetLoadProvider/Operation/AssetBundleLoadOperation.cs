@@ -5,21 +5,21 @@ using UnityEngine;
 namespace Chipstar.Downloads
 {
 	/// <summary>
-	/// アセットバンドルを撮ってくる機能
+	/// アセットバンドルを取ってくる機能
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public sealed class AssetBundleLoadOperation<T> : AssetLoadOperation<T>
+	public sealed class AssetBundleLoadOperation<T,TBundleData> : AssetLoadOperation<T>
 		where T : UnityEngine.Object
+		where TBundleData : IRuntimeBundleData<TBundleData>
 	{
 		//====================================
 		//	変数
 		//====================================
 		private AssetBundleRequest m_request = null;
+		private AssetData<TBundleData> m_data = null;
 		//====================================
 		//	プロパティ
 		//====================================
-		public override bool IsCompleted => m_request != null && m_request.isDone;
-		public override T Content { get { return m_request == null ? null : m_request.asset as T; } }
 		//====================================
 		//	関数
 		//====================================
@@ -27,18 +27,59 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// コンストラクタ
 		/// </summary>
-		public AssetBundleLoadOperation( AssetBundleRequest request )
+		public AssetBundleLoadOperation( AssetData<TBundleData> data )
 		{
-			m_request = request;
+			m_data = data;
 		}
-
+		
 		/// <summary>
 		/// 破棄処理
 		/// </summary>
 		protected override void DoDispose()
 		{
+			m_data?.ReleaseRef();
 			m_request = null;
+			m_data = null;
 			base.DoDispose();
+		}
+		/// <summary>
+		/// 実行
+		/// </summary>
+		protected override void DoRun()
+		{
+			m_data?.AddRef();
+			m_request = m_data?.LoadAsync<T>();
+			ChipstarLog.AssertNotNull(m_request, $"Bundle Rquest is Null ::{m_data?.Path ?? string.Empty}");
+		}
+
+		protected override void DoComplete()
+		{
+			base.DoComplete();
+		}
+
+		protected override ResultCode DoError(Exception e)
+		{
+			return ChipstarResult.ClientError($"AssetBundle Assets Load Error :: {m_data?.Path}", e);
+		}
+
+		protected override float GetProgress()
+		{
+			return m_request.progress;
+		}
+
+		protected override bool GetComplete()
+		{
+			return m_request.isDone;
+		}
+
+		protected override T GetContent()
+		{
+			return m_request.asset as T;
+		}
+
+		protected override string GetSamplingName()
+		{
+			return "[AssetBundleLoad]" + (m_data?.Path ?? string.Empty);
 		}
 	}
 }

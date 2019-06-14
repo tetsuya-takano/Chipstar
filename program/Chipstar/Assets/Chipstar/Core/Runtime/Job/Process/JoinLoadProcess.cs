@@ -37,17 +37,16 @@ namespace Chipstar.Downloads
 				return true;
 			}
 		}
-		public bool IsError
-		{
-			get
-			{
-				return m_prev.IsError || m_next.IsError;
-			}
-		}
+		public bool IsError { get { return m_prev.IsError || m_next.IsError; } }
 		public float Progress { get { return Mathf.InverseLerp(0, 2, m_prev.Progress + m_next.Progress); } }
 
 		object IEnumerator.Current => null;
 
+		public bool IsCanceled => m_prev.IsCanceled || m_next.IsCanceled;
+
+		public bool IsDisposed => m_prev.IsDisposed && m_next.IsDisposed;
+
+		public bool IsRunning => m_prev.IsRunning || m_next.IsRunning;
 		//================================
 		//  関数
 		//================================

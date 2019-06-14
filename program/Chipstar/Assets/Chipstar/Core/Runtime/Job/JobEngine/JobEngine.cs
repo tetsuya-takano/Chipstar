@@ -97,7 +97,7 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public virtual void Enqueue(ILoadJob job)
 		{
-			Chipstar.Log_AddJob(job);
+			ChipstarLog.Log_AddJob(job);
 			m_queue.Enqueue(job);
 		}
 

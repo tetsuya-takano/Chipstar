@@ -44,27 +44,16 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public bool CanLoad( string path )
 		{
-			if( !Database.Contains( path ) )
-			{
-				return false;
-			}
-			var data = Database.GetAssetData( path );
-			return data.BundleData.IsScene;
+			return Database.Contains( path );
 		}
 
 		/// <summary>
 		/// シーンロード
 		/// </summary>
-		public ISceneLoadOperation LoadLevel( string path )
+		public ISceneLoadOperater Create( string path, LoadSceneMode mode )
 		{
-			return new SceneLoadOperation( SceneManager.LoadSceneAsync( path ) );
-		}
-		/// <summary>
-		/// 加算ロード
-		/// </summary>
-		public ISceneLoadOperation LoadLevelAdditive( string path )
-		{
-			return new SceneLoadOperation( SceneManager.LoadSceneAsync( path, LoadSceneMode.Additive ) );
+			var data = Database.GetAssetData( path );
+			return new AssetBundleSceneLoadOperation<TRuntimeBundleData>(data, mode);
 		}
 	}
 }

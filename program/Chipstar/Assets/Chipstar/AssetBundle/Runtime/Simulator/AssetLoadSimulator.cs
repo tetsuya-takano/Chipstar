@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Chipstar.Downloads
 {
@@ -17,6 +18,10 @@ namespace Chipstar.Downloads
 		//=================================
 		private EditorFactoryContainer Container { get; set; }
 		private OperationRoutine Routine { get; } = new OperationRoutine();
+		public Action<ResultCode> OnError { set; private get; }
+		public Action StartAny { set => throw new NotImplementedException(); }
+		public Action StopAny { set => throw new NotImplementedException(); }
+
 		//=================================
 		//	関数
 		//=================================
@@ -51,33 +56,25 @@ namespace Chipstar.Downloads
 		{
 			var factory = Container .GetFromAsset( path );
 
-			Chipstar.Log_LoadAsset<T>( path, factory );
+			ChipstarLog.Log_LoadAsset<T>( path, factory );
 
 			return Routine.Register(factory.Create<T>(path));
 		}
-
-		/// <summary>
-		/// シーン
-		/// </summary>
-		public ISceneLoadOperation LoadLevel( string path )
+		public IAssetLoadOperation<T> LoadAsset<T>(string path, Func<string, ILoadProcess>[] preProcess) where T : UnityEngine.Object
 		{
-			var factory = Container .GetFromScene( path );
-
-			Chipstar.Log_LoadLevel( path, factory );
-
-			return Routine.Register(factory.LoadLevel(path));
+			return LoadAsset<T>(path);
 		}
-		/// <summary>
-		/// シーン加算
-		/// </summary>
-		public ISceneLoadOperation LoadLevelAdditive( string path )
+		public ISceneLoadOperation LoadLevel(string path, LoadSceneMode mode)
 		{
-			var factory = Container .GetFromScene( path );
-
-			Chipstar.Log_LoadLevelAdditive( path, factory );
-
-			return Routine.Register(factory.LoadLevelAdditive(path));
+			var factory = Container.GetFromScene(path);
+			return Routine.Register(factory.Create(path, mode));
 		}
+
+		public ISceneLoadOperation LoadLevel(string path, LoadSceneMode mode, Func<string, ILoadProcess>[] preProcess)
+		{
+			return LoadLevel(path, mode);
+		}
+
 
 		/// <summary>
 		/// ログイン状態を切り替える
@@ -95,6 +92,11 @@ namespace Chipstar.Downloads
 		public void DoUpdate()
 		{
 			Routine.Update();
+		}
+
+		public IPreloadOperation Preload(ILoadProcess process)
+		{
+			return Routine.Register(new PreloadOperation(process));
 		}
 	}
 }

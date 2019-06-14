@@ -11,6 +11,7 @@ namespace Chipstar.Downloads.CriWare
 	public interface ICriDownloader : IDisposable
 	{
 		Action<string, string> OnInstalled { set; }
+		Action<ResultCode> OnError { set; }
 		Func<IAccessPoint, string, IAccessLocation> GetFileDLLocation { set; }
 		Func<string, long, bool> GetSuccessDL { set; }
 		IEnumerator Init(IAccessPoint remotePath);
@@ -24,9 +25,9 @@ namespace Chipstar.Downloads.CriWare
 		//=====================================
 		//	変数
 		//=====================================
-		private IAccessPoint                    m_accessPoint   = null;
-		private IAccessPoint                    m_storage       = null;
-		private Dictionary<string,bool>         m_dlRequestDict = new Dictionary<string, bool>();
+		private IAccessPoint m_accessPoint = null;
+		private IAccessPoint m_storage = null;
+		private Dictionary<string, bool> m_dlRequestDict = new Dictionary<string, bool>();
 
 		//=====================================
 		//	プロパティ
@@ -36,6 +37,8 @@ namespace Chipstar.Downloads.CriWare
 		public Func<string, long, bool> GetSuccessDL { private get; set; }
 
 		public Func<IAccessPoint, string, IAccessLocation> GetFileDLLocation { private get; set; }
+
+		public Action<ResultCode> OnError { private get; set; }
 		//=====================================
 		//	関数
 		//=====================================
@@ -57,6 +60,7 @@ namespace Chipstar.Downloads.CriWare
 		{
 			OnCheckVersion	= null;
 			OnInstalled		= null;
+			OnError = null;
 		}
 
 		/// <summary>
@@ -100,7 +104,12 @@ namespace Chipstar.Downloads.CriWare
 					//	リクエスト完了とする
 					m_dlRequestDict[ srcLocation.AccessKey] = true;
 				}
-			} );
+			}, onError: code => DoError( code ));
+		}
+
+		private void DoError(ResultCode code)
+		{
+			OnError?.Invoke( code );
 		}
 
 		/// <summary>

@@ -46,9 +46,9 @@ namespace Chipstar.Downloads
 		{
 			get
 			{
-				foreach( var j in m_list )
+				foreach (var j in m_list)
 				{
-					if( j.IsError )
+					if (j.IsError)
 					{
 						return true;
 					}
@@ -57,6 +57,50 @@ namespace Chipstar.Downloads
 			}
 		}
 		object IEnumerator.Current => null;
+
+		public bool IsCanceled
+		{
+			get
+			{
+				foreach(var j in m_list)
+				{
+					if( j.IsCanceled )
+					{
+						return true;
+					}
+				}
+				return false;
+			}
+		}
+
+		public bool IsDisposed
+		{
+			get
+			{
+				foreach( var j in m_list)
+				{
+					if( j.IsDisposed )
+					{
+						return true;
+					}
+				}
+				return false;
+			}
+		}
+
+		public bool IsRunning
+		{
+			get
+			{
+				foreach( var j in m_list )
+				{
+					if (j.IsRunning) { return true; }
+				}
+				return false;
+			}
+		}
+
+
 
 		//================================
 		//  関数

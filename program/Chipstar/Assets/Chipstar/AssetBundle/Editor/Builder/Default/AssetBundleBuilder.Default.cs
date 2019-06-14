@@ -62,7 +62,7 @@ namespace Chipstar.Builder
 					packageCalclater: new PackageCalclater<ABPackageMst, ABBuildData>(),
 					buildProcess	: SimpleABBuildProcess<ABBuildData>.Empty,
 					preProcess		: ABBuildPreProcess<ABBuildData>.Empty,
-					postProcess		: new SaveBuildMapPostProcess( buildMapFile, assetVersionFile )
+					postProcess		: new SaveBuildMapPostProcess( buildMapFile )
 				)
 			{
 				

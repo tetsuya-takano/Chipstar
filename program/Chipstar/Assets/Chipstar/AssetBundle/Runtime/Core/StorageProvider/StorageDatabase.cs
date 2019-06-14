@@ -167,20 +167,20 @@ namespace Chipstar.Downloads
 		{
 			m_versionFile = m_entryPoint.ToLocation(m_fileName);
 			var path = m_versionFile.FullPath;
-			Chipstar.Log_InitStorageDB(path);
+			ChipstarLog.Log_InitStorageDB(path);
 
 			var isExist = File.Exists(path);
 			if (!isExist)
 			{
 				//	なければ空データ
 				m_table = new Table();
-				Chipstar.Log_InitStorageDB_FirstCreate(path);
+				ChipstarLog.Log_InitStorageDB_FirstCreate(path);
 			}
 			else
 			{
 				var bytes = File.ReadAllBytes(path);
 				m_table = Load(bytes);
-				Chipstar.Log_InitStorageDB_ReadLocalFile(m_table);
+				ChipstarLog.Log_InitStorageDB_ReadLocalFile(m_table);
 			}
 			yield return null;
 		}
@@ -230,7 +230,7 @@ namespace Chipstar.Downloads
 			// バージョン不一致
 			if (!data.IsMatchVersion(bundleData))
 			{
-				Chipstar.Log_MissMatchVersion(bundleData.Path, data.Version.ToString(), bundleData.Hash.ToString());
+				ChipstarLog.Log_MissMatchVersion(bundleData.Path, data.Version.ToString(), bundleData.Hash.ToString());
 				return false;
 			}
 			//
@@ -247,7 +247,7 @@ namespace Chipstar.Downloads
 			var isBreak = bundleData.PreviewSize != info.Length;
 			if (isBreak)
 			{
-				Chipstar.Log_MaybeFileBreak(info, bundleData.PreviewSize);
+				ChipstarLog.Log_MaybeFileBreak(info, bundleData.PreviewSize);
 			}
 			return isBreak;
 		}
@@ -287,7 +287,7 @@ namespace Chipstar.Downloads
 			var json = JsonUtility.ToJson(m_table, true);
 
 			File.WriteAllText(path, json, m_encoding);
-			Chipstar.Log_ApplyLocalSaveFile(path);
+			ChipstarLog.Log_ApplyLocalSaveFile(path);
 		}
 
 		/// <summary>
@@ -319,7 +319,7 @@ namespace Chipstar.Downloads
 		/// </summary>
 		private void SaveVersion(ICachableBundle data)
 		{
-			Chipstar.Log_SaveLocalVersion(data);
+			ChipstarLog.Log_SaveLocalVersion(data);
 			//  ストレージにあるかどうか
 			var storageData = m_table.Get(data.Path);
 			if (storageData == null)
@@ -344,7 +344,7 @@ namespace Chipstar.Downloads
 				//	存在しないなら削除しない
 				return;
 			}
-			Chipstar.Log_DeleteLocalBundle(data);
+			ChipstarLog.Log_DeleteLocalBundle(data);
 			File.Delete(path);
 		}
 		/// <summary>
@@ -352,7 +352,7 @@ namespace Chipstar.Downloads
 		/// </summary>
 		private void RemoveVersion(ICachableBundle data)
 		{
-			Chipstar.Log_RemoveLocalVersion(data);
+			ChipstarLog.Log_RemoveLocalVersion(data);
 			var storageData = m_table.Get(data.Path);
 			if (storageData == null)
 			{

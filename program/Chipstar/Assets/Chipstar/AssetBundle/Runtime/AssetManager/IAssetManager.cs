@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Chipstar
 {
@@ -15,7 +16,7 @@ namespace Chipstar
 		/// <summary>
 		/// 初期化
 		/// </summary>
-		IEnumerator	Setup();
+		IEnumerator Setup();
 
 		/// <summary>
 		/// リモートデータの取得
@@ -30,18 +31,18 @@ namespace Chipstar
 		/// <summary>
 		/// ダウンロード
 		/// </summary>
-		ILoadProcess DeepDownload( string assetPath );
+		IPreloadOperation DeepDownload( string assetPath );
 
 		/// <summary>
 		/// ダウンロード
 		/// </summary>
-		ILoadProcess SingleDownload( string abName );
+		IPreloadOperation SingleDownload( string abName );
 
 		/// <summary>
 		/// アセットバンドルオープン
 		/// </summary>
-		ILoadProcess DeepOpenFile( string assetPath );
-		ILoadProcess SingleOpenFile( string abName );
+		IPreloadOperation DeepOpenFile( string assetPath );
+		IPreloadOperation SingleOpenFile( string abName );
 
 		/// <summary>
 		/// アセットの読み込み
@@ -51,22 +52,7 @@ namespace Chipstar
 		/// <summary>
 		/// シーン遷移
 		/// </summary>
-		ISceneLoadOperation LoadLevel( string scenePath );
-
-		/// <summary>
-		/// シーン加算
-		/// </summary>
-		ISceneLoadOperation LoadLevelAdditive( string scenePath );
-
-		/// <summary>
-		/// 参照の解放
-		/// </summary>
-		void Release( string assetPath );
-
-		/// <summary>
-		/// 参照カウンタ作成
-		/// </summary
-		IDisposable CreateAssetReference( string assetPath );
+		ISceneLoadOperation LoadLevel( string scenePath, LoadSceneMode mode );
 
 		/// <summary>
 		/// アセットの破棄

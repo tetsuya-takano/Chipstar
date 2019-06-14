@@ -50,5 +50,27 @@ namespace Chipstar.Downloads
 		{
 			return source.isNetworkError || source.isHttpError;
 		}
+
+		/// <summary>
+		/// エラー情報を返す
+		/// </summary>
+		protected override ResultCode DoError(UnityWebRequest source)
+		{
+			if( source == null )
+			{
+				return ChipstarResult.Generic;
+			}
+			if( source.isNetworkError )
+			{
+				return ChipstarResult.NetworkError( source.responseCode, source.error);
+			}
+
+			if( source.isHttpError)
+			{
+				return ChipstarResult.HttpError( source.responseCode, source.error );
+			}
+
+			return ChipstarResult.NotImpl;
+		}
 	}
 }

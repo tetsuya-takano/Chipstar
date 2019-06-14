@@ -37,13 +37,13 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// リクエスト作成
 		/// </summary>
-		public IAssetLoadOperation<T> Create<T>( string path ) where T : UnityEngine.Object
+		public IAssetLoadOperater<T> Create<T>( string path ) where T : UnityEngine.Object
 		{
 			var key = path;
 			if( !Path.HasExtension( key ) )
 			{
 				//	拡張子の無いリクエストは警告を出す
-				Chipstar.Log_WarningNotHasExtensions( key );
+				ChipstarLog.Log_WarningNotHasExtensions( key );
 			}
 			else
 			{
@@ -53,12 +53,12 @@ namespace Chipstar.Downloads
 			var match = m_regex.Match( key );
 			if( !match.Success )
 			{
-				return new ResourcesLoadOperation<T>( Resources.LoadAsync<T>( key ) );
+				return new ResourcesLoadOperation<T>( key );
 			}
 
 			//	Resources以下を拾う
 			var accessKey = match.Groups[2].Value;
-			return new ResourcesLoadOperation<T>( Resources.LoadAsync<T>( accessKey ) );
+			return new ResourcesLoadOperation<T>( key );
 		}
 
 		/// <summary>

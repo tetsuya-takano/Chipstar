@@ -20,6 +20,12 @@ namespace Chipstar.Downloads
 
 		public bool IsError => false;
 
+		public bool IsCanceled => false;
+
+		public bool IsDisposed => true;
+
+		public bool IsRunning => true;
+
 		private SkipLoadProcess() { }
 		public void Dispose() { }
 

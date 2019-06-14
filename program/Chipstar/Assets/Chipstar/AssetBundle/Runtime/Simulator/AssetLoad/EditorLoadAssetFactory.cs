@@ -41,7 +41,7 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// 作成
 		/// </summary>
-		public IAssetLoadOperation<T> Create<T>( string path ) where T : UnityEngine.Object
+		public IAssetLoadOperater<T> Create<T>( string path ) where T : UnityEngine.Object
 		{
 			var fullPath = Path.Combine( m_folderPrefix, path );
 			var randomWait = UnityEngine.Random.Range(0,3);

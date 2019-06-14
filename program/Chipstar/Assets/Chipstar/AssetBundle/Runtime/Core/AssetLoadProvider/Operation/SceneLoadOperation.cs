@@ -2,25 +2,40 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
 namespace Chipstar.Downloads
 {
 	/// <summary>
+	/// シーン読み込み処理
+	/// </summary>
+	public interface ISceneLoadOperation
+		: ILoadOperation
+	{
+		Action OnCompleted { set; }
+	}
+	public interface ISceneLoadOperater
+		: ILoadOperater, ISceneLoadOperation
+	{
+	}
+	/// <summary>
 	/// シーン読み込みタスク
 	/// </summary>
-	public sealed class SceneLoadOperation 
+	public abstract class SceneLoadOperation 
 		:	LoadOperation,
-			ISceneLoadOperation
+			ISceneLoadOperater
 	{
 		//==============================
 		//	変数
 		//==============================
+		
 		private AsyncOperation	m_sceneOperation = null;
+		private Action m_onComplete = null;
 		//==============================
 		//	プロパティ
 		//==============================
-		public override bool IsCompleted { get { return m_sceneOperation != null && m_sceneOperation.isDone; } }
-		public Action OnCompleted { set; private get; }
-
+		public Action OnCompleted { set => m_onComplete = value; }
+		protected LoadSceneMode SceneMode { get; private set; }
 		//==============================
 		//	関数
 		//==============================
@@ -28,9 +43,9 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// コンストラクタ
 		/// </summary>
-		public SceneLoadOperation( AsyncOperation operation )
+		public SceneLoadOperation( LoadSceneMode mode )
 		{
-			m_sceneOperation = operation;
+			SceneMode = mode;
 		}
 		protected override void DoDispose()
 		{
@@ -39,11 +54,26 @@ namespace Chipstar.Downloads
 			base.DoDispose();
 		}
 
+		protected override void DoRun()
+		{
+			m_sceneOperation = CreateLoadSceneAsync();
+		}
+
+		protected abstract AsyncOperation CreateLoadSceneAsync();
+
 		protected override void DoComplete()
 		{
-			var onComplete = OnCompleted;
-			OnCompleted = null;
-			onComplete?.Invoke();
+			ChipstarUtils.OnceInvoke(ref m_onComplete);
+		}
+
+		protected override float GetProgress()
+		{
+			return m_sceneOperation.progress;
+		}
+
+		protected override bool GetComplete()
+		{
+			return m_sceneOperation.isDone;
 		}
 	}
 }
