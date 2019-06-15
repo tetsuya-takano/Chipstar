@@ -31,101 +31,7 @@ namespace Chipstar.Downloads
 	/// </summary>
 	public class StorageDatabase : IStorageDatabase
 	{
-		//===============================================
-		//  class
-		//===============================================
-		[Serializable]
-		protected sealed class Table : IEnumerable<LocalBundleData>,
-				ISerializationCallbackReceiver
-		{
-			//============================================
-			//	SerializeField
-			//============================================
-			[SerializeField] List<LocalBundleData> m_list = new List<LocalBundleData>();
-
-			//============================================
-			//	変数
-			//============================================
-			private Dictionary<string, LocalBundleData> m_table = new Dictionary<string, LocalBundleData>();
-
-			//============================================
-			//	関数
-			//============================================
-			public LocalBundleData Get(string key)
-			{
-				if (m_table.ContainsKey(key))
-				{
-					return m_table[key];
-				}
-				return null;
-			}
-
-			public IEnumerator<LocalBundleData> GetEnumerator()
-			{
-				return ((IEnumerable<LocalBundleData>)m_table.Values).GetEnumerator();
-			}
-
-			/// <summary>
-			/// 追加
-			/// </summary>
-			internal void Add(ICachableBundle data)
-			{
-				if (m_table.ContainsKey(data.Path))
-				{
-					m_table[data.Path] = new LocalBundleData(data.Path, data.Hash, data.Crc);
-					return;
-				}
-				m_table.Add(data.Path, new LocalBundleData(data.Path, data.Hash, data.Crc));
-			}
-
-			/// <summary>
-			/// 削除
-			/// </summary>
-			internal void Remove(LocalBundleData localData)
-			{
-				if (!m_table.ContainsKey(localData.Key))
-				{
-					return;
-				}
-				m_table.Remove(localData.Key);
-			}
-
-			/// <summary>
-			/// 列挙
-			/// </summary>
-			IEnumerator IEnumerable.GetEnumerator()
-			{
-				return ((IEnumerable<LocalBundleData>)m_table.Values).GetEnumerator();
-			}
-
-			/// <summary>
-			/// 読み込む時
-			/// </summary>
-			public void OnAfterDeserialize()
-			{
-				if (m_list == null)
-				{
-					m_table = new Dictionary<string, LocalBundleData>();
-					return;
-				}
-				//	List -> Dictionary
-				m_table = m_list.ToDictionary(c => c.Key);
-			}
-
-			/// <summary>
-			/// 保存するとき
-			/// </summary>
-			public void OnBeforeSerialize()
-			{
-				if (m_table == null)
-				{
-					m_list = new List<LocalBundleData>();
-					return;
-				}
-				//	Dictionary -> List
-				m_list = m_table.Values.ToList();
-			}
-		}
+		
 		//===============================================
 		//  変数
 		//===============================================
@@ -133,7 +39,6 @@ namespace Chipstar.Downloads
 		private IAccessPoint m_entryPoint = null;
 		private IAccessLocation m_versionFile = null;
 		private Table m_table = null;
-		private Encoding m_encoding = null;
 
 		//===============================================
 		//  プロパティ
