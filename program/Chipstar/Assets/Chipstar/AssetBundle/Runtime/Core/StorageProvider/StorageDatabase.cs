@@ -30,7 +30,7 @@ namespace Chipstar.Downloads
     /// 内部ストレージの管理
     /// </summary>
     public class StorageDatabase<TTable, TData> : IStorageDatabase
-        where TTable : ISaveFileTable<TData>
+        where TTable : ISaveFileTable<TData>,new()
         where TData : ILocalBundleData
     {
 
@@ -89,6 +89,7 @@ namespace Chipstar.Downloads
 			{
 				//	なければ空データ
 				ChipstarLog.Log_InitStorageDB_FirstCreate(path);
+                m_table = m_parser.CreateEmpty();
 			}
 			else
 			{
