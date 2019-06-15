@@ -26,34 +26,42 @@ namespace Chipstar.Downloads
 
 		IAccessPoint GetCacheStorage();
 	}
-	/// <summary>
-	/// 内部ストレージの管理
-	/// </summary>
-	public class StorageDatabase : IStorageDatabase
-	{
-		
-		//===============================================
-		//  変数
-		//===============================================
-		private string m_fileName = null;
+    /// <summary>
+    /// 内部ストレージの管理
+    /// </summary>
+    public class StorageDatabase<TTable, TData> : IStorageDatabase
+        where TTable : ISaveFileTable<TData>
+        where TData : ILocalBundleData
+    {
+
+        //===============================================
+        //  変数
+        //===============================================
+        private string m_fileName = null;
 		private IAccessPoint m_entryPoint = null;
 		private IAccessLocation m_versionFile = null;
-		private Table m_table = null;
+        private TTable m_table = default;
+        private IDatabaseParser<TTable> m_parser = null;
+        private IDatabaseWriter<TTable> m_writer = null;
 
-		//===============================================
-		//  プロパティ
-		//===============================================
-		public Func<ICachableBundle, bool> OnSaveVersion { private get; set; }
+        //===============================================
+        //  プロパティ
+        //===============================================
+        public Func<ICachableBundle, bool> OnSaveVersion { private get; set; }
 
 		//===============================================
 		//  関数
 		//===============================================
 
-		public StorageDatabase(IAccessPoint savePoint, string storageDbName, Encoding encoding)
+		public StorageDatabase(
+            IAccessPoint savePoint, string storageDbName, 
+            IDatabaseParser<TTable> parser,
+            IDatabaseWriter<TTable> writer )
 		{
 			m_entryPoint = savePoint;
 			m_fileName = storageDbName;
-			m_encoding = encoding;
+            m_parser = parser;
+            m_writer = writer;
 		}
 
 		/// <summary>
@@ -61,8 +69,10 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public void Dispose()
 		{
-			m_table = null;
 			OnSaveVersion = null;
+            m_writer = null;
+            m_parser = null;
+            m_table = default;
 		}
 
 		/// <summary>
@@ -78,14 +88,12 @@ namespace Chipstar.Downloads
 			if (!isExist)
 			{
 				//	なければ空データ
-				m_table = new Table();
 				ChipstarLog.Log_InitStorageDB_FirstCreate(path);
 			}
 			else
 			{
 				var bytes = File.ReadAllBytes(path);
-				m_table = Load(bytes);
-				ChipstarLog.Log_InitStorageDB_ReadLocalFile(m_table);
+				m_table = m_parser.Parse( bytes );
 			}
 			yield return null;
 		}
@@ -101,20 +109,6 @@ namespace Chipstar.Downloads
 				return new Hash128();
 			}
 			return data.Version;
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		protected Table Load(byte[] data)
-		{
-			return ParseLocalTable(data);
-		}
-
-		protected virtual Table ParseLocalTable(byte[] data)
-		{
-			var json = m_encoding.GetString(data);
-			return JsonUtility.FromJson<Table>(json);
 		}
 
 		/// <summary>
@@ -189,9 +183,8 @@ namespace Chipstar.Downloads
 			{
 				Directory.CreateDirectory(dirPath);
 			}
-			var json = JsonUtility.ToJson(m_table, true);
 
-			File.WriteAllText(path, json, m_encoding);
+            m_writer.Write(path, m_table);
 			ChipstarLog.Log_ApplyLocalSaveFile(path);
 		}
 
@@ -278,8 +271,9 @@ namespace Chipstar.Downloads
 			{
 				Directory.Delete(m_entryPoint.BasePath, true);
 			}
-			//	空のインスタンスで上書き
-			m_table = new Table();
+            //	空のインスタンスで上書き
+            m_table.Clear();
+            Apply();
 		}
 
 		public override string ToString()

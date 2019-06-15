@@ -47,19 +47,11 @@ namespace Chipstar.Downloads
 			set { m_crc = value; }
 		}
 
-		//=================================
-		//  関数
-		//=================================
+        //=================================
+        //  関数
+        //=================================
 
-		/// <summary>
-		/// 
-		/// </summary>
-		public LocalBundleData( string key, Hash128 hash, uint crc )
-        {
-            Path         = key;
-            Version     = hash;
-			CRC         = crc;
-        }
+        public LocalBundleData() { }
 
         /// <summary>
         /// 破棄処理
@@ -89,7 +81,8 @@ namespace Chipstar.Downloads
 		public void Apply( ICachableBundle bundle )
 		{
             Version = bundle.Hash;
-			CRC     = bundle.Crc;
+            CRC = bundle.Crc;
+            Path = bundle.Path;
         }
 
 		public override string ToString()

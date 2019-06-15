@@ -9,11 +9,13 @@ namespace Chipstar.Downloads
     /// <summary>
     /// 
     /// </summary>
-    public interface ISaveFileTable<T> : IEnumerable<T> 
-        where T : ILocalBundleData
+    public interface ISaveFileTable<TData> : IEnumerable<TData> 
+        where TData : ILocalBundleData
     {
+        TData Get(string key);
         void Add(ICachableBundle data);
-        void Remove(T data);
+        void Remove(TData data);
+        void Clear();
     }
     [Serializable]
     public class SaveFileTable<TData> : ISaveFileTable<TData>,
@@ -69,6 +71,15 @@ namespace Chipstar.Downloads
                 return;
             }
             m_table.Remove(localData.Path);
+        }
+
+        /// <summary>
+        /// クリア
+        /// </summary>
+        public void Clear()
+        {
+            m_table.Clear();
+            m_list.Clear();
         }
 
         /// <summary>
