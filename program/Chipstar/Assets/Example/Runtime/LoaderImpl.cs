@@ -103,17 +103,16 @@ namespace Pony
             //	アセットバンドルマネージャの機能構築
             var contentConfig = new ContentGroupConfig();
             var engine = new JobEngine();
-
+            var encoding = new System.Text.UTF8Encoding(false);
+            var parser = new CompressedJsonParser<BuildMapDataTable>(encoding);
             var localStorage = local.ToAppend(contentConfig.StorageDirPath);
-            var loadDatabase = new LoadDatabase<BuildMapDataTable, BundleBuildData, AssetBuildData, RuntimeBundleData>(
-                dbFileName: contentConfig.RemoteFileName,
-                encoding: new System.Text.UTF8Encoding(false)
-            );
+            var loadDatabase = new LoadDatabase<BuildMapDataTable, BundleBuildData, AssetBuildData, RuntimeBundleData>( parser );
 
-            var storageDatabase = new StorageDatabase(
+            var storageDatabase = new StorageDatabase<SaveFileTable<LocalBundleData>, LocalBundleData>(
                 savePoint: localStorage,
                 storageDbName: contentConfig.LocalFileName,
-                encoding: new System.Text.UTF8Encoding(false)
+                parser: new RawTextJsonParser<SaveFileTable<LocalBundleData>>(encoding),
+                writer: new RawTextJsonWriter<SaveFileTable<LocalBundleData>>(encoding)
             );
             var storageProvider = new StorageProvider<RuntimeBundleData>
                 (
@@ -183,17 +182,19 @@ namespace Pony
             var movieConfig = new ContentGroupConfig();
 			var streamingAssetsDB = new StreamingAssetsDatabase("Database/streamingAssetsList.json");
 
-			var soundManager = new CriSoundFileManager(
+            var soundManager = new CriSoundFileManager(
 				includeStorage : includeStorage.ToAppend(soundConfig.IncludeDirPath),
 				downloadStorage: downloadStorage.ToAppend(soundConfig.StorageDirPath),
-				streamingAssetsDatabase:streamingAssetsDB
+				streamingAssetsDatabase:streamingAssetsDB,
+                new MultiLineJobEngine( 2 )
 			);
 			var movieManager = new CriMovieFileManager
 				(
 					includeStorage : includeStorage.ToAppend( movieConfig.IncludeDirPath ),
 					downloadStorage: downloadStorage.ToAppend( movieConfig.StorageDirPath ),
-					streamingAssetsDatabase : streamingAssetsDB
-				);
+					streamingAssetsDatabase : streamingAssetsDB,
+                    new MultiLineJobEngine(2)
+                );
 			soundManager.GetManifestLocation = server =>
 			{
 
