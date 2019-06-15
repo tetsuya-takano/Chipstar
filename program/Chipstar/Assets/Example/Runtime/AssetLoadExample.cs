@@ -31,8 +31,6 @@ namespace Chipstar.Example
 		// Use this for initialization
 		IEnumerator Start()
         {
-
-            yield return Loader.
             yield break;
 		}
 
