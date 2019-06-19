@@ -7,7 +7,6 @@ namespace Chipstar.Downloads
 {
     public interface ILocalBundleData : IDisposable
     {
-        string Path { get; }
 		Hash128	Version { get; }
 
         bool IsMatchKey     ( string			key    ); // 一致データがあるかどうか
@@ -30,7 +29,7 @@ namespace Chipstar.Downloads
         //=================================
         //  プロパティ
         //=================================
-        public string            Path
+        public string            Key
         {
             get { return m_key; }
             set { m_key = value; }
@@ -47,11 +46,19 @@ namespace Chipstar.Downloads
 			set { m_crc = value; }
 		}
 
-        //=================================
-        //  関数
-        //=================================
+		//=================================
+		//  関数
+		//=================================
 
-        public LocalBundleData() { }
+		/// <summary>
+		/// 
+		/// </summary>
+		public LocalBundleData( string key, Hash128 hash, uint crc )
+        {
+            Key         = key;
+            Version     = hash;
+			CRC         = crc;
+        }
 
         /// <summary>
         /// 破棄処理
@@ -72,7 +79,7 @@ namespace Chipstar.Downloads
         /// </summary>
         public virtual bool IsMatchKey( string key )
         {
-            return EqualityComparer<string>.Default.Equals(key, Path);
+            return EqualityComparer<string>.Default.Equals(key, Key);
         }
 
 		/// <summary>
@@ -81,13 +88,12 @@ namespace Chipstar.Downloads
 		public void Apply( ICachableBundle bundle )
 		{
             Version = bundle.Hash;
-            CRC = bundle.Crc;
-            Path = bundle.Path;
+			CRC     = bundle.Crc;
         }
 
 		public override string ToString()
 		{
-			return string.Format( "{0}[{1}]({2})", Path, Version, CRC );
+			return string.Format( "{0}[{1}]({2})", Key, Version, CRC );
 		}
 
 		private bool IsMatchHash( Hash128 hash	) { return Version == hash; }

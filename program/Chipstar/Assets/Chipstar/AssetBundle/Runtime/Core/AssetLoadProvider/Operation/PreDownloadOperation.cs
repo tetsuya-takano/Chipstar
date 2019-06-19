@@ -34,6 +34,7 @@ namespace Chipstar.Downloads
 		//	prote
 		//=======================================
 		protected abstract ILoadOperater MainProcess { get; }
+		protected string Path { get { return m_path ?? string.Empty; } }
 
 		//=======================================
 		//	関数

@@ -67,13 +67,13 @@ namespace Chipstar.Downloads
 
 		protected override void DoComplete()
 		{
-			m_asset = AssetDatabase.LoadAssetAtPath<T>(m_path);
 			base.DoComplete();
 		}
 
 		protected override void DoRun()
 		{
 			m_frameCount = 0;
+			m_asset = AssetDatabase.LoadAssetAtPath<T>(m_path);
 		}
 	}
 }

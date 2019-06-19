@@ -1,5 +1,4 @@
-﻿#if false
-using Chipstar.Downloads;
+﻿using Chipstar.Downloads;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -46,21 +45,21 @@ namespace Chipstar.Downloads.CriWare
 		/// <summary>
 		/// 進捗
 		/// </summary>
-		protected override float DoGetProgress( CriFsInstallRequest source )
+		protected override float GetProgress( CriFsInstallRequest source )
 		{
 			return source.progress;
 		}
 		/// <summary>
 		/// 完了判定
 		/// </summary>
-		protected override bool DoIsComplete( CriFsInstallRequest source )
+		protected override bool GetIsComplete( CriFsInstallRequest source )
 		{
 			return source.isDone;
 		}
 		/// <summary>
 		/// エラー判定
 		/// </summary>
-		protected override bool DoIsError( CriFsInstallRequest source )
+		protected override bool GetIsError( CriFsInstallRequest source )
 		{
 			return source.error != null && source.isDone;
 		}
@@ -80,4 +79,3 @@ namespace Chipstar.Downloads.CriWare
 		}
 	}
 }
-#endif

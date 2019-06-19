@@ -36,17 +36,17 @@ namespace Chipstar.Downloads
             Source = DLHandler.CreateRequest( location );
             Source.SendWebRequest();
         }
-		protected override float DoGetProgress( UnityWebRequest source )
+		protected override float GetProgress( UnityWebRequest source )
 		{
 			return source.downloadProgress;
 		}
 
-		protected override bool DoIsComplete( UnityWebRequest source )
+		protected override bool GetIsComplete( UnityWebRequest source )
 		{
 			return source.isDone;
 		}
 
-		protected override bool DoIsError( UnityWebRequest source )
+		protected override bool GetIsError( UnityWebRequest source )
 		{
 			return source.isNetworkError || source.isHttpError;
 		}

@@ -100,6 +100,18 @@ namespace Chipstar.Downloads
 			}
 		}
 
+		public bool IsFinish
+		{
+			get
+			{
+				foreach (var j in m_list)
+				{
+					if (!j.IsFinish) { return false; }
+				}
+				return true;
+			}
+		}
+
 
 
 		//================================
@@ -129,6 +141,11 @@ namespace Chipstar.Downloads
 		}
 
 		void IEnumerator.Reset() { }
+
+		public override string ToString()
+		{
+			return $"[Parallel] {m_list?.Length ?? 0 }";
+		}
 	}
 
 	/// <summary>

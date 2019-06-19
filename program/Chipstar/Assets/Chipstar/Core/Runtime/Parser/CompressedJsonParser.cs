@@ -9,8 +9,8 @@ namespace Chipstar.Downloads
 	/// <summary>
 	/// 
 	/// </summary>
-	public class CompressedJsonParser<T> : JsonDatabaseParser<T> where T : new()
-    {
+	public class CompressedJsonParser<T> : JsonDatabaseParser<T>
+	{
 		public CompressedJsonParser(Encoding encode) : base(encode)
 		{
 		}

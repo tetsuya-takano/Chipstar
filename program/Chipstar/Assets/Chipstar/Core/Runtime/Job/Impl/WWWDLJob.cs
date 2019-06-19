@@ -29,17 +29,17 @@ namespace Chipstar.Downloads
             Source = new WWW( location.FullPath );
         }
 
-		protected override float DoGetProgress( WWW source )
+		protected override float GetProgress( WWW source )
 		{
 			return source.progress;
 		}
 
-		protected override bool DoIsComplete( WWW source )
+		protected override bool GetIsComplete( WWW source )
 		{
 			return source.isDone;
 		}
 
-		protected override bool DoIsError( WWW source )
+		protected override bool GetIsError( WWW source )
 		{
 			return source.error != null && source.error.Length > 0;
 		}

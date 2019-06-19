@@ -25,19 +25,25 @@ namespace Chipstar.Downloads
 		public AssetBundleSceneLoadOperation(AssetData<T> data, LoadSceneMode mode) : base(mode)
 		{
 			m_data = data;
+			m_data?.AddRef();
 		}
 
 		protected override void DoDispose()
 		{
 			m_data?.ReleaseRef();
+			ChipstarLog.Log_Dump_RefLog(m_data);
 			m_data = null;
 			base.DoDispose();
 		}
 
 		protected override AsyncOperation CreateLoadSceneAsync()
 		{
-			m_data?.AddRef();
 			return SceneManager.LoadSceneAsync(m_data.Path, SceneMode);
+		}
+
+		public override string ToString()
+		{
+			return "[AssetBundleSceneLoadOperation]" + (m_data?.Path ?? string.Empty);
 		}
 	}
 }

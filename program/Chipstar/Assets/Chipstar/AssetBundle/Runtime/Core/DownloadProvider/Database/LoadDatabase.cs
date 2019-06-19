@@ -25,7 +25,7 @@ namespace Chipstar.Downloads
 
             where TBundle       : IBundleBuildData
             where TAsset        : IAssetBuildData
-            where TTable        : IBuildMapDataTable<TBundle, TAsset>, new()
+            where TTable        : IBuildMapDataTable<TBundle, TAsset>
 
             where TRuntimeData  : IRuntimeBundleData<TRuntimeData>, new()
     {

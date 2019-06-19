@@ -29,6 +29,8 @@ namespace Chipstar.Downloads
 		public bool IsCanceled => m_self?.IsCanceled ?? false;
 		public bool IsDisposed => m_self?.IsDisposed ?? true;
 
+		public bool IsFinish => m_self?.IsFinish ?? true;
+
 		//========================================
 		//	関数
 		//========================================
@@ -43,6 +45,11 @@ namespace Chipstar.Downloads
 		public void Dispose()
 		{
 			m_self = null;
+		}
+
+		public override string ToString()
+		{
+			return "[ Coroutine Process]";
 		}
 	}
 	public static partial class ILoadProcessExtensions

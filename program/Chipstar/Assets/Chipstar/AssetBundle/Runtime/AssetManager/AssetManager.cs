@@ -74,7 +74,7 @@ namespace Chipstar.Downloads
 			ErrorHandler = errorHandler;
 			if( ErrorHandler != null)
 			{
-				DownloadProvider.OnLoadError = code => ErrorHandler.Receive( code );
+				DownloadProvider.OnDownloadError = code => ErrorHandler.Receive( code );
 				AssetLoadProvider.OnError = code => ErrorHandler.Receive( code );
 			}
 		}

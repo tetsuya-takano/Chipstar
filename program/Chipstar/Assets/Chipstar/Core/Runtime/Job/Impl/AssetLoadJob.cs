@@ -28,17 +28,17 @@ namespace Chipstar.Downloads
             m_bundle = assetData.BundleData;
         }
 
-		protected override float DoGetProgress( AssetBundleRequest source )
+		protected override float GetProgress( AssetBundleRequest source )
 		{
 			return source.progress;
 		}
 
-		protected override bool DoIsComplete( AssetBundleRequest source )
+		protected override bool GetIsComplete( AssetBundleRequest source )
 		{
 			return source.isDone;
 		}
 
-		protected override bool DoIsError( AssetBundleRequest source )
+		protected override bool GetIsError( AssetBundleRequest source )
 		{
 			return source.isDone && source.asset == null;
 		}

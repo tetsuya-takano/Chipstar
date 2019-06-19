@@ -46,6 +46,13 @@ namespace Chipstar.Downloads.CriWare
 		private Dictionary<string, MovieFileSetData> m_localMovieTable  = new Dictionary<string, MovieFileSetData>();
 
 		private bool m_isLogin           = false;
+
+		public OnGetManifestDelegate GetManifestLocation { set; private get; }
+		public OnGetFileDelegate GetFileDLLocation { set; private get; }
+		public OnErrorDelegate OnLoadError { set; private get; }
+		public Action OnStartAny { set; private get; }
+		public Action OnStopAny { set; private get; }
+
 		//=============================
 		//	プロパティ
 		//=============================
@@ -74,6 +81,12 @@ namespace Chipstar.Downloads.CriWare
 		{
 			m_routine.Clear();
 			m_remoteMovieTable.Clear();
+
+			OnStartAny = null;
+			OnStopAny = null;
+			OnLoadError = null;
+			GetManifestLocation = null;
+			GetFileDLLocation = null;
 		}
 
 		/// <summary>
@@ -144,7 +157,10 @@ namespace Chipstar.Downloads.CriWare
 		}
 		public IPreloadOperation Prepare( string path )
 		{
-			return m_routine.Register(new PreloadOperation(SkipLoadProcess.Default));
+			var operation = new PreloadOperation(SkipLoadProcess.Default);
+			operation.OnStart = _ => OnStartAny?.Invoke();
+			operation.OnStop = _ => OnStopAny?.Invoke();
+			return m_routine.Register( operation );
 		}
 
 		public IMovieFileData FindDLData( string path )

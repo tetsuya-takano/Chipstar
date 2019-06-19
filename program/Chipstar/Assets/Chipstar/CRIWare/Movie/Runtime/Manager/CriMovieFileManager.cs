@@ -9,13 +9,9 @@ using UnityEngine;
 
 namespace Chipstar.Downloads.CriWare
 {
-	public interface ICriMovieFileManager : IDisposable
+	public interface ICriMovieFileManager : ICriFileManager
 	{
 		IAccessPoint GetFileDir( string key );
-
-		IEnumerator Setup(string includeDirPath, string saveFileName);
-		IEnumerator Login(IAccessPoint accessPoint);
-		void Logout();
 
 		IPreloadOperation Prepare(string key);
 
@@ -26,12 +22,6 @@ namespace Chipstar.Downloads.CriWare
 
 		IEnumerable<IMovieFileData> GetDLDataList();
 		IEnumerable<IMovieFileData> GetNeedDLList();
-
-		IEnumerator StorageClear();
-
-		void DoUpdate();
-
-		void Stop();
 	}
 	/// <summary>
 	/// Criのファイル管理をする
@@ -321,9 +311,5 @@ namespace Chipstar.Downloads.CriWare
 			m_cacheDB = new CriVersionTableJson();
 		}
 
-		public void Stop()
-		{
-			Cancel();
-		}
 	}
 }

@@ -33,6 +33,8 @@ namespace Chipstar.Downloads
 
 		public bool IsRunning => true;
 
+		public bool IsFinish => IsCompleted && m_onWait != null;
+
 		//===============================
 		//	関数
 		//===============================
@@ -55,5 +57,10 @@ namespace Chipstar.Downloads
 		}
 
 		void IEnumerator.Reset() { }
+
+		public override string ToString()
+		{
+			return "[Wait Process]";
+		}
 	}
 }

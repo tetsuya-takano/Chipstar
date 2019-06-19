@@ -17,11 +17,33 @@ namespace Chipstar.Downloads.CriWare
 	/// ファイルアクセス用のデリゲート
 	/// </summary>
 	public delegate IAccessLocation OnGetFileDelegate( IAccessPoint server, string relativePath );
+	/// <summary>
+	/// エラーコールバック
+	/// </summary>
+	public delegate void OnErrorDelegate(IReadOnlyList<ResultCode> results );
+
+	public interface ICriFileManager : IDisposable
+	{
+		OnGetManifestDelegate GetManifestLocation { set; }
+		OnGetFileDelegate GetFileDLLocation { set; }
+		OnErrorDelegate OnLoadError { set; }
+
+		Action OnStartAny { set; }
+		Action OnStopAny { set; }
+
+		IEnumerator Setup(string includeRelativePath, string saveFileName);
+		IEnumerator Login(IAccessPoint accessPoint);
+		void Logout();
+
+		void DoUpdate();
+		void Stop();
+		IEnumerator StorageClear();
+	}
 
 	/// <summary>
 	/// Cri用のマネージャ
 	/// </summary>
-	public abstract class CriFileManager : IDisposable
+	public abstract class CriFileManager : ICriFileManager
 	{
 		//====================================
 		//	プロパティ
@@ -54,8 +76,10 @@ namespace Chipstar.Downloads.CriWare
 
 		public OnGetManifestDelegate GetManifestLocation { private get; set; }
 		public OnGetFileDelegate GetFileDLLocation { private get; set; }
-		public Action<IReadOnlyList<ResultCode>> OnLoadError { private get; set; }
+		public OnErrorDelegate OnLoadError { private get; set; }
 
+		public Action OnStartAny { private get; set; }
+		public Action OnStopAny { private get; set; }
 		//====================================
 		//	関数
 		//====================================
@@ -68,6 +92,10 @@ namespace Chipstar.Downloads.CriWare
 			Engine = null;
 			GetManifestLocation = null;
 			GetFileDLLocation = null;
+			OnLoadError = null;
+			OnStartAny = null;
+			OnStopAny = null;
+
 			ErrorList.Clear();
 			DoDispose();
 		}
@@ -135,6 +163,9 @@ namespace Chipstar.Downloads.CriWare
 		protected T AddQueue<T>(T operation) where T : ILoadOperater
 		{
 			operation.OnError = code => OnError(code);
+			operation.OnStart = _ => OnStartAny?.Invoke();
+			operation.OnStop = _ => OnStopAny?.Invoke();
+
 			return Routine.Register(operation);
 		}
 
@@ -214,5 +245,11 @@ namespace Chipstar.Downloads.CriWare
 			ErrorList.Add(code);
 		}
 
+		public void Stop()
+		{
+			Cancel();
+			DoStop();
+		}
+		protected virtual void DoStop() { }
 	}
 }

@@ -7,6 +7,7 @@ namespace Chipstar.Downloads
 		float Progress { get; }
 		bool IsRunning { get; }
 		bool IsCompleted { get; }
+		bool IsFinish { get; }
 		bool IsError { get; }
 		bool IsCanceled { get; }
 		bool IsDisposed { get; }

@@ -20,11 +20,11 @@ namespace Chipstar
 		{
 			if (cacheDB == null)
 			{
-				AssertSimple($"CRI Local Database Is Null :: { location.FullPath }");
+				Assert($"CRI Local Database Is Null :: { location.FullPath }");
 				return;
 			}
-			LogSimple($"Read Cache Info Success:{location.FullPath}");
-			LogDetail($"{cacheDB.ToString()}");
+			Log($"Read Cache Info Success:{location.FullPath}");
+			Log($"{cacheDB.ToString()}");
 		}
 
 		/// <summary>
@@ -33,7 +33,7 @@ namespace Chipstar
 		[Conditional(ENABLE_CHIPSTAR_LOG)]
 		internal static void Log_RequestCueSheet_Error( string cueSheetName )
 		{
-			AssertSimple( cueSheetName );
+			Assert( cueSheetName );
 		}
 		/// <summary>
 		/// サウンドDLする
@@ -41,26 +41,26 @@ namespace Chipstar
 		[Conditional(ENABLE_CHIPSTAR_LOG)]
 		internal static void Log_Download_Sound( ISoundFileData fileData )
 		{
-			LogDetail($" Start Sound Download : { fileData.CueSheetName } : {fileData.AcbPath},{fileData.AwbPath}");
+			Log($" Start Sound Download : { fileData.CueSheetName } : {fileData.AcbPath},{fileData.AwbPath}");
 		}
 
 		/// </summary>
 		[Conditional(ENABLE_CHIPSTAR_LOG)]
 		internal static void Log_NotContains_RemoteDB_Sound( string cueSheetName )
 		{
-			WarningDetail($" Not Contains RemoteDB : { cueSheetName  }");
+			Warning($" Not Contains RemoteDB : { cueSheetName  }");
 		}
 		/// </summary>
 		[Conditional(ENABLE_CHIPSTAR_LOG)]
 		internal static void Log_NotContains_LocalDB_Sound(string cueSheetName)
 		{
-			WarningDetail($" Not Contains LocalDB : { cueSheetName  }");
+			Warning($" Not Contains LocalDB : { cueSheetName  }");
 		}
 		/// </summary>
 		[Conditional(ENABLE_CHIPSTAR_LOG)]
 		internal static void Log_NotFound_Downloaded_File( string path )
 		{
-			WarningDetail( $" File Not Exists : { path }");
+			Warning( $" File Not Exists : { path }");
 		}
 	}
 }

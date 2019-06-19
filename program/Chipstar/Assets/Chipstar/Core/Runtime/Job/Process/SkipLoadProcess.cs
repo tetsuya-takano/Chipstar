@@ -26,6 +26,8 @@ namespace Chipstar.Downloads
 
 		public bool IsRunning => true;
 
+		public bool IsFinish => true;
+
 		private SkipLoadProcess() { }
 		public void Dispose() { }
 
@@ -36,6 +38,11 @@ namespace Chipstar.Downloads
 		}
 
 		void IEnumerator.Reset() { }
+
+		public override string ToString()
+		{
+			return "[Skip Process]";
+		}
 	}
 
 }

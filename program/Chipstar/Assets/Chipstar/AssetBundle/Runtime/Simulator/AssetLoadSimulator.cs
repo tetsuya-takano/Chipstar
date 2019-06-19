@@ -19,8 +19,8 @@ namespace Chipstar.Downloads
 		private EditorFactoryContainer Container { get; set; }
 		private OperationRoutine Routine { get; } = new OperationRoutine();
 		public Action<ResultCode> OnError { set; private get; }
-		public Action StartAny { set => throw new NotImplementedException(); }
-		public Action StopAny { set => throw new NotImplementedException(); }
+		public Action OnStopAny { set; private get; }
+		public Action OnStartAny { set; private get; }
 
 		//=================================
 		//	関数
@@ -48,6 +48,8 @@ namespace Chipstar.Downloads
 			Container.Dispose();
 			Container = null;
 			Routine.Clear();
+			OnStartAny = null;
+			OnStopAny = null;
 		}
 		/// <summary>
 		/// アセット
@@ -56,9 +58,7 @@ namespace Chipstar.Downloads
 		{
 			var factory = Container .GetFromAsset( path );
 
-			ChipstarLog.Log_LoadAsset<T>( path, factory );
-
-			return Routine.Register(factory.Create<T>(path));
+			return Register(factory.Create<T>(path));
 		}
 		public IAssetLoadOperation<T> LoadAsset<T>(string path, Func<string, ILoadProcess>[] preProcess) where T : UnityEngine.Object
 		{
@@ -67,7 +67,7 @@ namespace Chipstar.Downloads
 		public ISceneLoadOperation LoadLevel(string path, LoadSceneMode mode)
 		{
 			var factory = Container.GetFromScene(path);
-			return Routine.Register(factory.Create(path, mode));
+			return Register(factory.Create(path, mode));
 		}
 
 		public ISceneLoadOperation LoadLevel(string path, LoadSceneMode mode, Func<string, ILoadProcess>[] preProcess)
@@ -75,6 +75,18 @@ namespace Chipstar.Downloads
 			return LoadLevel(path, mode);
 		}
 
+		public IPreloadOperation Preload(ILoadProcess process)
+		{
+			return Register(new PreloadOperation(process));
+		}
+
+		private T Register<T>( T operation ) where T : ILoadOperater
+		{
+			operation.OnStart = _ => OnStartAny?.Invoke();
+			operation.OnStop = _ => OnStopAny?.Invoke();
+
+			return Routine.Register( operation );
+		}
 
 		/// <summary>
 		/// ログイン状態を切り替える
@@ -94,10 +106,6 @@ namespace Chipstar.Downloads
 			Routine.Update();
 		}
 
-		public IPreloadOperation Preload(ILoadProcess process)
-		{
-			return Routine.Register(new PreloadOperation(process));
-		}
 	}
 }
 #endif

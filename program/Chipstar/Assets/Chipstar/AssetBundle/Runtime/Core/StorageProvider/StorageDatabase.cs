@@ -26,42 +26,129 @@ namespace Chipstar.Downloads
 
 		IAccessPoint GetCacheStorage();
 	}
-    /// <summary>
-    /// 内部ストレージの管理
-    /// </summary>
-    public class StorageDatabase<TTable, TData> : IStorageDatabase
-        where TTable : ISaveFileTable<TData>,new()
-        where TData : ILocalBundleData
-    {
+	/// <summary>
+	/// 内部ストレージの管理
+	/// </summary>
+	public class StorageDatabase : IStorageDatabase
+	{
+		//===============================================
+		//  class
+		//===============================================
+		[Serializable]
+		protected sealed class Table : IEnumerable<LocalBundleData>,
+				ISerializationCallbackReceiver
+		{
+			//============================================
+			//	SerializeField
+			//============================================
+			[SerializeField] List<LocalBundleData> m_list = new List<LocalBundleData>();
 
-        //===============================================
-        //  変数
-        //===============================================
-        private string m_fileName = null;
+			//============================================
+			//	変数
+			//============================================
+			private Dictionary<string, LocalBundleData> m_table = new Dictionary<string, LocalBundleData>();
+
+			//============================================
+			//	関数
+			//============================================
+			public LocalBundleData Get(string key)
+			{
+				if (m_table.ContainsKey(key))
+				{
+					return m_table[key];
+				}
+				return null;
+			}
+
+			public IEnumerator<LocalBundleData> GetEnumerator()
+			{
+				return ((IEnumerable<LocalBundleData>)m_table.Values).GetEnumerator();
+			}
+
+			/// <summary>
+			/// 追加
+			/// </summary>
+			internal void Add(ICachableBundle data)
+			{
+				if (m_table.ContainsKey(data.Path))
+				{
+					m_table[data.Path] = new LocalBundleData(data.Path, data.Hash, data.Crc);
+					return;
+				}
+				m_table.Add(data.Path, new LocalBundleData(data.Path, data.Hash, data.Crc));
+			}
+
+			/// <summary>
+			/// 削除
+			/// </summary>
+			internal void Remove(LocalBundleData localData)
+			{
+				if (!m_table.ContainsKey(localData.Key))
+				{
+					return;
+				}
+				m_table.Remove(localData.Key);
+			}
+
+			/// <summary>
+			/// 列挙
+			/// </summary>
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				return ((IEnumerable<LocalBundleData>)m_table.Values).GetEnumerator();
+			}
+
+			/// <summary>
+			/// 読み込む時
+			/// </summary>
+			public void OnAfterDeserialize()
+			{
+				if (m_list == null)
+				{
+					m_table = new Dictionary<string, LocalBundleData>();
+					return;
+				}
+				//	List -> Dictionary
+				m_table = m_list.ToDictionary(c => c.Key);
+			}
+
+			/// <summary>
+			/// 保存するとき
+			/// </summary>
+			public void OnBeforeSerialize()
+			{
+				if (m_table == null)
+				{
+					m_list = new List<LocalBundleData>();
+					return;
+				}
+				//	Dictionary -> List
+				m_list = m_table.Values.ToList();
+			}
+		}
+		//===============================================
+		//  変数
+		//===============================================
+		private string m_fileName = null;
 		private IAccessPoint m_entryPoint = null;
 		private IAccessLocation m_versionFile = null;
-        private TTable m_table = default;
-        private IDatabaseParser<TTable> m_parser = null;
-        private IDatabaseWriter<TTable> m_writer = null;
+		private Table m_table = null;
+		private Encoding m_encoding = null;
 
-        //===============================================
-        //  プロパティ
-        //===============================================
-        public Func<ICachableBundle, bool> OnSaveVersion { private get; set; }
+		//===============================================
+		//  プロパティ
+		//===============================================
+		public Func<ICachableBundle, bool> OnSaveVersion { private get; set; }
 
 		//===============================================
 		//  関数
 		//===============================================
 
-		public StorageDatabase(
-            IAccessPoint savePoint, string storageDbName, 
-            IDatabaseParser<TTable> parser,
-            IDatabaseWriter<TTable> writer )
+		public StorageDatabase(IAccessPoint savePoint, string storageDbName, Encoding encoding)
 		{
 			m_entryPoint = savePoint;
 			m_fileName = storageDbName;
-            m_parser = parser;
-            m_writer = writer;
+			m_encoding = encoding;
 		}
 
 		/// <summary>
@@ -69,10 +156,8 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public void Dispose()
 		{
+			m_table = null;
 			OnSaveVersion = null;
-            m_writer = null;
-            m_parser = null;
-            m_table = default;
 		}
 
 		/// <summary>
@@ -88,13 +173,14 @@ namespace Chipstar.Downloads
 			if (!isExist)
 			{
 				//	なければ空データ
+				m_table = new Table();
 				ChipstarLog.Log_InitStorageDB_FirstCreate(path);
-                m_table = m_parser.CreateEmpty();
 			}
 			else
 			{
 				var bytes = File.ReadAllBytes(path);
-				m_table = m_parser.Parse( bytes );
+				m_table = Load(bytes);
+				ChipstarLog.Log_InitStorageDB_ReadLocalFile(m_table);
 			}
 			yield return null;
 		}
@@ -110,6 +196,20 @@ namespace Chipstar.Downloads
 				return new Hash128();
 			}
 			return data.Version;
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		protected Table Load(byte[] data)
+		{
+			return ParseLocalTable(data);
+		}
+
+		protected virtual Table ParseLocalTable(byte[] data)
+		{
+			var json = m_encoding.GetString(data);
+			return JsonUtility.FromJson<Table>(json);
 		}
 
 		/// <summary>
@@ -184,8 +284,9 @@ namespace Chipstar.Downloads
 			{
 				Directory.CreateDirectory(dirPath);
 			}
+			var json = JsonUtility.ToJson(m_table, true);
 
-            m_writer.Write(path, m_table);
+			File.WriteAllText(path, json, m_encoding);
 			ChipstarLog.Log_ApplyLocalSaveFile(path);
 		}
 
@@ -272,9 +373,8 @@ namespace Chipstar.Downloads
 			{
 				Directory.Delete(m_entryPoint.BasePath, true);
 			}
-            //	空のインスタンスで上書き
-            m_table.Clear();
-            Apply();
+			//	空のインスタンスで上書き
+			m_table = new Table();
 		}
 
 		public override string ToString()

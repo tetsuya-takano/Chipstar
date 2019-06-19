@@ -11,7 +11,6 @@ namespace Chipstar.Downloads
 		// 変数
 		//===========================
 		private ISceneLoadOperater m_mainProcess = null;
-
 		//===========================
 		// プロパティ
 		//===========================
@@ -61,6 +60,11 @@ namespace Chipstar.Downloads
 		protected override void DoComplete()
 		{
 			m_mainProcess?.Complete();
+		}
+
+		public override string ToString()
+		{
+			return "[Download Scene]" + Path;
 		}
 	}
 }

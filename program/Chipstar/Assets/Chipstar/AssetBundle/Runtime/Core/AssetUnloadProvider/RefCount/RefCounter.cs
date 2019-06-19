@@ -8,6 +8,7 @@ namespace Chipstar.Downloads
 	public interface IRefCountable
 	{
 		bool IsFree { get; }
+		int RefCount { get; }
 		void AddRef();
 		void ReleaseRef();
 		void ClearRef();

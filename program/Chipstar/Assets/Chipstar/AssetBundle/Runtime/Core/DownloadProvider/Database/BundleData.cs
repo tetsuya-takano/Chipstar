@@ -35,6 +35,7 @@ namespace Chipstar.Downloads
 		public string Guid { get; private set; }
 		public T BundleData { get; private set; }
 		bool IRefCountable.IsFree => BundleData?.IsFree ?? false;
+		int IRefCountable.RefCount => BundleData?.RefCount ?? 0;
 		public AssetData(IAssetBuildData data)
 		{
 			Apply(data.Path, data.Guid);
@@ -75,7 +76,7 @@ namespace Chipstar.Downloads
 		public string Name { get; private set; }
 		public AssetData<T>[] Assets { get; private set; }
 		public T[] Dependencies { get; private set; }
-		public bool IsOnMemory { get { return Bundle != null; } }
+		public bool IsOnMemory { get { return Bundle; } }
 		public bool IsScene { get { return IsOnMemory ? Bundle.isStreamedSceneAssetBundle : false; } }
 		public long FileSize { get; private set; }
 		public bool IsFree { get { return RefCount <= 0; } }

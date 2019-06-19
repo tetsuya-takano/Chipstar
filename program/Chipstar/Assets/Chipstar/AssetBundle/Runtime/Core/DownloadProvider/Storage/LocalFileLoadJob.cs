@@ -38,17 +38,17 @@ namespace Chipstar.Downloads
 			Source = AssetBundle.LoadFromFileAsync( location.FullPath, m_crc );
 		}
 
-		protected override float DoGetProgress( AssetBundleCreateRequest source )
+		protected override float GetProgress( AssetBundleCreateRequest source )
 		{
 			return source.progress;
 		}
 
-		protected override bool DoIsComplete( AssetBundleCreateRequest source )
+		protected override bool GetIsComplete( AssetBundleCreateRequest source )
 		{
 			return source.isDone;
 		}
 
-		protected override bool DoIsError( AssetBundleCreateRequest source )
+		protected override bool GetIsError( AssetBundleCreateRequest source )
 		{
 			return source.isDone && source.assetBundle == null;
 		}

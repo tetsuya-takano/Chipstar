@@ -23,6 +23,8 @@ namespace Chipstar.Downloads
 
 		object IEnumerator.Current => null;
 
+		public virtual bool IsFinish => true;
+
 		public void Complete() { }
 
 		public void Dispose() { }

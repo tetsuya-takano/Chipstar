@@ -27,14 +27,14 @@ namespace Chipstar.Downloads.CriWare
 			public string AwbHash { get { return string.Empty; } }
 			public string AcbHash { get { return string.Empty; } }
 
-			public long AwbSize { get { return HasAwb() && File.Exists( AwbPath ) ? new FileInfo( AwbPath ).Length : 0; } }
-			public long AcbSize { get { return File.Exists( AcbPath ) ? new FileInfo( AcbPath ).Length : 0; } }
+			public long AwbSize { get { return HasAwb() && File.Exists(AwbPath) ? new FileInfo(AwbPath).Length : 0; } }
+			public long AcbSize { get { return File.Exists(AcbPath) ? new FileInfo(AcbPath).Length : 0; } }
 			public bool IsIncludeFlag { private get; set; }
 			public string AssetVersion { get { return string.Empty; } }
 
 			public bool HasAwb()
 			{
-				return !string.IsNullOrEmpty(AwbPath );
+				return !string.IsNullOrEmpty(AwbPath);
 			}
 
 			public bool IsInclude() { return IsIncludeFlag; }
@@ -49,10 +49,17 @@ namespace Chipstar.Downloads.CriWare
 		private IAccessPoint m_soundIncludeDir = null;  //	内包データパス
 		private IAccessPoint m_soundRawDir = null; //	ダウンロード先
 
-		private Dictionary<string, SoundFileSetData> m_remoteSoundTable	= new Dictionary<string, SoundFileSetData>();
-		private Dictionary<string, SoundFileSetData> m_localSoundTable	= new Dictionary<string, SoundFileSetData>();
+		private Dictionary<string, SoundFileSetData> m_remoteSoundTable = new Dictionary<string, SoundFileSetData>();
+		private Dictionary<string, SoundFileSetData> m_localSoundTable = new Dictionary<string, SoundFileSetData>();
 
-		private bool                            m_isLogin           = false;
+		private bool m_isLogin = false;
+
+		public OnGetManifestDelegate GetManifestLocation { set; private get; }
+		public OnGetFileDelegate GetFileDLLocation { set; private get; }
+		public OnErrorDelegate OnLoadError { set; private get; }
+		public Action OnStartAny { set; private get; }
+		public Action OnStopAny { set; private get; }
+
 		//	プロパティ
 		//=============================
 
@@ -81,6 +88,13 @@ namespace Chipstar.Downloads.CriWare
 		{
 			m_routine.Clear();
 			m_remoteSoundTable.Clear();
+
+			OnStartAny = null;
+			OnStopAny = null;
+			OnLoadError = null;
+			GetFileDLLocation = null;
+			GetManifestLocation = null;
+
 		}
 
 		/// <summary>
@@ -196,7 +210,10 @@ namespace Chipstar.Downloads.CriWare
 
 		public IPreloadOperation Prepare( string cueSheetName )
 		{
-			return m_routine.Register(new PreloadOperation(SkipLoadProcess.Default));
+			var operation = new PreloadOperation(SkipLoadProcess.Default);
+			operation.OnStart = _ => OnStartAny?.Invoke();
+			operation.OnStop = _ => OnStopAny?.Invoke();
+			return m_routine.Register(operation);
 		}
 
 		public IEnumerable<ISoundFileData> GetDLDataList()

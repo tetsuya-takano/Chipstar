@@ -35,5 +35,10 @@ namespace Chipstar.Downloads
 			// 完了時に自動で破棄
 			this.DisposeIfNotNull();
 		}
+
+		public override string ToString()
+		{
+			return "[BuiltInScene]" + m_path ?? string.Empty;
+		}
 	}
 }

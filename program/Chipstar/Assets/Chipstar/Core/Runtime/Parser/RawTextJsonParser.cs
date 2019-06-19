@@ -4,8 +4,8 @@ namespace Chipstar.Downloads
 	/// <summary>
 	/// 生テキストで取得
 	/// </summary>
-	public sealed class RawTextJsonParser<T> : JsonDatabaseParser<T> where T : new()
-    {
+	public sealed class RawTextJsonParser<T> : JsonDatabaseParser<T>
+	{
 		public RawTextJsonParser(Encoding encode) : base(encode) { }
 		protected override byte[] Decompress(byte[] datas) { return datas; }
 	}

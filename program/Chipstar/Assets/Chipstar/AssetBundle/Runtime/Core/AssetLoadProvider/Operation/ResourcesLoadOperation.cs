@@ -71,5 +71,10 @@ namespace Chipstar.Downloads
 		{
 			return m_request.asset as T;
 		}
+
+		public override string ToString()
+		{
+			return "[ResourcesLoadOperation]" + m_key;
+		}
 	}
 }

@@ -30,8 +30,9 @@ namespace Chipstar.Downloads
 		public AssetBundleLoadOperation( AssetData<TBundleData> data )
 		{
 			m_data = data;
+			m_data?.AddRef();
 		}
-		
+
 		/// <summary>
 		/// 破棄処理
 		/// </summary>
@@ -47,7 +48,6 @@ namespace Chipstar.Downloads
 		/// </summary>
 		protected override void DoRun()
 		{
-			m_data?.AddRef();
 			m_request = m_data?.LoadAsync<T>();
 			ChipstarLog.AssertNotNull(m_request, $"Bundle Rquest is Null ::{m_data?.Path ?? string.Empty}");
 		}
@@ -77,9 +77,9 @@ namespace Chipstar.Downloads
 			return m_request.asset as T;
 		}
 
-		protected override string GetSamplingName()
+		public override string ToString()
 		{
-			return "[AssetBundleLoad]" + (m_data?.Path ?? string.Empty);
+			return "[AssetBundleLoadOperation]" + (m_data?.Path ?? string.Empty);
 		}
 	}
 }

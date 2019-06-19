@@ -14,8 +14,8 @@ namespace Chipstar.Downloads
 	{
 		Action<ResultCode> OnError { set; }
 
-		Action StartAny { set; }
-		Action StopAny { set; }
+		Action OnStartAny { set; }
+		Action OnStopAny { set; }
 
 		IAssetLoadOperation<T> LoadAsset<T>(string path) where T : UnityEngine.Object;
 		IAssetLoadOperation<T> LoadAsset<T>(string path, Func<string, ILoadProcess>[] preProcess) where T : UnityEngine.Object;
@@ -40,8 +40,8 @@ namespace Chipstar.Downloads
 		public Action<ResultCode> OnError { private get; set; }
 		private IFactoryContainer Container { get; set; }
 		private OperationRoutine  Routine { get; set; }
-		public Action StartAny { private get; set; }
-		public Action StopAny { private get; set; }
+		public Action OnStopAny { private get; set; }
+		public Action OnStartAny { private get; set; }
 
 		//=======================
 		//	関数
@@ -64,8 +64,8 @@ namespace Chipstar.Downloads
 			Container.Dispose();
 			Container = null;
 			OnError = null;
-			StartAny = null;
-			StopAny = null;
+			OnStopAny = null;
+			OnStartAny = null;
 		}
 
 		/// <summary>
@@ -74,7 +74,6 @@ namespace Chipstar.Downloads
 		public IAssetLoadOperation<T> LoadAsset<T>( string path ) where T : UnityEngine.Object
 		{
 			var factory = Container.GetFromAsset( path );
-			ChipstarLog.Log_LoadAsset<T>( path, factory );
 			return AddCueue(factory.Create<T>(path));
 		}
 
@@ -99,7 +98,6 @@ namespace Chipstar.Downloads
 		public ISceneLoadOperation LoadLevel( string path, LoadSceneMode mode )
 		{
 			var factory = Container.GetFromScene( path );
-			ChipstarLog.Log_LoadLevel( path, factory );
 			return AddCueue(factory.Create(path, mode));
 		}
 		/// <summary>
@@ -108,7 +106,6 @@ namespace Chipstar.Downloads
 		public ISceneLoadOperation LoadLevel(string path, LoadSceneMode mode, Func<string, ILoadProcess>[] preProcess)
 		{
 			var factory = Container.GetFromScene( path );
-			ChipstarLog.Log_LoadLevel( path, factory );
 			// ダウンロードを待ってからDLする機能
 			var operation = new DownloadSceneOperation(
 				path,
@@ -134,6 +131,8 @@ namespace Chipstar.Downloads
 		private T AddCueue<T>( T operation ) where T : ILoadOperater
 		{
 			operation.OnError = (code) => OnError?.Invoke( code );
+			operation.OnStart = (_) => OnStartAny?.Invoke( );
+			operation.OnStop = (_) => OnStopAny?.Invoke( );
 			return Routine.Register(operation);
 		}
 		/// <summary>

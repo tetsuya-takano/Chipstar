@@ -7,7 +7,7 @@ namespace Chipstar.Downloads
 {
     public interface IDownloadProvider : IDisposable
 	{
-		Action<ResultCode> OnLoadError { set; }
+		Action<ResultCode> OnDownloadError { set; }
 
 		ILoadProcess InitLoad(IAccessPoint accessPoint);
 		ILoadProcess CacheOrDownload(string name);
@@ -41,7 +41,10 @@ namespace Chipstar.Downloads
 		private IAccessPoint Server { get; set; } // 接続先
 		public Func<IAccessPoint, IAccessLocation> GetBuildMapLocation { private get; set; }
 		public Func<IAccessPoint, TRuntimeData, IAccessLocation> GetBundleLocation { private get; set; }
-		public Action<ResultCode> OnLoadError { set; private get; }
+
+		public Action<ResultCode> OnDownloadError { set; private get; }
+		public Action OnStartAny { set; private get; }
+		public Action OnStopAny { set; private get; }
 		//===============================
 		//  関数
 		//===============================
@@ -72,7 +75,9 @@ namespace Chipstar.Downloads
 
 			GetBundleLocation = null;
 			GetBuildMapLocation = null;
-			OnLoadError = null;
+			OnDownloadError = null;
+			OnStartAny = null;
+			OnStopAny = null;
 		}
 
 		/// <summary>
@@ -89,7 +94,7 @@ namespace Chipstar.Downloads
 			var location = GetBuildMapLocation?.Invoke( Server );
 			var loadBuildMap = DoInitielizeLoad( location );
 			var process = new LoadProcess<byte[]>(
-				job : loadBuildMap, 
+				job : AddJob( loadBuildMap ), 
 				onCompleted : c => 
 				{
 					LoadDatabase.Create( c );
@@ -171,10 +176,9 @@ namespace Chipstar.Downloads
 				return SkipLoadProcess.Default;
 			}
 			var localPath = StorageDatabase.ToLocation( data );
-            var job = JobCreator.FileDL( JobEngine, location, localPath );
-			ChipstarLog.Log_RequestDownload( data );
+			var job = JobCreator.FileDL(JobEngine, location, localPath);
 			return new LoadProcess<Empty>(
-				job,
+				AddJob( job ),
 				onCompleted: ( _ ) =>
 				{
 					//	バージョンを保存
@@ -199,7 +203,7 @@ namespace Chipstar.Downloads
 
 			var job	= JobCreator.OpenLocalBundle( JobEngine, location, data.Hash, data.Crc );
 			return new LoadProcess<AssetBundle>(
-				job,
+				AddJob( job ),
 				onCompleted: ( content ) =>
 				{
 					data.OnMemory( content );
@@ -207,9 +211,18 @@ namespace Chipstar.Downloads
 				onError : code => OnError( code )
 			);
 		}
+
+		private T AddJob<T>( T job ) where T : ILoadJob
+		{
+			job.OnStart = (_) => OnStartAny?.Invoke();
+			job.OnStop = (_) => OnStopAny?.Invoke();
+
+			return job;
+		}
+
 		private void OnError( ResultCode code )
 		{
-			OnLoadError?.Invoke( code );
+			OnDownloadError?.Invoke( code );
 		}
 
 		public void Cancel()

@@ -14,8 +14,8 @@ namespace Chipstar.Downloads
 	}
 	public interface ILoadOperater : ILoadOperation
 	{
-		Action OnStart { set; }
-		Action OnStop { set; }
+		Action<ILoadOperation> OnStart { set; }
+		Action<ILoadOperation> OnStop { set; }
 
 		void Run();
 		void Update();
@@ -32,8 +32,8 @@ namespace Chipstar.Downloads
 		//	変数
 		//===================================
 		private Action<ResultCode> m_onError = null;
-		private Action m_onStart = null;
-		private Action m_onStop = null;
+		private Action<ILoadOperation> m_onStart = null;
+		private Action<ILoadOperation> m_onStop = null;
 
 		//===================================
 		//	プロパティ
@@ -46,13 +46,15 @@ namespace Chipstar.Downloads
 			protected get { return m_onError; }
 		}
 
-		public Action OnStart { set => m_onStart = value; }
-		public Action OnStop { set => m_onStop= value; }
+		public Action<ILoadOperation> OnStart { set => m_onStart = value; }
+		public Action<ILoadOperation> OnStop { set => m_onStop= value; }
 
 		public float Progress { get; protected set; }
 		public bool IsError { get; private set; }
 		public bool IsCanceled { get; private set; }
 		public bool IsDisposed { get; private set; }
+		public bool IsFinish { get; private set; }
+
 		object IEnumerator.Current => null;
 
 		/// <summary>
@@ -60,7 +62,6 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public LoadOperation()
 		{
-			ChipstarLog.Log_StartOperation( this );
 		}
 		/// <summary>
 		/// 破棄処理
@@ -68,11 +69,11 @@ namespace Chipstar.Downloads
 		void IDisposable.Dispose()
 		{
 			if (IsDisposed) { return; }
-			ChipstarLog.Log_OoperationDisposed(this);
 			if ( !IsCompleted )
 			{
 				Cancel();
 			}
+			ChipstarLog.Log_Dispose(this);
 			DoDispose();
 
 			StopImpl();
@@ -86,11 +87,11 @@ namespace Chipstar.Downloads
 
 		protected void StartImpl()
 		{
-			ChipstarUtils.OnceInvoke(ref m_onStart);
+			ChipstarUtils.OnceInvoke(ref m_onStart, this );
 		}
 		protected void StopImpl()
 		{
-			ChipstarUtils.OnceInvoke(ref m_onStop);
+			ChipstarUtils.OnceInvoke(ref m_onStop, this );
 		}
 
 		/// <summary>
@@ -105,6 +106,7 @@ namespace Chipstar.Downloads
 
 			IsRunning = true;
 			StartImpl();
+			ChipstarLog.Log_Run(this);
 			DoRun();
 		}
 		protected abstract void DoRun();
@@ -121,7 +123,9 @@ namespace Chipstar.Downloads
 			}
 			try
 			{
+				BeginSample();
 				ProcessImpl();
+				EndSample();
 			}
 			catch(Exception e )
 			{
@@ -149,7 +153,12 @@ namespace Chipstar.Downloads
 			StopImpl();
 			try
 			{
-				DoComplete();
+				if (!IsFinish)
+				{
+					IsFinish = true;
+					ChipstarLog.Log_Done(this);
+					DoComplete();
+				}
 			}
 			catch (Exception e)
 			{
@@ -161,6 +170,8 @@ namespace Chipstar.Downloads
 		private void Error(Exception e)
 		{
 			StopImpl();
+
+			ChipstarLog.Log_Error(this);
 			var result = DoError(e);
 			IsError = true;
 			ChipstarUtils.OnceInvoke( ref m_onError, result );
@@ -175,6 +186,7 @@ namespace Chipstar.Downloads
 		protected void Cancel()
 		{
 			if(IsCanceled) { return; }
+			ChipstarLog.Log_Cancel(this);
 			DoCancel();
 			StopImpl();
 			IsCanceled = true;
@@ -200,6 +212,6 @@ namespace Chipstar.Downloads
 		{
 			UnityEngine.Profiling.Profiler.EndSample();
 		}
-		protected virtual string GetSamplingName() { return "[LoadOperation]"; }
+		protected virtual string GetSamplingName() { return ToString(); }
 	}
 }

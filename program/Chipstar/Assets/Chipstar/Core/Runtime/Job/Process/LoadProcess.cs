@@ -52,6 +52,8 @@ namespace Chipstar.Downloads
 		public bool IsDisposed => m_job?.IsDisposed ?? true;
 		public bool IsRunning => m_job?.IsRunning ?? false;
 
+		public bool IsFinish => m_job?.IsFinish ?? true;
+
 		//=====================================
 		//  関数
 		//=====================================
@@ -125,6 +127,8 @@ namespace Chipstar.Downloads
 		public bool IsDisposed => m_process?.IsDisposed ?? true;
 
 		public bool IsRunning => m_process?.IsRunning ?? false;
+
+		public bool IsFinish => m_process?.IsFinish ?? true;
 
 		//=================================
 		//	関数

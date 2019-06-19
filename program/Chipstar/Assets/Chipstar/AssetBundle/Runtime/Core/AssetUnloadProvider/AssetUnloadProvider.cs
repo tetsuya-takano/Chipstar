@@ -56,7 +56,7 @@ namespace Chipstar.Downloads
 				//	参照の無いやつを取得
 				var freeList = Database
 								.BundleList
-								.Where(c => c.IsFree )
+								.Where(c => c.IsFree && c.IsOnMemory )
 								.ToArray();
 				//	解放
 				foreach (var bundle in freeList)

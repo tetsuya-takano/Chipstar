@@ -47,15 +47,7 @@ namespace Chipstar.Downloads
 
 		protected override void DoRun()
 		{
-		}
-
-		protected override void DoPostUpdate()
-		{
-			if( m_process.IsDisposed )
-			{
-				//	プロセスが終了していたら完了にする
-				this.DisposeIfNotNull();
-			}
+			
 		}
 
 		protected override bool GetComplete()
@@ -66,6 +58,11 @@ namespace Chipstar.Downloads
 		protected override float GetProgress()
 		{
 			return m_process.Progress;
+		}
+
+		public override string ToString()
+		{
+			return "[PreloadOperation]" + (m_process?.ToString() ?? string.Empty);
 		}
 	}
 }

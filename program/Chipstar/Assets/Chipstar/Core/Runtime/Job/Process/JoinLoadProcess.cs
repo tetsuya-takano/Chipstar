@@ -47,6 +47,9 @@ namespace Chipstar.Downloads
 		public bool IsDisposed => m_prev.IsDisposed && m_next.IsDisposed;
 
 		public bool IsRunning => m_prev.IsRunning || m_next.IsRunning;
+
+		public bool IsFinish => m_prev.IsFinish && m_next.IsFinish;
+
 		//================================
 		//  関数
 		//================================
@@ -72,6 +75,11 @@ namespace Chipstar.Downloads
 		}
 
 		void IEnumerator.Reset() { }
+
+		public override string ToString()
+		{
+			return $"[Join Process]{m_prev?.ToString()} & {m_next?.ToString()}";
+		}
 	}
 
 	public static partial class ILoadProcessExtensions

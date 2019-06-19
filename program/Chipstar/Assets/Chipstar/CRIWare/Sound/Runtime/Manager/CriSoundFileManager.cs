@@ -9,13 +9,10 @@ using UnityEngine;
 
 namespace Chipstar.Downloads.CriWare
 {
-	public interface ICriSoundFileManager : IDisposable
+	public interface ICriSoundFileManager : ICriFileManager
 	{
 		IAccessPoint GetFileDir(string cueSheetName);
 
-		IEnumerator Setup(string includeRelativePath, string saveFileName);
-		IEnumerator Login(IAccessPoint accessPoint);
-		void Logout();
 		IPreloadOperation Prepare(string cueSheetName);
 
 		ISoundFileData FindDLData(string cueSheetName);
@@ -27,9 +24,6 @@ namespace Chipstar.Downloads.CriWare
 
 		IEnumerable<ISoundFileData> GetNeedDLList();
 
-		IEnumerator StorageClear();
-		void DoUpdate();
-		void Stop();
 	}
 	/// <summary>
 	/// Criのファイル管理をする
@@ -353,11 +347,6 @@ namespace Chipstar.Downloads.CriWare
 		protected override void DoDatabaseClear()
 		{
 			m_cacheDB = new CriVersionTableJson();
-		}
-
-		public void Stop()
-		{
-			Cancel();
 		}
 	}
 }

@@ -68,5 +68,10 @@ namespace Chipstar.Downloads
 		{
 			m_mainProcess?.Complete();
 		}
+
+		public override string ToString()
+		{
+			return "[Download Asset]" + Path;
+		}
 	}
 }
