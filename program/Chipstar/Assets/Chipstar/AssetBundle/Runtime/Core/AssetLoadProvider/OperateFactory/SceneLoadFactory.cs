@@ -17,7 +17,9 @@ namespace Chipstar.Downloads
 		//================================
 		//	プロパティ
 		//================================
-		private ILoadDatabase<TRuntimeBundleData> Database;
+
+		public int Priority { get; }
+		private ILoadDatabase<TRuntimeBundleData> Database { get; set; }
 
 		//================================
 		//	関数
@@ -26,8 +28,9 @@ namespace Chipstar.Downloads
 		/// <summary>
 		/// コンストラクタ
 		/// </summary>
-		public SceneLoadFactory( ILoadDatabase<TRuntimeBundleData> database )
+		public SceneLoadFactory( ILoadDatabase<TRuntimeBundleData> database,int priority )
 		{
+			Priority = priority;
 			Database = database;
 		}
 

@@ -18,12 +18,14 @@ namespace Chipstar.Downloads
 		private static readonly Regex   m_regex = new Regex( PATTERN );
 
 		//==============================
-		//	変数
+		//	プロパティ
 		//==============================
+		public int Priority { get; }
 
 		//==============================
 		//	関数
 		//==============================
+		public ResourcesLoadFactory(int priority) { Priority = priority; }
 
 		/// <summary>
 		/// 取得可能かどうか

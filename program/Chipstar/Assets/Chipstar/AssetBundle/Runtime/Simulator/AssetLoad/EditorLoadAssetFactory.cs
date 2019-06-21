@@ -29,6 +29,9 @@ namespace Chipstar.Downloads
 		{
 			m_folderPrefix = prefex;
 		}
+
+		public int Priority => 99;
+
 		/// <summary>
 		/// 判定
 		/// </summary>

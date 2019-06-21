@@ -49,6 +49,7 @@ namespace Chipstar
 		}
 		private static bool EnableLog		{ get { return LogLevelMode != LogLevel.None	; } }
 		private static bool EnableLogDetail { get { return LogLevelMode == LogLevel.Detail	; } }
+
 		private static bool EnableLogDeep { get { return LogLevelMode == LogLevel.DeepDetail; } }
 		public static LogLevel LogLevelMode { get; set; } = LogLevel.None;
 
@@ -200,6 +201,19 @@ namespace Chipstar
 		{
 			if (!EnableLogDetail) { return; }
 			Log($"{bundleData?.Name} Unload");
+		}
+
+		[Conditional(ENABLE_CHIPSTAR_LOG)]
+		internal static void Log_DisposeUnused<T>(IReadOnlyList<T> freeList) where T : IRuntimeBundleData<T>
+		{
+			if (!EnableLogDetail) { return; }
+			m_builder.Length = 0;
+			m_builder.AppendLine("[ UnUsed Dispose ]");
+			foreach( var b in freeList )
+			{
+				m_builder.AppendLine( b.Name );
+			}
+			Warning(m_builder.ToString());
 		}
 
 		[Conditional( ENABLE_CHIPSTAR_LOG )]

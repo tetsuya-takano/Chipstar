@@ -63,6 +63,7 @@ namespace Chipstar.Downloads
 				{
 					bundle.Unload();
 				}
+				ChipstarLog.Log_DisposeUnused( freeList );
 			}
 			
 			//	Resourcesの未使用を解放

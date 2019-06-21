@@ -21,6 +21,8 @@ namespace Chipstar.Downloads
 		private IAssetLoadFactory[] m_assets = null;
 		private ISceneLoadFactory[] m_scenes = null;
 
+		private List<ILoadOperateFactory> m_list = new List<ILoadOperateFactory>();
+
 		//===============================
 		//	関数
 		//===============================
@@ -50,6 +52,7 @@ namespace Chipstar.Downloads
 
 			m_assets = null;
 			m_scenes = null;
+			m_list.Clear();
 		}
 
 		/// <summary>
@@ -57,6 +60,7 @@ namespace Chipstar.Downloads
 		/// </summary>
 		private T Get<T>( string path, IList<T> list ) where T : ILoadOperateFactory
 		{
+			m_list.Clear();
 			for( int i = 0; i < list.Count; i++ )
 			{
 				//	型チェック
@@ -68,8 +72,21 @@ namespace Chipstar.Downloads
 				//	取得可能なら通す
 				if( factory.CanLoad( path ) )
 				{
-					return (T)factory;
+					m_list.Add( factory );
 				}
+			}
+			if( m_list.Count > 0 )
+			{
+				T fact = (T)m_list[ 0 ];
+				for( int i = 0; i < m_list.Count;i++)
+				{
+					var f = (T)m_list[ i ];
+					if( f.Priority > fact.Priority)
+					{
+						fact = f;
+					}
+				}
+				return fact;
 			}
 			throw new Exception( string.Format( "{0}({1})\nをロード出来る機能がありません", path, typeof( T ) ) );
 		}

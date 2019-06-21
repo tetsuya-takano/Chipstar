@@ -34,6 +34,7 @@ namespace Chipstar.Downloads
 		/// </summary>
 		public EditorLoadAssetOperation( string path, int waitFrame )
 		{
+			m_path = path;
 			m_frameCount = 0;
 			m_waitFrame = waitFrame;
 		}

@@ -295,6 +295,7 @@ namespace Chipstar.Downloads
 			if( isForceUnloadAll )
 			{
 				yield return UnloadProvider.ForceReleaseAll();
+				yield break;
 			}
 			yield return UnloadProvider.UnloadUnusedAssets();
 		}

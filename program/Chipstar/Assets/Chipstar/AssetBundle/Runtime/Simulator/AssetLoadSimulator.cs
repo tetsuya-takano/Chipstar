@@ -34,9 +34,9 @@ namespace Chipstar.Downloads
 			Container	= new EditorFactoryContainer
 				(
 					afterLoginAssetFact : new EditorLoadAssetFactory( assetAccessPrefix ),
-					alwaysAssetFact		: new ResourcesLoadFactory(),
+					alwaysAssetFact		: new ResourcesLoadFactory(1),
 					afterLoginSceneFact	: new EditorSceneLoadFactory(),
-					alwaysSceneFact		: new BuiltInSceneLoadFactory()
+					alwaysSceneFact		: new BuiltInSceneLoadFactory(1)
 				);
 		}
 

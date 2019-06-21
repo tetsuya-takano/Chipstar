@@ -15,6 +15,8 @@ namespace Chipstar.Downloads
 	/// </summary>
 	public sealed class EditorSceneLoadFactory : ISceneLoadFactory
 	{
+		public int Priority => 99;
+
 		//======================================
 		//	変数
 		//======================================

@@ -12,8 +12,15 @@ namespace Chipstar.Downloads
 	public sealed class BuiltInSceneLoadFactory : ISceneLoadFactory
 	{
 		//======================================
+		//	プロパティ
+		//======================================
+		public int Priority { get; }
+
+		//======================================
 		//	関数
 		//======================================
+
+		public BuiltInSceneLoadFactory(int priority) { Priority = priority; }
 
 		/// <summary>
 		/// 破棄

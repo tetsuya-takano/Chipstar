@@ -12,6 +12,7 @@ namespace Chipstar.Downloads
 	/// </summary>
 	public interface ILoadOperateFactory : IDisposable
 	{
+		int Priority { get; }
 		bool CanLoad( string path );
 	}
 
